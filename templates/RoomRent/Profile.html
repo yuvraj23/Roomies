@@ -1,0 +1,56 @@
+
+{%extends "RoomRent/home.html"%}
+{%load static%}
+
+{%block body%}
+
+
+{%block content%}
+
+
+<center>
+
+  <div class="jumbotron">
+
+          <table class="table table-bordered table-dark center" style="text-align:center;">
+            <thead>
+              <tr>
+                <th scope="col" style="width:10%; text-align:center;">User Name</th>
+                <td style="width:50%; text-align:center;">{{user.username}}</td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+
+                <th scope="col" style="width:10%; text-align:center;">Full Name  </th>
+                <td style="width:50%; text-align:center;">{{user.get_full_name|title}}</td>
+
+              </tr>
+
+              <tr>
+
+                <th scope="col" style="width:10%; text-align:center;">Email ID  </th>
+                    <td style="width:50%; text-align:center;"> {{user.email}} </td>
+
+              </tr>
+
+              <tr>
+
+                <th scope="col" style="width:10%; text-align:center;">Last Login  </th>
+                <td style="width:50%; text-align:center;">  {{user.last_login }}</td>
+              </tr>
+            </tbody>
+          </table>
+<br>
+    <a href="/edit_profile" class="btn btn-success btn-lg"> Update Profile</a>
+
+  </div>
+
+</center>
+
+{%endblock%}
+
+
+
+
+{%endblock%}

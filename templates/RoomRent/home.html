@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+{%load static%}
+<html lang="en" dir="ltr">
+  <head>
+
+    <title>Rent Room</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Latest compiled and minified CSS
+<link rel="stylesheet" href="{%static 'css/magnific-popup.css' %}">
+-->
+
+<script src='https://kit.fontawesome.com/a076d05399.js'></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@master/devicon.min.css">
+<link href='https://fonts.googleapis.com/css?family=Oswald:400' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Oswald:300' rel='stylesheet' type='text/css'>
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/emojionearea/3.4.2/emojionearea.css" integrity="sha512-0Nyh7Nf4sn+T48aTb6VFkhJe0FzzcOlqqZMahy/rhZ8Ii5Q9ZXG/1CbunUuEbfgxqsQfWXjnErKZosDSHVKQhQ==" crossorigin="anonymous" />
+
+<link href="https://fonts.googleapis.com/css?family=Roboto+Condensed:300,300i,400,400i,700i" rel="stylesheet">
+
+
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/2.0.2/anime.min.js"></script>
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+
+
+
+
+
+
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+
+
+
+
+
+<script type="text/javascript" src="{%static 'js/jquery.magnific-popup.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/ajax.js' %}"></script>
+
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+
+<style media="screen">
+
+body{
+  font-family: tahoma;
+
+}
+
+
+.video-wrapper {
+  position: relative;
+  object-fit: cover;
+height: fit-content;
+
+  height:auto;
+  width: 100%;
+  padding-bottom:2%;
+padding-left: 3%;
+padding-right: 6%;
+  overflow: hidden;
+ opacity:0.9;
+ filter:saturate(2);
+ filter:contrast(90%);
+
+
+}
+
+.overlay {
+    position:absolute;
+    top:10%;
+    left:10%;
+    z-index:1;
+}
+
+
+
+.ml10 {
+  position: relative;
+  font-weight: 900;
+  font-size-adjust: 0.30;
+}
+
+.ml10 .text-wrapper {
+  position: relative;
+  display: inline-block;
+  padding-top: 0.2em;
+  padding-right: 0.05em;
+  padding-bottom: 0.1em;
+  overflow: hidden;
+}
+
+.ml10 .letter {
+  display: inline-block;
+  line-height: 1em;
+  transform-origin: 0 0;
+}
+
+.Renter{
+  position: relative;
+  margin-top: 10%;
+  left: 1%;
+  padding: 2% !important;
+  padding-left: 10% !important;
+  border: 20px !important;
+  border-color: deepskyblue !important;
+  padding-right: 10% !important;
+  transform: translate(-50%,-50%) !important;
+  width: 100% !important;
+  height: 100% !important;
+  text-align: center;
+  line-height: 60px;
+  color: white !important;
+  font-size: 24px !important;
+  text-transform: uppercase;
+  text-decoration: none !important;
+  font-family: sans-serif !important;
+  box-sizing: border-box !important;
+  background: linear-gradient(90deg,#03a9f4,#f441a5,#ffeb3b,#03a9f4) !important;
+  background-size: 400%;
+  border-radius: 30px;
+
+transition: all 150ms ease-in-out !important;
+
+}
+
+.Recently-Added{
+  padding: 4% !important;
+
+}
+
+
+.card1 {
+  display: block;
+  position: relative;
+  background-color: #f2f8f9;
+  text-decoration: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+
+.card1:hover {
+  background: #7b2cbf;
+  border-radius: 32px;
+    transition: all 0.3s ease-out;
+    color: rgba(255, 255, 255, 0.8);
+    transition: all 0.3s ease-out;
+    color: white;
+
+}
+
+
+#Explore-More{
+background-color: deepskyblue !important;
+color: black;
+border-style: hidden;
+border-radius: 20px !important;
+margin-right: 5% !important;
+margin-left: 10% !important;
+width: 80%;
+}
+
+.col-md-3 {
+           display: inline-block;
+           margin-left: 3%;
+           margin-right: 3%;
+
+       }
+
+       .col-md-3 {
+           width: 100%;
+           height: auto;
+
+       }
+
+#Explore-More:hover{
+  background-color: #7b2cbf !important;
+  color: white;
+}
+
+.text{
+  color: black !important;
+  font-weight: bolder;
+}
+
+ #fname{
+  border-radius: 20px !important;
+  margin-left: 10% !important;
+  width: 70%;
+  padding: 20px 20px;
+  margin: 8px 0;
+  box-sizing: border-box;
+  border: 3px solid #ccc;
+  -webkit-transition: 0.5s;
+  transition: 0.5s;
+  outline: none;
+}
+
+#fname:focus {
+  border: 3px solid #555;
+}
+
+#search{
+  border-radius: 20%;
+position: absolute;
+padding-left:2%;
+padding-right:2%;
+padding-top: 1%;
+background-color: red;
+color: white !important;
+background-color: deepskyblue !important;
+overflow:inherit;
+}
+
+#search:hover{
+  background-color: #7b2cbf !important;
+
+}
+
+.new_card{
+  margin-left: 5% !important;
+}
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  margin-top:-2%;
+  height: 70px;
+  width: 100px;
+
+  background-size: 20%, 20%;
+  border-radius: 20%;
+  border: 1px solid black;
+  background-image: none;
+}
+
+.carousel-control-next-icon:after
+{
+  content: '>';
+  font-size: 55px;
+  color: red;
+}
+
+.carousel-control-prev-icon:after {
+  content: '<';
+  font-size: 55px;
+  color: red;
+}
+
+
+.footer-section {
+  background: #151414;
+  position: relative;
+}
+.footer-cta {
+  border-bottom: 1px solid #373636;
+}
+.single-cta i {
+  color: #ff5e14;
+  font-size: 30px;
+  float: left;
+  margin-top: 8px;
+}
+.cta-text {
+  padding-left: 15px;
+  display: inline-block;
+}
+.cta-text h4 {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.cta-text span {
+  color: #757575;
+  font-size: 15px;
+}
+.footer-content {
+  position: relative;
+  z-index: 2;
+}
+.footer-pattern img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 330px;
+  background-size: cover;
+  background-position: 100% 100%;
+}
+.footer-logo {
+  margin-bottom: 30px;
+}
+.footer-logo img {
+    max-width: 200px;
+}
+.footer-text p {
+  margin-bottom: 14px;
+  font-size: 14px;
+      color: #7e7e7e;
+  line-height: 28px;
+}
+.footer-social-icon span {
+  color: #fff;
+  display: block;
+  font-size: 20px;
+  font-weight: 700;
+  font-family: 'Poppins', sans-serif;
+  margin-bottom: 20px;
+}
+.footer-social-icon a {
+  color: #fff;
+  font-size: 16px;
+  margin-right: 15px;
+}
+.footer-social-icon i {
+  height: 40px;
+  width: 40px;
+  text-align: center;
+  line-height: 38px;
+  border-radius: 50%;
+}
+.facebook-bg{
+  background: #3B5998;
+}
+.twitter-bg{
+  background: #55ACEE;
+}
+.google-bg{
+  background: #DD4B39;
+}
+.footer-widget-heading h3 {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 40px;
+  position: relative;
+}
+.footer-widget-heading h3::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -15px;
+  height: 2px;
+  width: 50px;
+  background: #ff5e14;
+}
+.footer-widget ul li {
+  display: inline-block;
+  float: left;
+  width: 50%;
+  margin-bottom: 12px;
+}
+.footer-widget ul li a:hover{
+  color: #ff5e14;
+}
+.footer-widget ul li a {
+  color: #878787;
+  text-transform: capitalize;
+}
+.subscribe-form {
+  position: relative;
+  overflow: hidden;
+}
+.subscribe-form input {
+  width: 100%;
+  padding: 14px 28px;
+  background: #2E2E2E;
+  border: 1px solid #2E2E2E;
+  color: #fff;
+}
+.subscribe-form button {
+    position: absolute;
+    right: 0;
+    background: #ff5e14;
+    padding: 13px 20px;
+    border: 1px solid #ff5e14;
+    top: 0;
+}
+.subscribe-form button i {
+  color: #fff;
+  font-size: 22px;
+  transform: rotate(-6deg);
+}
+.copyright-area{
+  background: #202020;
+  padding: 25px 0;
+}
+.copyright-text p {
+  margin: 0;
+  font-size: 14px;
+  color: #878787;
+}
+.copyright-text p a{
+  color: #ff5e14;
+}
+.footer-menu li {
+  display: inline-block;
+  margin-left: 20px;
+}
+.footer-menu li:hover a{
+  color: #ff5e14;
+}
+.footer-menu li a {
+  font-size: 14px;
+  color: #878787;
+}
+
+
+</style>
+
+  </head>
+  <body>
+
+
+
+
+
+
+
+
+
+{%block nav%}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top">
+      <div class="container">
+        <a class="navbar-brand" href="#">
+             <img class="logo"  src="{%static 'image/room.jpg' %}" alt=""  id="logoimage" style="height:50px; width:80px; ">
+            </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav ml-auto">
+              <li class="nav-item">
+                <a class="nav-link pad" href="{%url 'home'%}">
+                  Home
+                </a>
+                </li>
+
+
+                        {% if request.user.is_superuser %}
+                        <li class="nav-item">
+                        <a class="nav-link pad" href="/admin">
+                        <b>ADMIN PANEL</b>
+                        </a>
+                        </li>
+                              {% else %}
+                                  {% endif %}
+
+
+                          {% if not  user.is_authenticated %}
+
+
+
+                            <li class="nav-item">
+                          <a class="nav-link pad" href="/signup">
+                            SignIn
+                          </a>
+                          </li>
+
+                          <li class="nav-item">
+                              <a class="nav-link pad" href="{%url 'login'%}">
+                                LogIn
+                              </a>
+                          </li>
+
+
+
+
+
+                          <li class="nav-item">
+                          <p class="nav-link" style="color:white; font-size:15px; font-weight:bold;
+                          ">Welcome,Guest</p>
+                          </li>
+
+
+
+
+                          {% endif %}
+
+
+                          {% if  user.is_authenticated %}
+
+                          <li class="nav-item">
+                              <a class="nav-link pad" href="{%url 'chatlist' %}">
+                              Chat<span style="background-color:red;border-radius:40%;">{{cl}}</span>
+                              </a>
+                          </li>
+
+                          <li class="nav-item">
+                              <a class="nav-link pad" href="{%url 'uactivity'%}">
+                              Service
+                              </a>
+                          </li>
+
+                          <li class="nav-item">
+                              <a class="nav-link pad" href="{%url 'agreement_list'%}">
+                              AGREEMENT & Activity
+                              </a>
+                          </li>
+
+
+                          <li class="nav-item">
+                              <a class="nav-link pad" href="{%url 'logout'%}">
+                                LogOut
+                              </a>
+                          </li>
+
+                          <li class="nav-item">
+                          <p class="nav-link" style="color:white; font-size:15px; font-weight:bold;"> Welcome,  <a class="" href="/profile"> {{user.get_username|title}}</a></p>
+                          </li>
+
+
+                          <li class="nav-item">
+                            <p>
+
+
+                              </p>
+                          </li>
+
+
+
+                          {%endif%}
+
+
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+{%endblock nav%}
+{%block content%}
+
+<section  id="home" >
+
+
+
+<div class='video-wrapper' style="background-color:black; height: 30% !important;">
+
+  <video playsinline autoplay muted loop poster="   {% static 'image/city.jpg' %}    " id="bgvid">
+  <source src="{% static 'image/city.webm' %}    " type="video/webm">
+  <source src="{% static 'image/city.mp4' %} " type="video/mp4">
+  </video>
+
+  <div class="overlay">
+
+    <h1 class="ml10">
+  <span class="text-wrapper">
+    <span class="letters" style="color:black;background:#caf0f8;">Your searching will end here.</span>
+  </span>
+
+</h1>
+<p class="h2" style="color:white;">Focus on what’s important
+& spend less on rent.</p>
+<p class="h2" style="color:white;">No broker in Your deal,direct deal with owner.</p>
+
+
+<a href="{%url 'post_room'%}" class="Renter overlay"  > Post Room for Rent</a>  <br> <br> <br>
+<a href="#ser" class="Renter overlay" >Find Room on Rent</a>
+
+     </div>
+  </div>
+
+<br><br>
+
+
+
+</section class="Recently-Added">
+
+<h4 class="display-4" style="padding-left: 4% !important;">Recently Added</h4>
+
+{
+
+<div class="card-deck" style="padding: 4% !important;" id='Recently-Added'>
+  {%for i,j in top_three_object_zip%}
+    <div class="card card1">
+       <img class="card-img-top" src="/media/{{j.image}}" alt="Card image cap" style="height:50%;">
+
+        <div class="card-body">
+          <h5><span class="badge bg-secondary">Room ID {{i.id}}</span></h5>
+          <p class="card-text">Owner Name : {{i.owner_name|slice:12}}...</p>
+          <p class="card-text">Monthly Rent : {{i.room_rent}}</p>
+          <p class="card-text">Location : {{i.full_location|slice:40}}...</p>
+          <a href="{%url 'room_detail' i.id %}" class="btn btn-primary">Contact Owner</a>
+        </div>
+
+        <div class="card-footer">
+          <small class="text-muted text">Posted on {{i.date}}</small>
+        </div>
+
+  </div>
+{%endfor%}
+</div>
+
+<button type="button" class="btn btn-outline-success btn-lg" id="Explore-More">Explore</button>
+
+<br>
+<br>
+<br>
+
+
+<form class="" action="search_by_city/" method="post" id="ser">
+  {%csrf_token%}
+  <input type="text"  id="fname" class="search"  placeholder="Enter Location" name="ser">
+  <button type="submit"><i class="fa fa-search fa-3x"></i></button>
+
+</form>
+
+
+
+
+
+
+
+<!--        carousel indicators starts from here-->
+
+    <div class="container jumbotron room_showing" >
+
+
+    <div id="demo" class="carousel slide my-3" data-ride="carousel" >
+
+
+                <a class="carousel-control-prev" href="#demo" role="button" data-slide="prev" >
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="sr-only" >Previous</span>
+                  </a>
+                  <a class="carousel-control-next" href="#demo" role="button" data-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Next</span>
+                  </a>
+
+    <ul class="carousel-indicators">
+
+          {% for i in r %}
+       <li data-target="#demo" data-slide-to="{{i}}" ></li>
+    {% endfor %}
+    </ul>
+
+          <div class="container carousel-inner   no-padding">
+
+            <div class="carousel-item active" >
+
+            {% for i,j in all_object_zip %}
+            <div class="col-xs-3 col-sm-3 col-md-3">
+              <div class="card card1" style="width: 18rem; height: 50%;">
+              <img src="/media/{{j.image}}" class="card-img-top" alt="..." style="height:15rem;">
+                <div class="card-body">
+                  <h5><span class="badge bg-secondary">Room ID {{i.id}}</span></h5>
+                  <p class="card-text">Owner Name : {{i.owner_name|slice:12}}...</p>
+                  <p class="card-text">Monthly Rent : {{i.room_rent}}</p>
+                  <p class="card-text">Location : {{i.full_location|slice:40}}...</p>
+                  <a href="{%url 'room_detail' i.id %}" class="btn btn-primary">Contact Owner</a>
+
+                  <div class="card-footer" style="margin-top:3%;">
+                    <small class="text-muted text">Posted on {{i.date}}</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {% if forloop.counter|divisibleby:3 and forloop.counter > 0 and not forloop.last %}
+             </div><div class="carousel-item ">
+            {% endif%}
+
+            {% endfor %}
+
+            </div>
+            </div>
+              </div>
+</div>
+
+
+
+<!--
+<div class="jumbotron">
+
+<div class="mapouter"><div class="gmap_canvas"><iframe width="100%;" style="overflow: hidden;" height="800" id="gmap_canvas" src="https://maps.google.com/maps?q=KDB+School+in+396105&amp;um=1&amp;ie=UTF-8&amp;sa=X&amp;ved=0ahUKEwjGtpiW2qLvAhVfErkGHXnLADUQ_AUICCgB,-105.0668&output=svembed"></a><style>.gmap_canvas {overflow:hidden;background:none!important;height:500px;width:600px;}</style></div></div>
+
+</div>
+-->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</section>
+
+
+  <div class="row">
+    {%block side%}
+
+    {%endblock side%}
+
+    {%block Bcontent%}
+
+    {%endblock Bcontent%}
+
+    </div>
+  </div>
+<hr>
+
+
+<footer class="footer-section" style="margin:4%;">
+        <div class="container">
+            <div class="footer-cta pt-5 pb-5">
+                <div class="row">
+                    <div class="col-xl-4 col-md-4 mb-30">
+                        <div class="single-cta">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <div class="cta-text">
+                                <h4>Find us</h4>
+                                <span>Laxmi Institute of technology</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-md-4 mb-30">
+                        <div class="single-cta">
+                            <i class="fas fa-phone"></i>
+                            <div class="cta-text">
+                                <h4>Call us</h4>
+                                <span>910***677</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-md-4 mb-30">
+                        <div class="single-cta">
+                            <i class="far fa-envelope-open"></i>
+                            <div class="cta-text">
+                                <h4>Mail us</h4>
+                                <span>roomies@gmail.com</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-content pt-5 pb-5">
+                <div class="row">
+                    <div class="col-xl-4 col-lg-4 mb-50">
+                        <div class="footer-widget">
+                            <div class="footer-logo">
+                                <a href="index.html"><img src="{%static 'image/room.jpg' %}" class="img-fluid" alt="logo"></a>
+                            </div>
+                            <div class="footer-text">
+                                <p style="color:white">
+                                <span style="color:orange;"> The main Motive of the Roomies is to help those people who are getting
+                                  difficulties to find a rent </span> room and as well the owner who get the difficulties
+                                  to find right rent person. The Roomies  provide <span style="color:green;">  a platform through which the
+                                  owner gets it right rent person and migrant peoples find room according to his/her requirement.</span>
+
+                                    </p>
+                            </div>
+                            <div class="footer-social-icon">
+                                <span>Follow us</span>
+                                <a href="#"><i class="fab fa-facebook-f facebook-bg"></i></a>
+                                <a href="#"><i class="fab fa-twitter twitter-bg"></i></a>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-lg-4 col-md-6 mb-30">
+                        <div class="footer-widget">
+                            <div class="footer-widget-heading">
+                                <h3>Useful Links</h3>
+                            </div>
+                            <ul>
+                                <li><a href="#">Home</a></li>
+                                <li><a href="/team">Our Team</a></li>
+                                <li><a href="/agreement_detail_form">Make Agreement of Room</a></li>
+                                <li><a href="#Recently-Added">Latest Post</a></li>
+                            </ul>
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="col-xl-4 col-lg-4 col-md-6 mb-50">
+                        <div class="footer-widget">
+                            <div class="footer-widget-heading">
+                                <h3>Location</h3>
+                            </div>
+                            <iframe width="100%;" style="overflow: hidden;" height='400' id="gmap_canvas"
+                            src="https://maps.google.com/maps?q=google+map+of+396105+Bhilad&amp;um=1&amp;ie=UTF-8&amp;sa=X&amp;ved=0ahUKEwj3qoPWmZrwAhU5gdgFHQWPCuoQ_AUICCgB,-105.0668&output=svembed">
+                          </iframe>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="copyright-area">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xl-6 col-lg-6 text-center text-lg-left">
+                        <div class="copyright-text">
+                            <p>Copyright &copy; 2021, All Right Reserved Roomies.com</a></p>
+                        </div>
+                    </div>
+                    <div class="col-xl-6 col-lg-6 d-none d-lg-block text-right">
+                        <div class="footer-menu">
+                            <ul>
+                                <li><a href="#">Home</a></li>
+                                <li><a href="/privacyterms">Privacy & Policy</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+{%endblock content%}
+
+
+
+<script type="text/javascript" src="{% static 'js/ajax.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/2.0.2/anime.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/1.1.1/typed.min.js"></script>
+<script type="text/javascript" src="{% static 'js/ajax.js' %}"></script>
+
+
+
+  </body>
+</html>

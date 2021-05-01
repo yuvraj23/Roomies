@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+{%load static%}
+<html lang="en" dir="ltr">
+  <head>
+
+    <title>Imaginary World</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="{%static 'css/magnific-popup.css' %}">
+<script src='https://kit.fontawesome.com/a076d05399.js'></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@master/devicon.min.css">
+<link href='https://fonts.googleapis.com/css?family=Oswald:400' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Oswald:300' rel='stylesheet' type='text/css'>
+
+
+<link href="https://fonts.googleapis.com/css?family=Roboto+Condensed:300,300i,400,400i,700i" rel="stylesheet">
+
+
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/2.0.2/anime.min.js"></script>
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+
+
+
+
+
+
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+
+
+
+<script type="text/javascript" src="{%static 'js/jquery.magnific-popup.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/ajax.js' %}"></script>
+
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+
+<style media="screen">
+
+.Title_Form{
+  margin-left: 10%;
+  margin-right: 10%;
+  margin-top: 2%;
+  margin-bottom:2%;
+}
+
+.Form{
+  margin: 2%;
+}
+.signin-button {
+
+
+  outline: none;
+  border:none;
+  cursor: pointer;
+  width:70%;
+  height: 10%;
+  border-radius: 30px;
+  font-size: 20px;
+  font-weight: 700;
+  font-family: 'Lato', sans-serif;
+  color:#fff;
+  text-align: center;
+  background: #24cfaa;
+  box-shadow: 3px 3px 8px #b1b1b1,
+              -3px -3px 8px #ffffff;
+  transition: 0.5s;
+}
+.signin-button:hover {
+  background:#2fdbb6;
+}
+.signin-button:active {
+  background:#1da88a;
+}
+
+
+
+</style>
+
+  </head>
+  <body>
+
+
+
+
+
+
+
+
+
+{%block nav%}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top">
+      <div class="container">
+        <a class="navbar-brand" href="#">
+             <img class="logo"  src="{%static 'image/room.jpg' %}" alt=""  id="logoimage" style="height:50px; width:80px; ">
+            </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav ml-auto">
+              <li class="nav-item">
+                <a class="nav-link pad" href="{%url 'home'%}">
+                  Home
+                </a>
+                </li>
+
+
+                        {% if request.user.is_superuser %}
+                        <li class="nav-item">
+                        <a class="nav-link pad" href="/admin">
+                        <b>ADMIN PANEL</b>
+                        </a>
+                        </li>
+                              {% else %}
+                                  {% endif %}
+
+
+                          {% if not  user.is_authenticated %}
+
+
+
+                            <li class="nav-item">
+                          <a class="nav-link pad" href="/signup">
+                            SignIn
+                          </a>
+                          </li>
+
+                          <li class="nav-item">
+                              <a class="nav-link pad" href="{%url 'login'%}">
+                                LogIn
+                              </a>
+                          </li>
+
+
+
+
+
+                          <li class="nav-item">
+                          <p class="nav-link" style="color:white; font-size:15px; font-weight:bold;
+                          ">Welcome,Guest</p>
+                          </li>
+
+
+
+
+                          {% endif %}
+
+
+                          {% if  user.is_authenticated %}
+
+                          <li class="nav-item">
+                              <a class="nav-link pad" href="{%url 'logout'%}">
+                                LogOut
+                              </a>
+                          </li>
+
+                          <li class="nav-item">
+                          <p class="nav-link" style="color:white; font-size:15px; font-weight:bold;
+                          ">Welcome,{{user.get_username|title}}</p>
+                          </li>
+
+
+                          <li class="nav-item">
+                            <p>
+
+
+                              </p>
+                          </li>
+
+
+
+                          {%endif%}
+
+
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+{%endblock nav%}
+{%block content%}
+
+
+<div class="Post_Room_Form">
+
+
+
+<div class="jumbotron jumbotron-fluid Title_Form">
+  <div class="container">
+    <h1 class="display-4">Post Your Room Advertisement For Free</h1>
+  </div>
+</div>
+
+<div class="jumbotron Form" >
+
+  <form class="needs-validation"  method="post"   enctype="multipart/form-data" novalidate>
+      {%csrf_token%}
+    <div class="form-row">
+
+      <div class="col-md-4 mb-3">
+        <label for="validationCustom02">Owner Name</label>
+        <input type="text" class="form-control" id="validationCustom02" name='name' placeholder="Name" value="Otto" required>
+        <div class="valid-feedback">
+          Looks good!
+        </div>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label for="validationCustom05">Mobile Number</label>
+        <div class="input-group">
+          <input type="number" class="form-control" id="validationCustom05" value="91992993333" name='mobile_no' placeholder="Username" aria-describedby="inputGroupPrepend" required>
+          <div class="invalid-feedback">
+            Enter a Mobile Number
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 mb-3">
+        <label for="owner_name">Building/Apartment/Society/Chawl Name</label>
+        <input type="text" class="form-control" id="owner_name" name="buildingName" placeholder="Your Name" value="Mark" required>
+        <div class="valid-feedback">
+          Looks good!
+        </div>
+      </div>
+
+    </div>
+    <div class="form-row">
+      <div class="col-md-4 mb-3">
+        <label for="validationCustom04">State</label>
+        <input type="text" class="form-control" id="validationCustom04" name='State' value="Gujarat" placeholder="State" required>
+        <div class="invalid-feedback">
+          Please provide a valid State.
+        </div>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label for="validationCustom06">City</label>
+        <input type="text" class="form-control" id="validationCustom05" name='city' value="vapi" placeholder="City" required>
+        <div class="invalid-feedback">
+          Please provide a valid city.
+        </div>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label for="validationCustom07">PIN/ZIP code</label>
+        <input type="text" class="form-control" id="validationCustom07" name="pin" value="abc" placeholder="PIN/ZIP" required>
+        <div class="invalid-feedback">
+          Please provide a valid ZIP/PIN CODE.
+        </div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="col-md-4 mb-3">
+        <label for="validationCustom08">Monthly Rent in INR</label>
+        <input type="text" class="form-control" id="validationCustom08" placeholder="Eg:3000" name='Monthly_Rent' value="2000" required>
+        <div class="valid-feedback">
+          Looks good!
+        </div>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label for="validationCustom09">Deposite in INR</label>
+        <input type="text" class="form-control" id="validationCustom09" placeholder="Eg:10000" name="Deposite" value="10000" required>
+        <div class="valid-feedback">
+          Looks good!
+        </div>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label for="validationCustom10">Room On which floor</label>
+        <div class="input-group">
+
+          <input type="text" class="form-control" id="validationCustom10" value="4" placeholder="Eg:04" name="floor" required>
+          <div class="invalid-feedback">
+            Enter Floor Number.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="col-md-2 mb-3">
+        <label for="validationCustom11">Total Floor</label>
+        <input type="text" class="form-control" id="validationCustom11" placeholder="Eg:10" name="total_floor" value="10" required>
+        <div class="valid-feedback">
+          Looks good!
+        </div>
+      </div>
+
+
+      <div class="col-md-2 mb-3">
+        <label for="validationCustom11">How many room</label>
+        <input type="text" class="form-control" id="validationCustom11" placeholder="Eg:10" name="total_room" value="1" required>
+        <div class="valid-feedback">
+          Looks good!
+        </div>
+      </div>
+
+
+      <div class="col-md-4 mb-3">
+        <label for="validationCustom12">Address</label>
+        <input type="text" class="form-control" id="validationCustom12" placeholder="Eg:Vapi"  name="Address" value="Otto" required>
+        <div class="valid-feedback">
+          Looks good!
+        </div>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label for="validationCustom13">Landmark</label>
+        <div class="input-group">
+
+          <input type="text" class="form-control" id="validationCustom13" value="Eg:Near SNG School right side of Gopal Krishna Mandir" placeholder="Eg:Near SNG School right side of Gopal Krishna Mandir" name="Landmark" aria-describedby="inputGroupPrepend" required>
+
+        </div>
+      </div>
+    </div>
+
+
+
+    <div class="form-row">
+      <div class="col-md-4 mb-3">
+
+            <label for="Query1">Bathroom is attached ?</label>
+            <select class="form-control" id="Query1" name="Bathroom">
+              <option>Yes</option>
+              <option>No</option>
+            </select>
+
+
+
+      </div>
+
+      <div class="col-md-4 mb-3">
+
+      <label for="Query2">Room Type ?</label>
+      <select class="form-control" id="Query2" name="Room_Type">
+        <option>In chawl</option>
+        <option>In Building</option>
+      </select>
+      </div>
+
+      <div class="col-md-4 mb-3">
+
+        <label for="Query2">Available For?</label>
+        <select class="form-control" id="Query2" name="Available_For">
+          <option>Only Bachelor</option>
+          <option>Only Female</option>
+          <option>Only Family</option>
+          <option>Available fro all</option>
+        </select>
+
+      </div>
+    </div>
+
+
+
+    <div class="form-row">
+        <div class="col-md-6 mb-3">
+             <label for="Description">Facilities</label>
+             <textarea class="form-control" id="Description" placeholder="You can write here what Facilities is there," name="Description" rows="3"></textarea>
+        </div>
+
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class="form-row" >
+        <div class="col-md-5 mb-3 " id="images">
+             <input type="file" class="form-control-file"  name="file[]"> <br><br>
+        </div>
+
+    </div>
+
+    <input type="button" class="btn btn-primary" name="add_image" id="add_image" value="Add Image">
+
+
+<br>
+<br>
+<br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <center>
+    <div class="link">
+      <input type="submit" name="" class="btn btn-primary signin-button"  value="Submit form">
+
+    </div>
+    </center>
+
+
+  </form>
+
+
+
+</div>
+
+
+
+</div>
+
+
+{%endblock content%}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/2.0.2/anime.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/1.1.1/typed.min.js"></script>
+
+
+
+
+
+  <script>
+
+  (function() {
+    'use strict';
+    window.addEventListener('load', function() {
+
+      var forms = document.getElementsByClassName('needs-validation');
+
+      var validation = Array.prototype.filter.call(forms, function(form) {
+        form.addEventListener('submit', function(event) {
+          if (form.checkValidity() === false) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+          form.classList.add('was-validated');
+        }, false);
+      });
+    }, false);
+  })();
+
+
+
+
+document.getElementById('add_image').onclick=function(ev){
+  var image=document.getElementById('images');
+  var newInput=document.createElement('input');
+  newInput.type="file";
+  newInput.name="file[]";
+  var br=document.createElement("br");
+  var br1=document.createElement("br");
+
+  image.appendChild(newInput);
+  image.appendChild(br);
+  image.appendChild(br1);
+
+
+}
+
+
+
+  </script>
+
+
+
+
+  </body>
+</html>

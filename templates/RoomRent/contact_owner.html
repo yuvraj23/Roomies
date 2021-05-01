@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+{%load static%}
+<html lang="en">
+<head>
+<title>Page Title</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+/* Style the body */
+body {
+  font-family: Arial;
+  margin: 0;
+}
+
+/* Header/Logo Title */
+.header {
+  padding: 60px;
+  text-align: center;
+  background-color: #fff000;
+background-image: linear-gradient(315deg, #fff000 0%, #ed008c 74%);
+  color: white;
+  font-size: 30px;
+  border: 5% solid black;
+border-radius: 25px;
+}
+
+.button {
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+img {
+  border-radius: 20%;
+}
+/* Page Content */
+.content {padding:20px;}
+
+.styled-table {
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.styled-table thead tr {
+    background-color: #009879;
+    color: #ffffff;
+    text-align: left;
+}
+
+.styled-table th,
+.styled-table td {
+    padding: 12px 15px;
+}
+
+.styled-table tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.styled-table tbody tr:last-of-type {
+    border-bottom: 2px solid #009879;
+}
+
+.styled-table tbody tr.active-row {
+    font-weight: bold;
+    color: #009879;
+}
+
+.note{
+  background-color: #000000;
+background-image: linear-gradient(147deg, #000000 0%, #434343 74%);
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+
+  <h4 style="color:white;">Hello <b>{{owner.username|title}}</b></h4>
+  <p style="color:white;"><b>Roomies want to contact you</b> &#10024; &#10024; &#129488;  &#10024; &#10024; </p>
+
+<span class="badge bg-secondary" style="text-align: center;padding:3%;">Roomies Details</span>
+  <table class="styled-table" style="background:white;margin-right: auto;margin-left: auto;">
+    <thead>
+        <tr>
+            <th colspan="2" style="text-align: center;">Details Of Room.</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr class="active-row">
+            <td>Roomies Name</td>
+            <td>{{roomies.username|title}}</td>
+        </tr>
+        <tr class="active-row">
+            <td>Roomies Contact Number</td>
+            <td>{{phone}}</td>
+        </tr>
+
+        <tr class="active-row">
+            <td>Roomies Email-ID</td>
+            <td>{{mail}}</td>
+        </tr>
+        <!-- and so on... -->
+    </tbody>
+</table>
+
+<span class="badge bg-secondary" style="text-align: center;padding:3%;">Room Details</span>
+  <table class="styled-table" style="background:white;margin-right: auto;margin-left: auto;">
+    <thead>
+        <tr>
+            <th colspan="2" style="text-align: center;">Details Of Room.</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr class="active-row">
+            <td>Room ID </td>
+            <td>{{room.id}}</td>
+        </tr>
+        <tr class="active-row">
+            <td>Room Adress</td>
+            <td>{{room.Address}}</td>
+        </tr>
+
+        <tr class="active-row">
+            <td>Building Name</td>
+            <td>{{room.buildingName}}</td>
+        </tr>
+        <!-- and so on... -->
+    </tbody>
+</table>
+
+<div class="note">Hey {{owner.username|title}} please try connect to {{roomies.username|title}} as soon as possible </div>
+
+</div>
+
+
+</body>
+</html>

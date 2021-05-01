@@ -1,0 +1,193 @@
+{%extends "RoomRent/home.html"%}
+
+{%load static%}
+
+{%block content%}
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Akaya+Kanadaka&display=swap" rel="stylesheet">
+
+<style media="screen">
+
+  body {
+    color: #000;
+    overflow-x: hidden;
+    height: 100%;
+    background-color: #8C9EFF;
+    background-repeat: no-repeat
+}
+
+.card {
+    z-index: 0;
+    background-color: #ECEFF1;
+    padding-bottom: 20px;
+    margin-top: 90px;
+    margin-bottom: 90px;
+    border-radius: 10px
+}
+
+.top {
+    padding-top: 40px;
+    padding-left: 13% !important;
+    padding-right: 13% !important
+}
+
+</style >
+
+
+
+
+
+<div class="container px-1 px-md-4 py-5 mx-auto">
+  <h1 style="text-align:center; background-color:#f72585; color:white;">LEASE AGREEMENT</h1>
+    <div class="card jumbotron" style="margin-top:1%;">
+
+      <b ><h4 style="text-align:center;">This Agreement is made by and between:</h4></b>
+      <p style="text-align:center; font-weight:bold;">
+      Tenant/Lessee/Renter    : {{agreement.renterName}} <br>
+      Landlord/Lessor/Owner  : {{agreement.ownerID}}
+      </p>
+      <br>
+
+
+      <p style="font-weight:bolder;">
+      The Landlord hereby agrees to lease the property located in: {{room.Address}} <br>
+      Street Address: {{room.Landmark}}  <br>
+      City: {{room.room_in_city}} <br>
+      State / Province: {{room.room_in_state}}<br>
+      Postal / Zip Code: {{room.room_pin}} <br>
+      </p>
+      <p>
+      The lease period shall be for {{agreement.period}} , beginning {{agreement.startDateOfRent}} and shall end and may be renewable {{agreement.endDateOfRent}}
+       year thereafter, on the agreed amount of {{room.room_rent}} to be paid monthly, and the amount of {{room.room_desposite}}
+      to be paid upon the execution of this Agreement.
+      </p>
+      <br>
+      <br>
+
+    <h3>Term and Conditions.</h3>   <br>
+      <div class="alert alert-danger" role="alert">
+        1. Use of Propery
+        <p style="color:#8338ec;">The Property leased shall only be used for residential purposes.</p>
+    </div>
+
+    <div class="alert alert-danger" role="alert">
+
+      2. Utilities
+        <p style="color:#8338ec;">
+          The Tenant agrees to pay for the utilities and other services used in the property on the continuity of
+          the lease of the Property.
+
+        </p>
+
+    </div>
+
+    <div class="alert alert-danger" role="alert">
+
+      3. Furnishings <br>
+
+      <p style="color:#8338ec;">
+        The leased premises contains the following property furnishings: 8 cubic feet Refrigerator, gas stove,
+        microwave oven, dishwasher, fully automatic washing machine, telephone. Damages and repairs shall
+        be borne by the tenant.
+
+      </p>
+
+    </div>
+
+    <div class="alert alert-danger" role="alert">
+
+      4. Acknowledgment <br>
+      <p style="color:#8338ec;">
+        The parties hereby acknowledge and understand the terms herein set forth in this Agreement.
+        Signed on this 2nd day of February, 2019.
+
+      </p>
+
+    </div>
+
+
+<div class="" style="display:flex; justify-content: space-between;">
+    {%if agreement.esignOwner != 'None'%}
+  <div>
+    <span style="position:left;float:left;">Owner Sign:</span><br><span class="badge bg-secondary" style="position:left;float:left; font-size:200%;">{{agreement.esignOwner}}</span>
+  </div>
+  {%endif%}
+  {%if agreement.esignRenter != 'None'%}
+  <div class="">
+    <span style="position:right;float:right;">Renter Sign:</span><br><span class="badge bg-secondary" style="position:right;float:right; font-size:200%;">{{agreement.esignRenter}}</span>
+  </div>
+  {%endif%}
+
+</div>
+
+
+
+
+{%if r %}
+<form method="post">
+  {%csrf_token%}
+
+
+    <input type="hidden" name="room" value="{{room.id}}">
+    <input type="hidden" name="oname" value="{{agreement.ownerID}}">
+    <input type="hidden" name="rname" value="{{agreement.renterName}}">
+    <input type="hidden" name="remail" value="{{agreement.renterEmail}}">
+    <input type="hidden" name="id" value="{{agreement.id}}">
+
+  <div class="form-group">
+    <label for="formGroupExampleInput">Renter Sign</label>
+    <input type="text" class="form-control" id="formGroupExampleInput" placeholder="Example input" required name='RenterSign'>
+  </div>
+  <input type="submit" name="" class="btn btn-primary signin-button"  value="Done Agreement" >
+</form>
+{%endif%}
+
+{%if o %}
+<form method="post">
+
+      <input type="hidden" name="room" value="{{room.id}}">
+      <input type="hidden" name="oname" value="{{agreement.ownerID}}">
+      <input type="hidden" name="rname" value="{{agreement.renterName}}">
+      <input type="hidden" name="remail" value="{{agreement.renterEmail}}">
+        <input type="hidden" name="id" value="{{agreement.id}}">
+
+
+  {%csrf_token%}
+  <div class="form-group">
+    <label for="formGroupExampleInput">Owner Sign</label>
+    <input type="text" class="form-control" id="formGroupExampleInput" placeholder="Example input" required name='OwnerSign'>
+  </div>
+  <input type="submit" name="" class="btn btn-primary signin-button"  value="Done Agreement">
+</form>
+{%endif%}
+
+<br>
+<br>
+{%if sendAgree%}
+<a href="{%url 'lease_agreement' lst_of_detail %}" class="btn btn-outline-success">Invite {{agreement.renterName}} For Sign AGREEMENT</a>
+
+{%endif%}
+
+
+
+
+
+        </div>
+    </div>
+
+
+
+
+
+
+
+<script type="text/javascript" src="{% static 'js/ajax.js' %}"></script>
+
+<script type="text/javascript">
+
+
+
+</script>
+
+
+{%endblock%}

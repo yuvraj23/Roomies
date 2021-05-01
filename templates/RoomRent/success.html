@@ -1,0 +1,43 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Akaya+Kanadaka&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+
+    <style media="screen">
+      .jumbotron {
+          background-color: #98d9e1;
+          background-image: linear-gradient(315deg, #98d9e1 0%, #d6aed6 74%);
+          font-family: 'Roboto', sans-serif;
+
+           margin-bottom: 0px !important;
+           height: 100vh !important;
+      }
+    </style >
+
+
+  </head>
+  <body>
+
+
+    <center>
+
+    <div class="suc jumbotron">
+      <h1 class="display-4"><img src="{%static 'image/success_emoji.jpg' %}" alt=""></h1>
+      <p class="lead">Hey {{request.user.username}}, Your Payment had been succeed.</p>
+      <p class="lead">Check Your mail for receipt.</p>
+      <hr class="my-4">
+      <p class="lead">
+        <a class="btn btn-primary btn-lg" href="/" role="button">Take me Home</a>
+      </p>
+    </div>
+    </center>
+
+
+  </body>
+</html>

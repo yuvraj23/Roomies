@@ -1,0 +1,109 @@
+{%extends "RoomRent/home.html"%}
+
+{%load static%}
+
+{%block content%}
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Akaya+Kanadaka&display=swap" rel="stylesheet">
+
+<style media="screen">
+
+  body {
+    color: #000;
+    overflow-x: hidden;
+    height: 100%;
+    background-color: #8C9EFF;
+    background-repeat: no-repeat
+}
+
+.card {
+    z-index: 0;
+    background-color: #ECEFF1;
+    padding-bottom: 20px;
+    margin-top: 90px;
+    margin-bottom: 90px;
+    border-radius: 10px
+}
+
+.top {
+    padding-top: 40px;
+    padding-left: 13% !important;
+    padding-right: 13% !important
+}
+
+
+@media screen and (max-width: 992px) {
+    .icon-content {
+        width: 50%
+    }
+}
+
+@media screen and (max-width: 992px) {
+    .btn {
+        margin-top:10%;
+    }
+}
+
+.btn{
+  border-radius:20px !important;
+  padding-left:20px;
+  padding-right:20px;
+}
+
+.btndone:hover{
+  background-color:#ff477e;
+}
+
+</style >
+
+
+
+
+
+<div class="container px-1 px-md-4 py-5 mx-auto">
+    <div class="card">
+        <div class="row justify-content-between top">
+          <a href="{% url 'agreement_detail_form' %}" class="btn btn-primary btndone">
+            <span class="badge badge-secondary">Generate Agreement</span>
+            <div class="row d-flex icon-content"> <i class="fa fa-file-text" style="font-size:48px;color:red"></i>
+              &nbsp&nbsp
+                <div class="d-flex flex-column">
+                    <p class="font-weight-bold"><br>LEASES <br>AGREEMENTS</p>
+                </div>
+            </div>
+            </a>
+
+
+          <a href="{% url 'payment_method' %}" class="btn btn-primary btndone">
+            <span class="badge badge-secondary " style="text-align:center;">Pay Rent/Deposite</span>
+          <div class="row d-flex icon-content" > <i class="fa fa-bank fa-3x " style="font-size:48px;color:red" ></i> &nbsp&nbsp
+              <div class="d-flex flex-column">
+                  <p class="font-weight-bold">Use Our System <br> To Pay Rent <br>This will keep <br>Track of monthly <br>Rent you Paid</p>
+              </div>
+          </div>
+          </a>
+
+
+        </div>
+    </div>
+
+
+
+
+</div>
+
+
+
+
+
+
+<script type="text/javascript" src="{% static 'js/ajax.js' %}"></script>
+
+<script type="text/javascript">
+
+
+
+</script>
+
+
+{%endblock%}

@@ -1,0 +1,190 @@
+{%extends "RoomRent/home.html"%}
+{%load static%}
+{%block content%}
+
+<style media="screen">
+
+  .box{
+    width:80%;
+    height:wrapp-content;
+    margin-left:10%;
+    margin-top:-3% !important;
+    background:black;
+    color:white;
+    transform:translte(-50%,-50%);
+    box-sizing:border-box;
+    padding:50px 30px;
+    border-radius:5%;
+  }
+
+  .box p{
+    margin:0;
+    padding:0;
+    font-weight:bold;
+  }
+
+  .box input{
+    width:100%;
+    margin-bottom:2%;
+
+  }
+
+  .box input[type="text"]{
+    border:none;
+    border-bottom:1px solid #fff;
+    background:transparent;
+    outline:none;
+    height:40px;
+    color:#ffffff;
+    font-size:16px;
+
+  }
+
+
+  .box input[type="email"]{
+    border:none;
+    border-bottom:1px solid #fff;
+    background:transparent;
+    outline:none;
+    height:40px;
+    color:#ffffff;
+    font-size:16px;
+
+  }
+
+
+
+  .box input[type="submit"]{
+    border:none;
+    background:#fb2525;
+    outline:none;
+    height:40px;
+    color:#ffffff;
+    font-size:20px;
+    border-radius:20px;
+
+  }
+
+  .box input[type="submit"]:hover{
+    cursor:pointer;
+    background:deepskyblue;
+    color:#000;
+
+  }
+
+
+  .box input[type="text"]:hover{
+    cursor:pointer;
+    background:white;
+    color:#000;
+
+  }
+
+
+  .box input[type="email"]:hover{
+    cursor:pointer;
+    background:white;
+    color:#000;
+
+  }
+
+.box a{
+  text-decoration:none;
+  font-size:22px;
+  line-height:20px;
+  color: darkgrey;
+}
+
+
+.box a:hover{
+  color: deepskyblue;
+}
+
+.errorlist
+    {
+        color: red;
+        font-weight:bold;
+
+    }
+
+
+
+</style>
+
+
+
+
+  <div class="jumbotron ">
+<div class="box">
+
+
+
+
+  {%if otp%}
+
+  {% else %}
+  <h1>Create Account</h1>
+  {% endif %}
+
+
+  {%if v%}
+    <div class="alert alert-danger" role="alert">
+      {{error_msg}}
+    </div>
+  {% else %}
+
+{% endif %}
+
+
+
+
+{%if otp%}
+  <h1>Verify OTP</h1>
+  {%if wrg_wrong_otp%}
+  <div class="alert alert-warning" role="alert">
+    Opps You entered Wrong OTP!!
+  </div>
+  {%else%}
+  {%endif%}
+
+<form  method="post">
+  {%csrf_token%}
+  <input type="number" name="otp"  class="form-control" placeholder="Enter Your OTP">
+  <input type="hidden" name="usr" value="{{usr.username}}">
+  <input type="hidden" name="otpform" value="True">
+    <input type="submit" name="" value="Verify OTP">
+
+  <a href="#" class="btn btn-success text-dark" onclick="ReSendOTP('{{usr.username}}','resendOTPmess')"
+  id="resendOTPmess"> Resend OTP
+  </a>
+
+</form>
+
+
+{% else %}
+
+
+<form method="post">
+{%csrf_token%}
+{{form.as_p}}
+
+<label for="for_password_again">Confirm Password</label>
+
+ <input type="password" name="password_again"  class="form-control" placeholder="">
+    <input type="submit" name="" value="SignIn">
+  </form>
+
+  <a href="{%url 'login'%}">Click here to Login</a>
+
+  <a href="{%url 'password_reset'%}" style="margin-left:50%">Forgot-Password</a>
+
+{% endif %}
+
+</div>
+
+  </div>
+
+
+
+
+{%endblock%}

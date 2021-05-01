@@ -1,0 +1,49 @@
+
+{%extends "RoomRent/home.html"%}
+{%load static%}
+
+{%block body%}
+
+
+{%block content%}
+
+
+<center>
+
+  <div class="jumbotron">
+
+
+    <form method="post">
+  <div class="form-row">
+    {%csrf_token%}
+    <div class="form-group col-md-6">
+      <label for="inputEmail4">User Name</label>
+      <input type="text" class="form-control" id="inputEmail4" value="{{request.user.username}}" name="username" required>
+    </div>
+    <div class="form-group col-md-6">
+      <label for="inputText1">First Name</label>
+      <input type="text" class="form-control" id="inputText1" value="{{request.user.first_name}}" name="first" required>
+    </div>
+    <div class="form-group col-md-6">
+      <label for="inputText2">Last Name</label>
+      <input type="text" class="form-control" id="inputText2" value="{{request.user.last_name}}" name="last" required>
+    </div>
+
+  </div>
+  <button type="submit" name="button" class="btn btn-success btn-lg">Save Profile</button>
+
+  </form>
+
+
+    <br>
+
+  </div>
+
+</center>
+
+{%endblock%}
+
+
+
+
+{%endblock%}

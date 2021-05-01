@@ -1,0 +1,659 @@
+{%extends "RoomRent/home.html"%}
+{%load static%}
+
+
+
+{%block content%}
+
+
+<style media="screen">
+
+.slider{
+  display: inline-block;
+  width: 100%;
+  max-height: 30%;
+  wrapper:content;
+  display: flex;
+flex-wrap: wrap;
+
+}
+
+  #feat{
+    width: 800px !important;
+    height: 60%;
+    object-fit: cover;
+    cursor: pointer;
+    border: 2px solid black;
+    object-fit: contain;
+
+  }
+
+.thumbnail{
+  object-fit:cover;
+  max-width:180px;
+  max-height:100px;
+  cursor:pointer;
+  opacity:0.4;
+  margin:5px;
+  border: 2px solid black;
+}
+.thumbnail:hover{
+  opacity:1;
+}
+
+.active{
+  opacity:1;
+}
+
+.slider-wrapper{
+  max-width:500px;
+  display:flex;
+  min-height:100px;
+  align-item:center;
+  margin: auto;
+}
+
+
+.slider{
+  width:440px;
+  display:flex;
+  flex-wrap:nowrap;
+  overflow-x:hidden;
+}
+
+.arrow{
+  width:30px;
+  height:30px;
+  cursor:pointer;
+  transition: .3s;
+}
+
+
+.arrow:hover{
+  opacity: .5;
+  width:35px;
+  height:35px;
+}
+
+
+
+.imageFrame{
+  display: grid;
+  height: 100%;
+}
+
+#feat {
+max-width: 100%;
+max-height: 100vh;
+margin: auto;
+}
+
+.card{
+  margin:-2% !important;
+  margin-top:-7% !important;
+  margin-bottom:-7% !important;
+}
+
+.card-text{
+  display: flex;
+  flex-direction:row;
+}
+
+.vl {
+  border-left: 3px solid lightblue;
+  height: auto;
+}
+
+@media screen and (max-width: 600px) {
+  .card-text{
+    display: flex;
+    flex-direction:column;
+  }
+}
+
+#details{
+  max-width: 100%;
+  max-height: auto;
+  margin: auto;
+
+}
+
+.map{
+
+
+  object-fit: cover;
+  cursor: pointer;
+  border: 2px solid black;
+  object-fit: contain;
+  max-width: auto;
+  max-height: auto;
+  margin: auto;
+  margin-top:10%;
+
+}
+
+.Nearby {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction:row;
+  align-items: center;
+  justify-content: center;
+
+}
+
+.map {
+  background-color: #f1f1f1;
+  width: 500px;
+  height: 500px;
+  margin: 20px;
+  text-align: center;
+  line-height: 75px;
+  margin-bottom:25px;
+
+
+}
+
+.btn-circle.btn-xl {
+  width: 70px;
+  height: 70px;
+  padding: 10px 16px;
+  font-size: 24px;
+  line-height: 1.33;
+  border-radius: 35px;
+}
+
+.chat_btn{
+  position: sticky;
+  top: 90px;
+  float:right;
+
+}
+
+.chat_btn span{
+margin-left:20px;
+}
+
+@media screen and (max-width: 1200px) {
+  .chat_btn{
+  display: none;
+  }
+}
+
+@media screen and (min-width: 1200px) {
+    .chat-btn-small-screen {
+        display: none !important;
+    }
+}
+
+.cmail {
+  display: block;
+  width: 100%;
+  border: none;
+  height:20%;
+  padding: 14px 28px;
+  font-size: 16px;
+  cursor: pointer;
+  text-align: center;
+  background-color: #f8ceec;
+background-image: linear-gradient(315deg, #f8ceec 0%, #a88beb 74%);
+font-weight:bold;
+
+}
+
+.cmail:hover{
+  background-color: #fc9842;
+background-image: linear-gradient(315deg, #fc9842 0%, #fe5f75 74%);
+}
+
+
+* {
+        box-sizing: border-box;
+      }
+      .openBtn {
+        display: flex;
+        justify-content: left;
+      }
+      .openButton {
+        border: none;
+        border-radius: 5px;
+        background-color: #1c87c9;
+        color: white;
+        padding: 14px 20px;
+        cursor: pointer;
+        position: fixed;
+      }
+      .loginPopup {
+        position: relative;
+        text-align: center;
+        width: 100%;
+      }
+      .formPopup {
+        display: none;
+        position: fixed;
+        left: 45%;
+        top: 5%;
+        transform: translate(-50%, 5%);
+        border: 3px solid #999999;
+        z-index: 9;
+      }
+      .formContainer {
+        max-width: 300px;
+        padding: 20px;
+        background-color: #fff;
+      }
+      .formContainer input[type=text],
+      .formContainer input[type=password] {
+        width: 100%;
+        padding: 15px;
+        margin: 5px 0 20px 0;
+        border: none;
+        background: #eee;
+      }
+      .formContainer input[type=text]:focus,
+      .formContainer input[type=password]:focus {
+        background-color: #ddd;
+        outline: none;
+      }
+      .formContainer .btn {
+        padding: 12px 20px;
+        border: none;
+        background-color: #8ebf42;
+        color: #fff;
+        cursor: pointer;
+        width: 100%;
+        margin-bottom: 15px;
+        opacity: 0.8;
+      }
+      .formContainer .cancel {
+        background-color: #cc0000;
+      }
+      .formContainer .btn:hover,
+      .openButton:hover {
+        opacity: 1;
+      }
+</style>
+
+
+
+
+
+<div class=" SliderFrame jumbotron">
+
+  <div class="Heading" style="text-align:center;">
+    <h1 class="display-4"  style="font-size:30px !important;">Image Of Your Rent House <i class="fas fa-home"></i></h1>
+
+  </div>
+
+
+<div class="imageFrame"  id="feat">
+  <img id="featured" src="/media/{{imageList.0}}" style="height:400px; width:100%;" alt="">
+</div>
+
+<div class="slider-wrapper jumbotron vertical-center">
+  <i class="fas fa-angle-double-left fa-2x" class="arrow" id='slideLeft'></i>
+<div class=" slider " id='slider'>
+
+          <img class="thumbnail active" src="/media/{{imageList.0}}" alt="">
+
+          {%for i in imageList%}
+          {% if forloop.first %}
+          {%else%}
+            <img class="thumbnail border border-primary" src="/media/{{i}}" alt="">
+          {%endif%}
+
+          {%endfor%}
+
+
+</div>
+  <i class="fas fa-angle-double-right fa-2x" class="arrow" id='slideRight'></i>
+</div>
+
+
+<br>
+<div class="chat-btn-small-screen" style="margin-top:-50px;">
+
+  <span class="badge badge-secondary" class="chat_btn">Chat with Owner Now</span>
+  <br>
+
+  <a href="{%url 'chat' room.user_primary_key %}"><button type="button" class="btn btn-danger btn-circle btn-xl" style="margin-left:50px;position:sticky;float:left;" ><i class="far fa-comment"></i></button></a>
+  <br>
+  <br>
+  <br>
+  <br>
+
+</div>
+
+<div class="jumbotron" id="details" >
+
+  <div class="chat_btn">
+  <span class="badge badge-secondary" class="chat_btn">Chat with Owner Now</span>
+  <br>
+<a href="{%url 'chat' room.user_primary_key %} "><button type="button" class="btn btn-danger btn-circle btn-xl" style="margin-left:50px;position:sticky;float:left;" ><i class="far fa-comment"></i></button></a>
+  </div>
+
+
+  <div class="card">
+      <div class="card-body">
+        <h5 class="card-title"><b>Details Of <span class="badge bg-secondary">Room ID -  {{room.id}}</span> </h5>
+        <div class="card-text">
+
+           <div class="table-responsive col-md-6">
+                <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th scope="col">Posted By:</th>
+                    <th scope="col">{{room.owner_name}}</th>
+
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr>
+                     <th scope="row">Posted on:</th>
+                     <td>{{room.date}}</td>
+
+                </tr>
+
+                <tr>
+                     <th scope="row">Location:</th>
+                     <td>{{room.room_in_state}}, {{room.room_in_city}},{{room.room_pin}}</td>
+
+                </tr>
+
+                <tr>
+                       <th scope="row">Address:</th>
+                       <td>{{room.full_location}}</td>
+
+                </tr>
+
+                <tr>
+                       <th scope="row">Landmark:</th>
+                       <td>{{room.Landmark}}</td>
+
+                </tr>
+                <tr>
+                       <th scope="row">Building/Apartment Name:</th>
+                       <td>{{room.buildingName}}</td>
+
+                </tr>
+
+
+
+                </tbody>
+                </table>
+
+
+    </div>
+
+
+<div class="vl"></div>
+
+            <div class="table-responsive col-md-6" >
+                 <table class="table table-striped">
+                 <thead>
+                 <tr>
+                     <th scope="col">Deposite : </th>
+                     <th scope="col"><span class="badge badge-danger">{{room.room_desposite}}
+                     <i class="fa fa-inr" aria-hidden="true"></i></span></th>
+
+                 </tr>
+                 </thead>
+
+                 <tbody>
+                 <tr>
+                      <th scope="row">Rent Per Month : </th>
+                      <td><span class="badge badge-danger">{{room.room_rent}} <i class="fa fa-inr" aria-hidden="true"></i></span></td>
+
+                 </tr>
+
+                 <tr>
+                      <th scope="row">Room type : </th>
+                      <td>{{room.House_Type}}</td>
+
+                 </tr>
+
+                 <tr>
+                        <th scope="row">Total room : </th>
+                        <td>{{room.total_room}}</td>
+
+                 </tr>
+
+                 <tr>
+                        <th scope="row">Total floor In Building &nbsp &nbsp &nbsp &nbsp &nbsp&nbsp&nbsp(If Available) : </th>
+                        <td>{{room.total_floor}} Floor</td>
+
+                 </tr>
+
+                 <tr>
+                        <th scope="row">Room At : </th>
+                        <td>{{room.room_floor}} Floor</td>
+
+                 </tr>
+
+                 <tr>
+                        <th scope="row">Bathroom is Attached : </th>
+                        <td>{{room.Bathroom}}</td>
+
+                 </tr>
+
+                 <tr>
+
+
+                        <th scope="row">Available For : </th>
+                        <td>{{room.Available}}</td>
+
+                 </tr>
+
+                 </tbody>
+                 </table>
+
+
+         </div>
+
+
+
+
+
+      </div>
+
+      <div class="alert alert-primary" role="alert">
+          <span class="badge badge-success" style="font-size:18px;">Description :</span> <b>{{room.room_description}}</b>
+          </div>
+      </div>
+
+      <button type="button" name="button" onclick="openForm()" class="cmail">Contact Owner Now</button>
+
+    </div>
+</div>
+
+
+
+        <div class="loginPopup">
+          <div class="formPopup" id="popupForm">
+            <div  class="formContainer">
+              <p>Please Enter Your Correct Details Owner Will Soon Contact You<p>
+              <label for="email">
+            <strong>E-mail</strong>
+          </label>
+          <input type="text" id="email" placeholder="Your Email" name="email" required>
+          <label for="psw">
+            <strong>Phone Number</strong>
+          </label>
+          <input type="text" id="psw"  placeholder="Your Phone Number" name="phone" required>
+          <input type="hidden" name="" value="{{room.owner_email}}" id="omail">
+          <input type="hidden" name="" value="{{room.id}}" id="id">
+          <button type="submit" class="btn" onclick="getDetail()">Submit</button>
+          <button type="button" class="btn cancel" onclick="closeForm()">Close</button>
+        </div>
+      </div>
+    </div>
+
+
+
+
+<div class="">
+
+
+  <div class="jumbotron">
+
+    <div class="mapouter">
+      <div class="gmap_canvas">
+        <div class="alert alert-info" role="alert" style="text-align: center;">
+          Map view of city
+        </div>
+
+      <iframe width="100%;" style="overflow: hidden;" height='700' id="gmap_canvas"
+      src="{{room.location_map}}"></iframe>
+      <style>.gmap_canvas {overflow:hidden;background:none!important;}</style></div></div>
+   </div>
+
+</div>
+
+
+<div class="Nearby">
+
+        <div class="map">
+          <div class="alert alert-info" role="alert" >
+          Near by Companies
+          </div>
+
+          <iframe width="100%;" style="overflow: hidden;" height='500' id="gmap_canvas"
+          src="{{room.near_by_company}}">
+        </iframe>
+
+          <style>.gmap_canvas {overflow:hidden;background:none!important;margin-bottom:30px !important;}</style>
+
+        </div>
+
+
+
+            <div class="map">
+
+              <div class="alert alert-info" role="alert" >
+                Near by School.
+              </div>
+
+              <iframe width="100%;" style="overflow: hidden;" height='500' id="gmap_canvas"
+              src="{{room.near_by_school}}"></iframe>
+              <style>.gmap_canvas {overflow:hidden;background:none!important;}</style>
+
+            </div>
+
+
+                <div class="map" style="margin-top:150px;">
+                  <div class="alert alert-info" role="alert" >
+                    Near by Hospitals.
+                  </div>
+
+
+                  <iframe width="100%;" style="overflow: hidden;" height='500' id="gmap_canvas"
+                  src="{{room.near_by_hospital}}"></iframe>
+                  <style>.gmap_canvas {overflow:hidden;background:none!important;}</style>
+
+                </div>
+
+
+                    <div class="map" style="margin-top:150px;">
+                      <div class="alert alert-info" role="alert" >
+                        Near by Hotels.
+                      </div>
+                      <iframe width="100%;" style="overflow: hidden;" height='500' id="gmap_canvas"
+                      src="{{room.near_by_hotel}}"></iframe>
+                      <style>.gmap_canvas {overflow:hidden;background:none!important;}</style>
+
+                    </div>
+
+
+
+
+                        <div class="map" style="margin-top:150px;">
+                          <div class="alert alert-info" role="alert" >
+                            Near by Shops.
+                          </div>
+
+
+                          <iframe width="100%;" style="overflow: hidden;" height='400' id="gmap_canvas"
+                          src="{{room.near_by_shop}}"></iframe>
+                          <style>.gmap_canvas {overflow:hidden;background:none!important;}</style>
+
+                        </div>
+
+</div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+<script type="text/javascript">
+
+  let thumbnail = document.getElementsByClassName('thumbnail');
+  let activeImage= document.getElementsByClassName('active');
+
+  for (var i=0;i<thumbnail.length;i++){
+    thumbnail[i].addEventListener('mouseover',function(){
+      if (activeImage.length>0){
+        activeImage[0].classList.remove('active');
+      }
+      this.classList.add('active');
+      document.getElementById('featured').src= this.src;
+
+
+
+    })
+  }
+
+
+let btnR=document.getElementById('slideRight');
+let btnL=document.getElementById('slideLeft');
+btnR.style.color = "#ff0000";
+btnL.style.color = "#ff0000";
+
+btnL.addEventListener('click',function(){
+  document.getElementById('slider').scrollLeft-=180;
+})
+
+
+btnR.addEventListener('click',function(){
+  document.getElementById('slider').scrollLeft+=180;
+})
+
+function openForm() {
+        document.getElementById("popupForm").style.display = "block";
+      }
+      function closeForm() {
+        document.getElementById("popupForm").style.display = "none";
+      }
+
+function getDetail(){
+        phone=document.getElementById("psw").value;
+        mail=document.getElementById("email").value;
+        omail=document.getElementById("omail").value;
+        rid=document.getElementById("id").value;
+
+
+        var url = '/contact_mail?phone='+phone+'&email='+mail+'&oemail='+omail+'&rid='+rid;
+
+        var req = new XMLHttpRequest();
+        req.onreadystatechange = function(){
+          if (this.readyState == 4 && this.status ==200){
+          alert("Your details have been send to Owner soon You will get contacted.")
+          closeForm();
+        }
+      };
+
+     req.open("GET", url , true);
+     req.send();
+}
+
+</script>
+
+{%endblock%}

@@ -1,0 +1,400 @@
+{%extends "RoomRent/home.html"%}
+
+{%load static%}
+
+{%block content%}
+
+<link rel="preconnect" href="https://fonts.gstatic.com" >
+<link href="https://fonts.googleapis.com/css2?family=Akaya+Kanadaka&display=swap" rel="stylesheet">
+
+<style media="screen">
+
+.jumbotron{
+  height:100%;
+}
+
+
+.cont {
+    border: 2px solid #dedede;
+    background-color: #f1f1f1;
+    border-radius: 5px;
+    padding: 10px;
+    margin-top:-20px;
+    height: 360px!important;
+   overflow: auto;
+  }
+
+  @media screen and (max-width: 600px) {
+    .cont{
+    height: 280px!important;
+    }
+  }
+
+
+  .inside-cont {
+    border: 2px solid #dedede;
+    background-color: #f1f1f1;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 10px 0;
+  }
+
+  .darker {
+    border-color: #ccc;
+    background-color: #ddd;
+  }
+
+.inside-cont::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+.inside-cont img {
+  float: left;
+  max-width: 60px;
+  width: 100%;
+  margin-right: 20px;
+  border-radius: 50%;
+}
+
+
+/* Style the right image */
+.inside-cont img.right {
+  float: right;
+  margin-left: 20px;
+  margin-right:0;
+}
+
+/* Style time text */
+.time-right {
+  float: right;
+  color: #aaa;
+}
+
+.time-left {
+  float: left;
+  color: #999;
+}
+
+.input-box{
+  padding-left:2%;
+  padding-right:2%;
+  padding-top:2%;
+  padding-bottom:1%;
+width:80% !important;
+min-height:30% !important;
+ height:auto;
+border-radius:30px !important;
+white-space: pre-wrap !important;
+}
+
+.input-box::-webkit-scrollbar {
+  display: none;
+}
+
+
+@media screen and (max-width: 600px) {
+  .input-box{
+    padding-left:6%;
+    padding-right:6%;
+    padding-top:6%;
+    padding-bottom:2%;
+  width:60% !important;
+  }
+}
+
+
+.btn{
+margin-bottom:10px !important;
+float:left;
+border: none !important;
+ background: none;
+}
+
+.btn:focus{
+  outline: none;
+}
+
+@media screen and (max-width: 700px) {
+  .btn{
+    margin-left:20%;
+    margin-top:100% !important;
+    float:left;
+    border: none !important;
+    background: none;
+  }
+}
+
+
+@media screen and (max-width: 600px) {
+  .input-group-append{
+    float:left !important;
+    position:left;
+    margin-top:-60px;
+
+  }
+}
+
+.TextBox_and_Btn{
+  margin-top:-5% !important;
+}
+
+.emojionearea-button{
+  position: absolute;
+  left:20px;
+  color:yellow !important;
+  height: 24px !important;
+
+}
+.emojionearea{
+  margin-left: 5%;
+  position: left !important;
+
+}
+
+@media screen and (max-width: 600px) {
+  .emojionearea{
+    margin-left: 30%;
+    position: left !important;
+  }
+}
+
+.cont{
+  background:#c37df8 !important;
+}
+
+.status-bar{
+
+  border: 2px solid #dedede;
+  background-color: #f705f3;
+  border-radius: 5px;
+  margin-left:3%;
+  margin-right:3%;
+  margin-top:0px;
+  margin-bottom:1px;
+  height: 40px!important;
+  font-family: 'Akaya Kanadaka', cursive;
+ overflow: auto;
+ text-align: center;
+}
+
+body{
+  background-color:#E9ECEF;
+}
+
+
+</style>
+
+
+
+<div class="status-bar" id='"status-bar' style="overflow:hidden;">
+
+<p id="status"> </p>
+
+</div>
+
+
+
+  <div class="jumbotron chat" id=''>
+  <div class="cont chatdiv">
+
+    {%for a in whole_msg_buffer%}
+
+    {% if a in sdn_data %}
+      {% for key, value in sdn_data.items  %}
+                  {% if key == a %}
+
+                    <div class="inside-cont darker"  style="float:left; width:45%; height:auto;
+                    word-wrap: break-word; border-radius: 30px; margin-left:54%;" >
+                      <p>{{ value }}</p>
+                      <span class="time-left">11:01</span>
+                    </div>
+                  {% endif %}
+
+                {% endfor %}
+
+    {%else%}
+
+    {% for key, value in rsv_data.items  %}
+                {% if key == a %}
+
+                  <div class="inside-cont" style="float:right; word-wrap: break-word; width:45%; height:auto; border-radius: 30px; margin-right:54%;">
+                    <p>{{ value }}</p>
+                    <span class="time-left">11:01</span>
+                  </div>
+                {% endif %}
+
+              {% endfor %}
+
+
+    {%endif%}
+    {%endfor%}
+
+
+
+
+</div>
+</div>
+<br>
+
+<div class="input-group mb-3 TextBox_and_Btn" style="margin-left:4%; margin-right:4%;margin-top:-10%;">
+
+<textarea name="chat" value="" class="input-box" id="sender_data"></textarea  >
+
+  <div class="input-group-append" >
+    <span class="input-group-text" id="basic-addon2" style="border: none; display:inline-block;  ">
+      <button type="button" class="btn-form-control btn-sucess btn" id="sendText"   name="button">
+        <i class="fa fa-telegram" style="font-size:70px;color:red " ></i>
+      </button  >
+      <input type="hidden" name="" id="sendID" value="{{id}} " >
+
+    </span>
+</div>
+
+<script type="text/javascript">
+
+
+
+    window.onload = initAll;
+    var sendTextBtn;
+    var saveExeTwice=true;
+
+    function initAll(){
+       $(".cont").scrollTop($(".cont")[0].scrollHeight);
+      sendTextBtn = document.getElementById('sendText');
+      sendTextBtn.onclick=sendText;
+  }
+
+
+
+
+    function sendText(v){
+        var x = document.getElementById("sendID").value;
+        x=parseInt(x);
+        console.log(x);
+
+
+      var msg=document.getElementById('sender_data').value;
+      var url = '/messanger?data='+msg+'&id='+x;
+
+     var req1 = new XMLHttpRequest();
+     req1.onreadystatechange = function(){
+       if (this.readyState == 4 && this.status ==200){
+         $('.input-box').val('').change();
+         $(".chatdiv").append('<div class="inside-cont darker"  style="float:left; width:45%; height:auto;  word-wrap: break-word; border-radius: 30px; margin-left:54%;" ><p>'+msg+'</p><span class="time-left">11:01</span></div>');
+          $(".cont").scrollTop($(".cont")[0].scrollHeight);
+
+       }
+     };
+
+     req1.open("GET", url , true);
+     req1.send();
+
+    }
+
+  var chk1;
+  var chk2;
+  var oneATtime=0;
+  var allow;
+  var status="";
+
+
+
+  setInterval(function(){
+    var x = document.getElementById("sendID").value;
+
+    x=parseInt(x);
+       var req4 = new XMLHttpRequest();
+       var allow=false
+       var url = '/all_msg?id='+x;
+       oneATtime=0;
+       req4.onreadystatechange = function(){
+
+         if (this.readyState === 4 && this.status ===200){
+           var d = JSON.parse(req4.responseText);
+           console.log(d);
+          lst=d['lst'];
+          l1=d['l1'];
+          l2=d['l2'];
+          rsvPer_data=d['rsv_data'];
+          sndPer_data=d['sdn_data'];
+          whole_msg_buffer=d['whole_msg_buffer'];
+          status=d['status'];
+          rsv_name=d['rsv_name'];
+
+        $('.status-bar').html('<p style="font-size:25px; color:#0d1b2a;">'+rsv_name+" - "+status+'</p>');
+
+
+          oneATtime+=1;
+          console.log(oneATtime+"in ready");
+            if(oneATtime===1){
+              try {
+                var lst_val=l2[l2.length-1]
+              }
+              catch(err) {
+                var l;
+              }
+            console.log("hii yuvraj");
+                for (var key in l2){
+                    if(rsvPer_data.hasOwnProperty(l2[key])===true){
+                      $(".chatdiv").append('<div class="inside-cont" style="float:right; word-wrap: break-word; width:45%; height:auto; border-radius: 30px; margin-right:54%;"><p>'+rsvPer_data[l2[key]]+'</p><span class="time-left">11:01</span></div>');
+                      $(".cont").scrollTop($(".cont")[0].scrollHeight);
+                      }
+                    if (l2[key]===lst_val){
+                        allow=true;
+                        saveExeTwice=false
+                        console.log('now allow')
+                      }
+                    }
+                    chk1=0;
+                    if (allow===true){
+                    console.log('i am in 2');
+                    maxValue1 = l1[l1.length-1];
+                    maxValue2 = l2[l2.length-1];
+
+                    if (maxValue1 === undefined){
+                      maxValue1=0
+                    }
+
+                    if (maxValue2 === undefined){
+                      maxValue2=0
+                    }
+
+
+                    console.log(maxValue2);
+
+                    var url2 = '/update_token?m1='+maxValue1+'&m2='+maxValue2;
+                    req4.onreadystatechange = function(){
+                      if (this.readyState === 4 && this.status === 200){
+                        var d = req2.responseText;
+                        console.log('ayaga bro ');
+                        saveExeTwice=true;
+
+                      }
+                    };
+
+                    req4.open("GET", url2 , true);
+                    req4.send();
+
+                    }
+
+          }
+
+         }
+       };
+
+       req4.open("GET", url , true);
+       req4.send();
+
+
+
+
+
+  }, 10000);
+
+
+</script>
+
+
+{%endblock%}

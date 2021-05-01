@@ -1,0 +1,218 @@
+{%cload staticc%}
+/*basic property*/
+
+
+
+{
+  margin: 0;
+  padding: 0;
+}
+
+
+
+
+
+
+
+
+
+/*navigation basic property*/
+
+.nav-link {
+      padding-right: .9rem !important;
+      padding-left: .9rem !important;
+      margin-right: 15px;
+
+    }
+
+.navbar{
+  padding: 20px 0px !important;
+  background-color: #34495e !important;
+  border-bottom: none !important;
+}
+
+
+.collapse ul li a{
+  transition: all 0.6s ease-in !important;
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: white !important;
+
+}
+
+.dropdown-item{
+  color: black !important;
+
+}
+
+
+.collapse ul li a:hover{
+  color: deepskyblue !important;
+}
+
+.navbar-toggler{
+  background-color: #898989 !important;
+  transition: all 0.6s ease-in !important;
+  margin-right: 5%;
+}
+
+.navbar-toggler:hover{
+background-color: deepskyblue !important;
+margin-right: 5%;
+
+}
+
+.ClassName label{
+    display: none;
+}
+
+.nav #navbarSupportedContent{
+border-bottom: #ebebeb !important;
+}
+
+.nav-link .loc{
+  box-sizing: border-box;
+ background-color: white;
+ color: black;
+ cursor: pointer;
+ border-radius: 60px;
+
+}
+
+.nav-link .loc:hover{
+  background-color: orangered;
+  color: white;
+}
+
+
+.toggle-icon{
+
+color:red !important;
+background-color: white !important;
+}
+
+
+/*slider property*/
+
+@keyframes blink {
+
+0%{
+opacity: 1;
+}
+
+
+50%{
+opacity: 0;
+}
+
+
+100%{
+opacity: 1;
+}
+
+}
+
+
+@-webkit-keyframes blink {
+
+0%{
+opacity: 1;
+}
+
+
+50%{
+opacity: 0;
+}
+
+
+100%{
+opacity: 1;
+}
+
+}
+
+
+
+@-moz-keyframes blink {
+
+0%{
+opacity: 1;
+}
+
+
+50%{
+opacity: 0;
+}
+
+
+100%{
+opacity: 1;
+}
+
+}
+
+
+
+
+.secondary{
+  background-color: #34495e !important;
+}
+
+
+
+
+/**/
+
+
+
+.showme{
+  display: none;
+
+}
+
+.showhim:hover .showme{
+  display: block;
+}
+
+/*Logo Image*/
+.navbar .navbar-header .logo{
+  color: rgba(0,0,0,0.9);
+
+}
+
+.navbar .navbar-header .logo:hover{
+  background: rgba(255,255,255,0.9);
+}
+
+.nav-item .pad:hover{
+    background: rgba(255,255,255,0.9);
+}
+
+.nav-item .dropdown-menu .dropdown-pad{
+  color: black !important;
+}
+.nav-item .dropdown-menu .dropdown-pad:hover{
+  color: white !important;
+  background: rgba(0,0,0,0.9);
+}
+
+
+
+
+
+.typed-cursor{
+  opacity: 1;
+  animation: blink 0.7s infinte;
+  -webkit-animation:blink 0.7s infinite;
+  -mox-animation:blink 0.7s infinite;
+
+}
+
+
+
+/*New Css For Blog */
+
+.jumbo-color{
+  background-color: rgb(83, 81, 81);
+  color: white;
+}

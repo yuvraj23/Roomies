@@ -1,0 +1,56 @@
+{%extends "RoomRent/home.html"%}
+
+{%load static%}
+
+{%block content%}
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Akaya+Kanadaka&display=swap" rel="stylesheet">
+
+<style media="screen">
+  body {
+
+      background-color: #98d9e1;
+      background-image: linear-gradient(315deg, #98d9e1 0%, #d6aed6 74%);
+      font-family: 'Roboto', sans-serif
+  }
+
+
+
+</style >
+
+
+
+
+
+
+
+  {%for k,v in dict.items%}
+    <div class="alert alert-primary" style="width:fit-content; margin-left: auto; margin-right:auto;">
+      <p><span><i class="fas fa-user fa-2x"></i>
+
+        {%for i,j in d.items%}
+        {%ifequal i k %}
+        {{j}}
+        {%endifequal%}
+        {%endfor%}
+        message from  {{k|title}} 
+       </span> &nbsp &nbsp  <i class="fas fa-comment-alt fa-2x"></i> &nbsp &nbsp<a href="{%url 'chat' v.Sender.id %}" class="btn btn-danger"><i class="fa fa-reply"></i> chat</a>  </p>
+    </div>
+  {%endfor%}
+
+
+
+
+
+
+
+
+<script type="text/javascript" src="{% static 'js/ajax.js' %}"></script>
+
+<script type="text/javascript">
+
+
+</script>
+
+
+{%endblock%}

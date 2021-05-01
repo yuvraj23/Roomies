@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+{%load static%}
+<html lang="en">
+<head>
+<title>Page Title</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+/* Style the body */
+body {
+  font-family: Arial;
+  margin: 0;
+}
+
+/* Header/Logo Title */
+.header {
+  padding: 60px;
+  text-align: center;
+  background: #1abc9c;
+  color: white;
+  font-size: 30px;
+  border: 5% solid black;
+border-radius: 25px;
+}
+
+.button {
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+img {
+  border-radius: 20%;
+}
+/* Page Content */
+.content {padding:20px;}
+
+.styled-table {
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.styled-table thead tr {
+    background-color: #009879;
+    color: #ffffff;
+    text-align: left;
+}
+
+.styled-table th,
+.styled-table td {
+    padding: 12px 15px;
+}
+
+.styled-table tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.styled-table tbody tr:last-of-type {
+    border-bottom: 2px solid #009879;
+}
+
+.styled-table tbody tr.active-row {
+    font-weight: bold;
+    color: #009879;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+
+  <h4 style="color:white;">Hello <b>{{content.2}}</b></h4>
+  <p style="color:white;"><b>{{content.3}}</b> Invite You To Sign An AGREEMENT for Room - id {{content.4}}</p>
+
+  <table class="styled-table" style="background:white;margin-right: auto;margin-left: auto;">
+    <thead>
+        <tr>
+            <th colspan="2" style="text-align: center;">Details Of Room.</th>
+
+        </tr>
+    </thead>
+    <tbody>
+        <tr class="active-row">
+            <td>Room ID </td>
+            <td>{{content.4}}</td>
+        </tr>
+        <tr class="active-row">
+            <td>Room Adress</td>
+            <td>{{content.5}}</td>
+        </tr>
+        <tr class="active-row">
+            <td>Landmark</td>
+            <td>{{content.6}}</td>
+        </tr>
+        <tr class="active-row">
+            <td>City</td>
+            <td>{{content.7}}</td>
+        </tr>
+        <tr class="active-row">
+            <td>State</td>
+            <td>{{content.8}}</td>
+        </tr>
+        <tr class="active-row">
+            <td>Pin Code</td>
+            <td>{{content.9}}</td>
+        </tr>
+
+        <!-- and so on... -->
+    </tbody>
+</table>
+
+<a href="http://127.0.0.1:8000{%url 'renter_sign' content  %}" class="button" style="border-radius:5%;color:black;font-weight:bolder;">WANT TO SEE AGREEMENT</a>
+
+</div>
+
+
+
+</body>
+</html>

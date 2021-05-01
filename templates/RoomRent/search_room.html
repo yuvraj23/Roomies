@@ -1,0 +1,104 @@
+{%extends "RoomRent/home.html"%}
+
+{%load static%}
+
+{%block content%}
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Akaya+Kanadaka&display=swap" rel="stylesheet">
+
+<style media="screen">
+
+  body {
+    color: #000;
+    overflow-x: hidden;
+    height: 100%;
+    background-color: #8C9EFF;
+    background-repeat: no-repeat;
+}
+
+.card {
+    z-index: 0;
+    background-color: #ECEFF1;
+    padding-bottom: 20px;
+    margin-top: 90px;
+    margin-bottom: 90px;
+    border-radius: 10px
+}
+
+.top {
+    padding-top: 40px;
+    padding-left: 13% !important;
+    padding-right: 13% !important
+}
+
+
+@media screen and (max-width: 992px) {
+    .icon-content {
+        width: 50%
+    }
+}
+
+@media screen and (max-width: 992px) {
+    .btn {
+        margin-top:10%;
+    }
+}
+
+.btn{
+  border-radius:20px !important;
+  padding-left:20px;
+  padding-right:20px;
+}
+
+.btndone:hover{
+  background-color:#ff477e;
+}
+
+</style >
+
+
+
+<center>
+
+  <div class="alert alert-success" role="alert">
+
+  <form class="" action="search_by_city/" method="post">
+    {%csrf_token%}
+    <input type="text"  id="fname" class="search"  placeholder="You Have Serach {{ser}}" name="ser">
+    <button type="submit"><i class="fa fa-search fa-3x"></i></button>
+
+  </form>
+<b><i class="fa fa-check" aria-hidden="true"></i> We have found {{l}} result related to {{ser}}</b>
+  </div>
+  {%for i,j in all_object_zip%}
+  <div class="card card1" style="width:50%; height:50%;">
+    <img class="card-img-top" src="/media/{{j.image}}" alt="Card image cap" style="height:50%;">
+    <div class="card-body">
+      <h5 class="card-title">Owner Name : {{i.owner_name}}</h5>
+      <p class="card-text">Monthly Rent : {{i.room_rent}}</p>
+      <p class="card-text">Location : {{i.full_location}}</p>
+      <a href="{%url 'room_detail' i.id %}" class="btn btn-primary">Contact Owner</a>
+    </div>
+    <div class="card-footer">
+      <small class="text-muted text">Last updated 3 mins ago</small>
+    </div>
+
+  </div>
+  {%endfor%}
+
+
+</center>
+
+
+
+
+<script type="text/javascript" src="{% static 'js/ajax.js' %}"></script>
+
+<script type="text/javascript">
+
+
+
+</script>
+
+
+{%endblock%}

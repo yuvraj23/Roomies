@@ -1,0 +1,91 @@
+{%extends "RoomRent/home.html"%}
+
+{%load static%}
+
+{%block content%}
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Akaya+Kanadaka&display=swap" rel="stylesheet">
+
+<style media="screen">
+
+  .block {
+    display: block;
+    width: 100%;
+    border: none;
+    background-color: #4CAF50;
+    padding: 14px 28px;
+    font-size: 16px;
+    cursor: pointer;
+    text-align: center;
+    color:white;
+    font-weight:bolder;
+    font-size:100%;
+
+  }
+
+</style >
+
+
+
+<div class="jumbotron jumbotron-fluid">
+  <div class="container">
+    <h1 class="display-4">Running Agreement.</h1>
+    {%for a in lst_agreement%}
+
+    {%if a.esignOwner != 'None' and a.esignRenter != 'None'%}
+    <p class="lead"><a href="{%url 'agreement_detail' a.id  %}" style="text-decoration: none;" class="block">Room ID - {{a.roomId.id}}, Owner Name - {{a.ownerID}},Renter Name -{{a.renterName}}</a></p>
+    {%endif%}
+    {%endfor%}
+  </div>
+</div>
+
+
+
+<div class="jumbotron jumbotron-fluid">
+  <div class="container">
+    <h1 class="display-4">Pending Agreement.</h1>
+    {%for a in lst_agreement%}
+    {%if a.esignOwner == 'None' and a.esignRenter == 'None'%}
+    <p class="lead"><a href="{%url 'renter_sign' a.id  %}" style="text-decoration: none;" class="block">Room ID - {{a.roomId.id}}, Owner Name - {{a.ownerID}},Renter Name -{{a.renterName}}</a></p>
+    {%endif%}
+    {%endfor%}
+  </div>
+</div>
+
+<div class="jumbotron jumbotron-fluid">
+  <div class="container">
+    <h1 class="display-4">Edit Room Details/Update Posted room status.</h1>
+    {%for r in all_room_by_user%}
+
+    <p class="lead btn-success" style="padding:2%;">Room ID - {{r.id}}, Owner Name - {{r.user.username}}, Status - <span id="{{r.id}}">{{r.status}}</span> <a  href="{%url 'edit_room' r.id  %}" class="btn btn-danger" style=" margin-left:30%;">EDIT</a> <button type="button" class="btn btn-danger" onclick="ChangeStatus('{{r.id}}')"  id="ID" style="float:right; margin-right:5px;">Change STATUS</button></p>
+
+    {%endfor%}
+
+  </div>
+</div>
+
+
+
+<script type="text/javascript">
+function ChangeStatus(ID){
+
+  var url = '/status?id='+ID;
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      s=xhttp.responseText;
+      sarr=s.split(",");
+      $('#'+sarr[0]).text(sarr[1]);
+     alert('Thanks For Update!');
+    }
+  };
+  xhttp.open("GET",url, true);
+  xhttp.send();
+
+}
+
+
+</script>
+
+
+{%endblock%}

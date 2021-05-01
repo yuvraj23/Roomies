@@ -1,0 +1,135 @@
+<!--payment_receipt_mail.html-->
+
+
+
+
+<!DOCTYPE html>
+{%load static%}
+<html lang="en">
+<head>
+<title>Page Title</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+/* Style the body */
+body {
+  font-family: Arial;
+  margin: 0;
+}
+
+/* Header/Logo Title */
+.header {
+  padding: 60px;
+  text-align: center;
+  background-color: #a4508b;
+background-image: linear-gradient(326deg, #a4508b 0%, #5f0a87 74%);
+
+  color: white;
+  font-size: 30px;
+  border: 5% solid black;
+border-radius: 25px;
+}
+
+
+/* Page Content */
+.content {padding:20px;}
+
+.styled-table {
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.styled-table thead tr {
+    background-color: #009879;
+    color: #ffffff;
+    text-align: left;
+}
+
+.styled-table th,
+.styled-table td {
+    padding: 12px 15px;
+}
+
+.styled-table tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.styled-table tbody tr:last-of-type {
+    border-bottom: 2px solid #009879;
+}
+
+.styled-table tbody tr.active-row {
+    font-weight: bold;
+    color: #009879;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+
+  <h4 style="color:black;">Hello <b>{{name}}</b></h4>
+  <p style="color:black;"><b>{{request.user}} Paid {{amount}}</p>
+
+  <table class="styled-table" style="background:white;margin-right: auto;margin-left: auto; color:black;">
+    <thead>
+        <tr>
+            <th colspan="2" style="text-align: center;">Details Of Room.</th>
+        </tr>
+    </thead>
+    <tbody>
+
+              <tr>
+                <td >Name : </td>
+                <td >{{name}}</td>
+              </tr>
+              <tr>
+                <td >Email Of Renter : </td>
+                <td >{{omail}}</td>
+
+              </tr>
+              <tr>
+                <td >Email Of Owner : </td>
+                <td >{{rmail}}</td>
+
+              </tr>
+              <tr>
+                <td >Room ID : </td>
+                <td >{{roomid}}</td>
+
+              </tr>
+
+              <tr>
+                <td >Amount : </td>
+                <td >{{amount}}</td>
+
+              </tr>
+              <tr>
+                <td >Payment Id : </td>
+                <td >{{pid}}</td>
+
+              </tr>
+
+
+              <tr>
+                <td >Message</td>
+                <td >{{msg}}</td>
+
+              </tr>
+
+    </tbody>
+</table>
+</div>
+
+
+
+</body>
+</html>
