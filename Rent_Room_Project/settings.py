@@ -142,6 +142,6 @@ MEDIA_ROOT = 'media'
 
 EMAIL_HOST='smtp.gmail.com'
 EMAIL_HOST_USER='sqltool23@gmail.com'
-EMAIL_HOST_PASSWORD='Python@23'
+EMAIL_HOST_PASSWORD='*********'
 EMAIL_PORT=587
 EMAIL_USE_TLS=True
