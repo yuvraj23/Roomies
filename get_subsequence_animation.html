@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Subsequence Recursion Animation</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 1000px;
+            height: 600px;
+            background-color: rgb(218, 17, 17);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(141, 47, 47, 0.1);
+            overflow: hidden;
+            position: relative;
+        }
+        .scene {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .scene.active {
+            opacity: 1;
+        }
+        h1, h2, h3 {
+            text-align: center;
+            color: #333;
+            margin: 10px 0;
+        }
+        
+        .two-panel {
+            display: flex;
+            width: 100%;
+            height: 80%;
+        }
+        
+        .panel {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            overflow: hidden;
+        }
+        
+        .panel-left {
+            border-right: 1px solid #ddd;
+        }
+        
+        .panel-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #555;
+        }
+        
+        .code {
+            font-family: monospace;
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            width: 90%;
+            text-align: left;
+            white-space: pre;
+            overflow-x: auto;
+            position: relative;
+        }
+        
+        .code-highlight {
+            background-color: #ffeb3b;
+            padding: 2px;
+        }
+        
+        .stack {
+            display: flex;
+            flex-direction: column-reverse;
+            width: 80%;
+            margin: 20px 0;
+        }
+        
+        .stack-frame {
+            padding: 10px;
+            margin: 2px 0;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            transition: all 0.5s ease;
+            transform-origin: center;
+        }
+        
+        .frame-abc { background-color: #2196F3; }
+        .frame-ab { background-color: #4CAF50; }
+        .frame-a { background-color: #FF9800; }
+        .frame-empty { background-color: #9C27B0; }
+        
+        .string-container {
+            display: flex;
+            margin: 20px 0;
+            justify-content: center;
+        }
+        
+        .char {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 5px;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .char-a { background-color: #FF9800; color: white; }
+        .char-b { background-color: #4CAF50; color: white; }
+        .char-c { background-color: #2196F3; color: white; }
+        .char-extracted { opacity: 0.5; transform: translateY(20px); }
+        
+        .result {
+            background-color: #e0f7fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            width: 90%;
+            text-align: center;
+        }
+        
+        .subsequence-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+            width: 90%;
+        }
+        
+        .subsequence {
+            padding: 8px 12px;
+            margin: 5px;
+            border-radius: 5px;
+            background-color: #e0f7fa;
+            transition: all 0.3s ease;
+        }
+        
+        .subsequence.new {
+            animation: pulse 1s;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); background-color: #b3e5fc; }
+            100% { transform: scale(1); }
+        }
+        
+        .controls {
+            position: absolute;
+            bottom: 0px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        button:hover {
+            background-color: #0b7dda;
+        }
+        
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .arrow {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 15px solid #333;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .step-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #333;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 14px;
+        }
+        
+        .insights {
+            width: 90%;
+            text-align: left;
+            margin: 20px 0;
+        }
+        
+        .insights ul {
+            padding-left: 20px;
+        }
+        
+        .include-exclude {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 90%;
+            margin: 15px 0;
+        }
+        
+        .include-exclude-row {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .arrow-right {
+            margin: 0 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Scene 1: Introduction -->
+        <div class="scene" id="scene1">
+            <h1>Visualizing Recursion</h1>
+            <h2>The Get Subsequence Problem</h2>
+            <p>How to generate all subsequences of a string using recursion</p>
+            <div class="string-container">
+                <div class="char char-a">a</div>
+                <div class="char char-b">b</div>
+                <div class="char char-c">c</div>
+            </div>
+            <div class="subsequence-container">
+                <div class="subsequence">""</div>
+                <div class="subsequence">a</div>
+                <div class="subsequence">b</div>
+                <div class="subsequence">c</div>
+                <div class="subsequence">ab</div>
+                <div class="subsequence">ac</div>
+                <div class="subsequence">bc</div>
+                <div class="subsequence">abc</div>
+            </div>
+            <p>We'll use a two-panel view: code on the left, visualization on the right</p>
+        </div>
+        
+        <!-- Scene 2: Problem Setup -->
+        <div class="scene" id="scene2">
+            <h2>Problem Setup</h2>
+            <div class="two-panel">
+                <div class="panel panel-left">
+                    <div class="panel-title">Code</div>
+                    <div class="code">
+public static ArrayList&lt;String&gt; getSS(String que) {
+    if(que.length() == 0) {
+        ArrayList&lt;String&gt; ans = new ArrayList&lt;&gt;();
+        ans.add("");
+        return ans;
+    }
+
+    char firstChar = que.charAt(que.length()-1);
+    que = que.substring(0, que.length()-1);
+
+    ArrayList&lt;String&gt; list = getSS(que);
+
+    ArrayList&lt;String&gt; wholeAns = new ArrayList&lt;&gt;();
+
+    for(String s : list) {
+        wholeAns.add(s + firstChar);
+    }
+    for(String s : list) {
+        wholeAns.add(s + ".");
+    }
+
+    return wholeAns;
+}
+                    </div>
+                </div>
+                <div class="panel panel-right">
+                    <div class="panel-title">Visualization</div>
+                    <p>Input String: "abc"</p>
+                    <div class="string-container">
+                        <div class="char char-a">a</div>
+                        <div class="char char-b">b</div>
+                        <div class="char char-c">c</div>
+                    </div>
+                    <p>Result: []</p>
+                </div>
+            </div>
+            <p>Let's see how recursion generates all subsequences step by step</p>
+        </div>
+        
+        <!-- Scene 3: Function Explanation -->
+        <div class="scene" id="scene3">
+            <h2>Function Explanation</h2>
+            <div class="two-panel">
+                <div class="panel panel-left">
+                    <div class="panel-title">Code</div>
+                    <div class="code">
+public static ArrayList&lt;String&gt; getSS(String que) {
+    <span class="code-highlight">if(que.length() == 0) {
+        ArrayList&lt;String&gt; ans = new ArrayList&lt;&gt;();
+        ans.add("");
+        return ans;
+    }</span>
+
+    <span class="code-highlight">char firstChar = que.charAt(que.length()-1);
+    que = que.substring(0, que.length()-1);</span>
+
+    <span class="code-highlight">ArrayList&lt;String&gt; list = getSS(que);</span>
+
+    ArrayList&lt;String&gt; wholeAns = new ArrayList&lt;&gt;();
+
+    <span class="code-highlight">for(String s : list) {
+        wholeAns.add(s + firstChar);
+    }
+    for(String s : list) {
+        wholeAns.add(s + ".");
+    }</span>
+
+    return wholeAns;
+}
+                    </div>
+                </div>
+                <div class="panel panel-right">
+                    <div class="panel-title">Key Steps</div>
+                    <ol>
+                        <li>Base case: Empty string returns [""]</li>
+                        <li>Extract the last character from the string</li>
+                        <li>Make recursive call with the shorter string</li>
+                        <li>For each subsequence from the recursive call:
+                            <ul>
+                                <li>Create a version that includes the character</li>
+                                <li>Create a version that excludes the character</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+            <p>The function works by including or excluding each character</p>
+        </div>
+        
+        <!-- Scene 4: Initial Function Call -->
+        <div class="scene" id="scene4">
+            <div class="step-indicator">Step 1/12</div>
+            <h2>Initial Function Call</h2>
+            <div class="two-panel">
+                <div class="panel panel-left">
+                    <div class="panel-title">Code</div>
+                    <div class="code">
+<span class="code-highlight">public static ArrayList&lt;String&gt; getSS(String que) {</span>
+    if(que.length() == 0) {
+        ArrayList&lt;String&gt; ans = new ArrayList&lt;&gt;();
+        ans.add("");
+        return ans;
+    }
+
+    char firstChar = que.charAt(que.length()-1);
+    que = que.substring(0, que.length()-1);
+
+    ArrayList&lt;String&gt; list = getSS(que);
+
+    ArrayList&lt;String&gt; wholeAns = new ArrayList&lt;&gt;();
+
+    for(String s : list) {
+        wholeAns.add(s + firstChar);
+    }
+    for(String s : list) {
+        wholeAns.add(s + ".");
+    }
+
+    return wholeAns;
+}
+
+// Initial call: getSS("abc")
+                    </div>
+                </div>
+                <div class="panel panel-right">
+                    <div class="panel-title">Stack & Data</div>
+                    <div class="stack">
+                        <div class="stack-frame frame-abc">getSS("abc")</div>
+                    </div>
+                    <p>Input String:</p>
+                    <div class="string-container">
+                        <div class="char char-a">a</div>
+                        <div class="char char-b">b</div>
+                        <div class="char char-c">c</div>
+                    </div>
+                </div>
+            </div>
+            <p>We start by calling the function with the string "abc"</p>
+        </div>
+        
+        <!-- Scene 5: First Recursive Step -->
+        <div class="scene" id="scene5">
+            <div class="step-indicator">Step 2/12</div>
+            <h2>First Recursive Step</h2>
+            <div class="two-panel">
+                <div class="panel panel-left">
+                    <div class="panel-title">Code</div>
+                    <div class="code">
+public static ArrayList&lt;String&gt; getSS(String que) {
+    if(que.length() == 0) {
+        ArrayList&lt;String&gt; ans = new ArrayList&lt;&gt;();
+        ans.add("");
+        return ans;
+    }
+
+    <span class="code-highlight">char firstChar = que.charAt(que.length()-1);
+    que = que.substring(0, que.length()-1);</span>
+
+    <span class="code-highlight">ArrayList&lt;String&gt; list = getSS(que);</span>
+
+    ArrayList&lt;String&gt; wholeAns = new ArrayList&lt;&gt;();
+
+    for(String s : list) {
+        wholeAns.add(s + firstChar);
+    }
+    for(String s : list) {
+        wholeAns.add(s + ".");
+    }
+
+    return wholeAns;
+}
+
+// Inside getSS("abc"): Extract 'c', call getSS("ab")
+                    </div>
+                </div>
+                <div class="panel panel-right">
+                    <div class="panel-title">Stack & Data</div>
+                    <div class="stack">
+                        <div class="stack-frame frame-ab">getSS("ab")</div>
+                        <div class="stack-frame frame-abc">getSS("abc")</div>
+                    </div>
+                    <p>Extracted Character: 'c'</p>
+                    <div class="string-container">
+                        <div class="char char-a">a</div>
+                        <div class="char char-b">b</div>
+                        <div class="char char-c char-extracted">c</div>
+                    </div>
+                    <p>New Input String: "ab"</p>
+                </div>
+            </div>
+            <p>The function extracts the last character 'c' and makes a recursive call with "ab"</p>
+        </div>
+        
+        <!-- Scene 6: Second Recursive Step -->
+        <div class="scene" id="scene6">
+            <div class="step-indicator">Step 3/12</div>
+            <h2>Second Recursive Step</h2>
+            <div class="two-panel">
+                <div class="panel panel-left">
+                    <div class="panel-title">Code</div>
+                    <div class="code">
+public static ArrayList&lt;String&gt; getSS(String que) {
+    if(que.length() == 0) {
+        ArrayList&lt;String&gt; ans = new ArrayList&lt;&gt;();
+        ans.add("");
+        return ans;
+    }
+
+    <span class="code-highlight">char firstChar = que.charAt(que.length()-1);
+    que = que.substring(0, que.length()-1);</span>
+
+    <span class="code-highlight">ArrayList&lt;String&gt; list = getSS(que);</span>
+
+    ArrayList&lt;String&gt; wholeAns = new ArrayList&lt;&gt;();
+
+    for(String s : list) {
+        wholeAns.add(s + firstChar);
+    }
+    for(String s : list) {
+        wholeAns.add(s + ".");
+    }
+
+    return wholeAns;
+}
+
+// Inside getSS("ab"): Extract 'b', call getSS("a")
+                    </div>
+                </div>
+                <div class="panel panel-right">
+                    <div class="panel-title">Stack & Data</div>
+                    <div class="stack">
+                        <div class="stack-frame frame-a">getSS("a")</div>
+                        <div class="stack-frame frame-ab">getSS("ab")</div>
+                        <div class="stack-frame frame-abc">getSS("abc")</div>
+                    </div>
+                    <p>Extracted Characters:</p>
+                    <div class="string-container">
+                        <div class="char char-a">a</div>
+                        <div class="char char-b char-extracted">b</div>
+                        <div class="char char-c char-extracted">c</div>
+                    </div>
+                    <p>New Input String: "a"</p>
+                </div>
+            </div>
+            <p>The function extracts the last character 'b' and makes a recursive call with "a"</p>
+        </div>
+        
+        <!-- Scene 7: Third Recursive Step -->
+        <div class="scene" id="scene7">
+            <div class="step-indicator">Step 4/12</div>
+            <h2>Third Recursive Step</h2>
+            <div class="two-panel">
+                <div class="panel panel-left">
+                    <div class="panel-title">Code</div>
+                    <div class="code">
+public static ArrayList&lt;String&gt; getSS(String que) {
+    if(que.length() == 0) {
+        ArrayList&lt;String&gt; ans = new ArrayList&lt;&gt;();
+        ans.add("");
+        return ans;
+    }
+
+    <span class="code-highlight">char firstChar = que.charAt(que.length()-1);
+    que = que.substring(0, que.length()-1);</span>
+
+    <span class="code-highlight">ArrayList&lt;String&gt; list = getSS(que);</span>
+
+    ArrayList&lt;String&gt; wholeAns = new ArrayList&lt;&gt;();
+
+    for(String s : list) {
+        wholeAns.add(s + firstChar);
+    }
+    for(String s : list) {
+        wholeAns.add(s + ".");
+    }
+
+    return wholeAns;
+}
+
+// Inside getSS("a"): Extract 'a', call getSS("")
+                    </div>
+                </div>
+                <div class="panel panel-right">
+                    <div class="panel-title">Stack & Data</div>
+                    <div class="stack">
+                        <div class="stack-frame frame-empty">getSS("")</div>
+                        <div class="stack-frame frame-a">getSS("a")</div>
+                        <div class="stack-frame frame-ab">getSS("ab")</div>
+                        <div class="stack-frame frame-abc">getSS("abc")</div>
+                    </div>
+                    <p>Extracted Characters:</p>
+                    <div class="string-container">
+                        <div class="char char-a char-extracted">a</div>
+                        <div class="char char-b char-extracted">b</div>
+                        <div class="char char-c char-extracted">c</div>
+                    </div>
+                    <p>New Input String: "" (empty string)</p>
+                </div>
+            </div>
+            <p>The function extracts the last character 'a' and makes a recursive call with an empty string</p>
+        </div>
+        
+        <!-- Scene 8: Base Case Resolution -->
+        <div class="scene" id="scene8">
+            <div class="step-indicator">Step 5/12</div>
+            <h2>Base Case Resolution</h2>
+            <div class="two-panel">
+                <div class="panel panel-left">
+                    <div class="panel-title">Code</div>
+                    <div class="code">
+public static ArrayList&lt;String&gt; getSS(String que) {
+    <span class="code-highlight">if(que.length() == 0) {
+        ArrayList&lt;String&gt; ans = new ArrayList&lt;&gt;();
+        ans.add("");
+        return ans;
+    }</span>
+
+    char firstChar = que.charAt(que.length()-1);
+    que = que.substring(0, que.length()-1);
+
+    ArrayList&lt;String&gt; list = getSS(que);
+
+    ArrayList&lt;String&gt; wholeAns = new ArrayList&lt;&gt;();
+
+    for(String s : list) {
+        wholeAns.add(s + firstChar);
+    }
+    for(String s : list) {
+        wholeAns.add(s + ".");
+    }
+
+    return wholeAns;
+}
+
+// Base case: getSS("") returns [""]
+                    </div>
+                </div>
+                <div class="panel panel-right">
+                    <div class="panel-title">Stack & Data</div>
+                    <div class="stack">
+                        <div class="stack-frame frame-a">getSS("a")</div>
+                        <div class="stack-frame frame-ab">getSS("ab")</div>
+                        <div class="stack-frame frame-abc">getSS("abc")</div>
+                    </div>
+                    <div class="result">
+                        <p>getSS("") returns:</p>
+                        <div class="subsequence-container">
+                            <div class="subsequence new">""</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <p>The base case returns a list containing only the empty string</p>
+        </div>
+        
+        <!-- Scene 9: First Character Include/Exclude -->
+        <div class="scene" id="scene9">
+            <div class="step-indicator">Step 6/12</div>
+            <h2>First Character Include/Exclude</h2>
+            <div class="two-panel">
+                <div class="panel panel-left">
+                    <div class="panel-title">Code</div>
+                    <div class="code">
+public static ArrayList&lt;String&gt; getSS(String que) {
+    if(que.length() == 0) {
+        ArrayList&lt;String&gt; ans = new ArrayList&lt;&gt;();
+        ans.add("");
+        return ans;
+    }
+
+    char firstChar = que.charAt(que.length()-1);
+    que = que.substring(0, que.length()-1);
+
+    ArrayList&lt;String&gt; list = getSS(que);
+
+    ArrayList&lt;String&gt; wholeAns = new ArrayList&lt;&gt;();
+
+    <span class="code-highlight">for(String s : list) {
+        wholeAns.add(s + firstChar);
+    }
+    for(String s : list) {
+        wholeAns.add(s + ".");
+    }</span>
+
+    return wholeAns;
+}
+
+// Inside getSS("a"): Process result from getSS("")
+                    </div>
+                </div>
+                <div class="panel panel-right">
+                    <div class="panel-title">Stack & Data</div>
+                    <div class="stack">
+                        <div class="stack-frame frame-a">getSS("a")</div>
+                        <div class="stack-frame frame-ab">getSS("ab")</div>
+                        <div class="stack-frame frame-abc">getSS("abc")</div>
+                    </div>
+                    <div class="include-exclude">
+                        <h3>For character 'a':</h3>
+                        <div class="include-exclude-row">
+                            <div class="subsequence">""</div>
+                            <div class="arrow-right">→</div>
+                            <div class="subsequence">Include 'a': "a"</div>
+                        </div>
+                        <div class="include-exclude-row">
+                            <div class="subsequence">""</div>
+                            <div class="arrow-right">→</div>
+                            <div class="subsequence">Exclude 'a': ""</div>
+                        </div>
+                    </div>
+                    <div class="result">
+                        <p>getSS("a") returns:</p>
+                        <div class="subsequence-container">
+                            <div class="subsequence">""</div>
+                            <div class="subsequence new">a</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <p>For character 'a', we create two versions: one including 'a' and one without</p>
+        </div>
+        
+        <!-- Scene 10: Second Character Include/Exclude -->
+        <div class="scene" id="scene10">
+            <div class="step-indicator">Step 7/12</div>
+            <h2>Second Character Include/Exclude</h2>
+            <div class="two-panel">
+                <div class="panel panel-left">
+                    <div class="panel-title">Code</div>
+                    <div class="code">
+public static ArrayList&lt;String&gt; getSS(String que) {
+    if(que.length() == 0) {
+        ArrayList&lt;String&gt; ans = new ArrayList&lt;&gt;();
+        ans.add("");
+        return ans;
+    }
+
+    char firstChar = que.charAt(que.length()-1);
+    que = que.substring(0, que.length()-1);
+
+    ArrayList&lt;String&gt; list = getSS(que);
+
+    ArrayList&lt;String&gt; wholeAns = new ArrayList&lt;&gt;();
+
+    <span class="code-highlight">for(String s : list) {
+        wholeAns.add(s + firstChar);
+    }
+    for(String s : list) {
+        wholeAns.add(s + ".");
+    }</span>
+
+    return wholeAns;
+}
+
+// Inside getSS("ab"): Process result from getSS("a")
+                    </div>
+                </div>
+                <div class="panel panel-right">
+                    <div class="panel-title">Stack & Data</div>
+                    <div class="stack">
+                        <div class="stack-frame frame-ab">getSS("ab")</div>
+                        <div class="stack-frame frame-abc">getSS("abc")</div>
+                    </div>
+                    <div class="include-exclude">
+                        <h3>For character 'b':</h3>
+                        <div class="include-exclude-row">
+                            <div class="subsequence">""</div>
+                            <div class="arrow-right">→</div>
+                            <div class="subsequence">Include 'b': "b"</div>
+                        </div>
+                        <div class="include-exclude-row">
+                            <div class="subsequence">""</div>
+                            <div class="arrow-right">→</div>
+                            <div class="subsequence">Exclude 'b': ""</div>
+                        </div>
+                        <div class="include-exclude-row">
+                            <div class="subsequence">a</div>
+                            <div class="arrow-right">→</div>
+                            <div class="subsequence">Include 'b': "ab"</div>
+                        </div>
+                        <div class="include-exclude-row">
+                            <div class="subsequence">a</div>
+                            <div class="arrow-right">→</div>
+                            <div class="subsequence">Exclude 'b': "a"</div>
+                        </div>
+                    </div>
+                    <div class="result">
+                        <p>getSS("ab") returns:</p>
+                        <div class="subsequence-container">
+                            <div class="subsequence">""</div>
+                            <div class="subsequence">a</div>
+                            <div class="subsequence new">b</div>
+                            <div class="subsequence new">ab</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <p>For character 'b', we create versions with and without 'b' for each existing subsequence</p>
+        </div>
+        
+        <!-- Scene 11: Third Character Include/Exclude -->
+        <div class="scene" id="scene11">
+            <div class="step-indicator">Step 8/12</div>
+            <h2>Third Character Include/Exclude</h2>
+            <div class="two-panel">
+                <div class="panel panel-left">
+                    <div class="panel-title">Code</div>
+                    <div class="code">
+public static ArrayList&lt;String&gt; getSS(String que) {
+    if(que.length() == 0) {
+        ArrayList&lt;String&gt; ans = new ArrayList&lt;&gt;();
+        ans.add("");
+        return ans;
+    }
+
+    char firstChar = que.charAt(que.length()-1);
+    que = que.substring(0, que.length()-1);
+
+    ArrayList&lt;String&gt; list = getSS(que);
+
+    ArrayList&lt;String&gt; wholeAns = new ArrayList&lt;&gt;();
+
+    <span class="code-highlight">for(String s : list) {
+        wholeAns.add(s + firstChar);
+    }
+    for(String s : list) {
+        wholeAns.add(s + ".");
+    }</span>
+
+    return wholeAns;
+}
+
+// Inside getSS("abc"): Process result from getSS("ab")
+                    </div>
+                </div>
+                <div class="panel panel-right">
+                    <div class="panel-title">Stack & Data</div>
+                    <div class="stack">
+                        <div class="stack-frame frame-abc">getSS("abc")</div>
+                    </div>
+                    <div class="include-exclude">
+                        <h3>For character 'c':</h3>
+                        <div class="include-exclude-row">
+                            <div class="subsequence">""</div>
+                            <div class="arrow-right">→</div>
+                            <div class="subsequence">Include 'c': "c"</div>
+                        </div>
+                        <div class="include-exclude-row">
+                            <div class="subsequence">a</div>
+                            <div class="arrow-right">→</div>
+                            <div class="subsequence">Include 'c': "ac"</div>
+                        </div>
+                        <div class="include-exclude-row">
+                            <div class="subsequence">b</div>
+                            <div class="arrow-right">→</div>
+                            <div class="subsequence">Include 'c': "bc"</div>
+                        </div>
+                        <div class="include-exclude-row">
+                            <div class="subsequence">ab</div>
+                            <div class="arrow-right">→</div>
+                            <div class="subsequence">Include 'c': "abc"</div>
+                        </div>
+                    </div>
+                    <p>(Exclude cases also created but not shown for clarity)</p>
+                </div>
+            </div>
+            <p>For character 'c', we again create versions with and without 'c' for each existing subsequence</p>
+        </div>
+        
+        <!-- Scene 12: Final Result -->
+        <div class="scene" id="scene12">
+            <div class="step-indicator">Step 9/12</div>
+            <h2>Final Result</h2>
+            <div class="two-panel">
+                <div class="panel panel-left">
+                    <div class="panel-title">Code</div>
+                    <div class="code">
+public static ArrayList&lt;String&gt; getSS(String que) {
+    if(que.length() == 0) {
+        ArrayList&lt;String&gt; ans = new ArrayList&lt;&gt;();
+        ans.add("");
+        return ans;
+    }
+
+    char firstChar = que.charAt(que.length()-1);
+    que = que.substring(0, que.length()-1);
+
+    ArrayList&lt;String&gt; list = getSS(que);
+
+    ArrayList&lt;String&gt; wholeAns = new ArrayList&lt;&gt;();
+
+    for(String s : list) {
+        wholeAns.add(s + firstChar);
+    }
+    for(String s : list) {
+        wholeAns.add(s + ".");
+    }
+
+    <span class="code-highlight">return wholeAns;</span>
+}
+
+// getSS("abc") returns the final result
+                    </div>
+                </div>
+                <div class="panel panel-right">
+                    <div class="panel-title">Final Result</div>
+                    <div class="result">
+                        <p>getSS("abc") returns:</p>
+                        <div class="subsequence-container">
+                            <div class="subsequence">""</div>
+                            <div class="subsequence">a</div>
+                            <div class="subsequence">b</div>
+                            <div class="subsequence">ab</div>
+                            <div class="subsequence new">c</div>
+                            <div class="subsequence new">ac</div>
+                            <div class="subsequence new">bc</div>
+                            <div class="subsequence new">abc</div>
+                        </div>
+                    </div>
+                    <p>All 8 possible subsequences of "abc"</p>
+                </div>
+            </div>
+            <p>The function returns all possible subsequences of "abc"</p>
+        </div>
+        
+        <!-- Scene 13: Visual Representation of Subsequences -->
+        <div class="scene" id="scene13">
+            <div class="step-indicator">Step 10/12</div>
+            <h2>Visual Representation of Subsequences</h2>
+            <div class="two-panel">
+                <div class="panel panel-left">
+                    <div class="panel-title">Original String</div>
+                    <div class="string-container">
+                        <div class="char char-a">a</div>
+                        <div class="char char-b">b</div>
+                        <div class="char char-c">c</div>
+                    </div>
+                </div>
+                <div class="panel panel-right">
+                    <div class="panel-title">Subsequences</div>
+                    <div style="display: flex; flex-direction: column; align-items: center;">
+                        <div style="display: flex; margin: 5px 0;">
+                            <div style="width: 40px; text-align: center;">""</div>
+                            <div style="margin-left: 20px;">Include: None</div>
+                        </div>
+                        <div style="display: flex; margin: 5px 0;">
+                            <div style="width: 40px; text-align: center;">a</div>
+                            <div style="margin-left: 20px;">Include: 'a'</div>
+                        </div>
+                        <div style="display: flex; margin: 5px 0;">
+                            <div style="width: 40px; text-align: center;">b</div>
+                            <div style="margin-left: 20px;">Include: 'b'</div>
+                        </div>
+                        <div style="display: flex; margin: 5px 0;">
+                            <div style="width: 40px; text-align: center;">c</div>
+                            <div style="margin-left: 20px;">Include: 'c'</div>
+                        </div>
+                        <div style="display: flex; margin: 5px 0;">
+                            <div style="width: 40px; text-align: center;">ab</div>
+                            <div style="margin-left: 20px;">Include: 'a', 'b'</div>
+                        </div>
+                        <div style="display: flex; margin: 5px 0;">
+                            <div style="width: 40px; text-align: center;">ac</div>
+                            <div style="margin-left: 20px;">Include: 'a', 'c'</div>
+                        </div>
+                        <div style="display: flex; margin: 5px 0;">
+                            <div style="width: 40px; text-align: center;">bc</div>
+                            <div style="margin-left: 20px;">Include: 'b', 'c'</div>
+                        </div>
+                        <div style="display: flex; margin: 5px 0;">
+                            <div style="width: 40px; text-align: center;">abc</div>
+                            <div style="margin-left: 20px;">Include: 'a', 'b', 'c'</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <p>Each subsequence represents a unique combination of characters from the original string</p>
+        </div>
+        
+        <!-- Scene 14: Key Insights -->
+        <div class="scene" id="scene14">
+            <div class="step-indicator">Step 11/12</div>
+            <h2>Key Insights</h2>
+            <div class="two-panel">
+                <div class="panel panel-left">
+                    <div class="panel-title">Code Patterns</div>
+                    <div class="code">
+// Base case
+if(que.length() == 0) {
+    ArrayList&lt;String&gt; ans = new ArrayList&lt;&gt;();
+    ans.add("");
+    return ans;
+}
+
+// Recursive breakdown
+char firstChar = que.charAt(que.length()-1);
+que = que.substring(0, que.length()-1);
+ArrayList&lt;String&gt; list = getSS(que);
+
+// Include/exclude pattern
+for(String s : list) {
+    wholeAns.add(s + firstChar); // Include
+}
+for(String s : list) {
+    wholeAns.add(s + "."); // Exclude
+}
+                    </div>
+                </div>
+                <div class="panel panel-right">
+                    <div class="panel-title">Key Insights</div>
+                    <div class="insights">
+                        <ul>
+                            <li>Recursion breaks down the problem by processing one character at a time</li>
+                            <li>The include/exclude pattern creates all possible combinations</li>
+                            <li>The number of subsequences is 2^n where n is the string length</li>
+                            <li>The call stack tracks the state at each level of recursion</li>
+                            <li>Base case prevents infinite recursion and provides the starting point</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Scene 15: Conclusion -->
+        <div class="scene" id="scene15">
+            <div class="step-indicator">Step 12/12</div>
+            <h1>Recursion: Elegant Solutions to Complex Problems</h1>
+            <p>Now you can visualize how recursion generates all subsequences!</p>
+            <div class="string-container">
+                <div class="char char-a">a</div>
+                <div class="char char-b">b</div>
+                <div class="char char-c">c</div>
+            </div>
+            <div class="subsequence-container">
+                <div class="subsequence">""</div>
+                <div class="subsequence">a</div>
+                <div class="subsequence">b</div>
+                <div class="subsequence">ab</div>
+                <div class="subsequence">c</div>
+                <div class="subsequence">ac</div>
+                <div class="subsequence">bc</div>
+                <div class="subsequence">abc</div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="prevBtn" disabled>Previous</button>
+            <button id="nextBtn">Next</button>
+            <button id="playBtn">Play</button>
+        </div>
+    </div>
+
+    <script>
+        let currentScene = 1;
+        const totalScenes = 15;
+        let isPlaying = false;
+        let playInterval;
+        
+        function showScene(sceneNumber) {
+            // Hide all scenes
+            document.querySelectorAll('.scene').forEach(scene => {
+                scene.classList.remove('active');
+            });
+            
+            // Show current scene
+            document.getElementById(`scene${sceneNumber}`).classList.add('active');
+            
+            // Update buttons
+            document.getElementById('prevBtn').disabled = sceneNumber === 1;
+            document.getElementById('nextBtn').disabled = sceneNumber === totalScenes;
+        }
+        
+        function nextScene() {
+            if (currentScene < totalScenes) {
+                currentScene++;
+                showScene(currentScene);
+            }
+        }
+        
+        function prevScene() {
+            if (currentScene > 1) {
+                currentScene--;
+                showScene(currentScene);
+            }
+        }
+        
+        function togglePlay() {
+            if (isPlaying) {
+                clearInterval(playInterval);
+                document.getElementById('playBtn').textContent = 'Play';
+            } else {
+                playInterval = setInterval(() => {
+                    if (currentScene < totalScenes) {
+                        nextScene();
+                    } else {
+                        clearInterval(playInterval);
+                        document.getElementById('playBtn').textContent = 'Play';
+                        isPlaying = false;
+                    }
+                }, 5000); // Change scene every 5 seconds
+                document.getElementById('playBtn').textContent = 'Pause';
+            }
+            isPlaying = !isPlaying;
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            showScene(1);
+            
+            document.getElementById('nextBtn').addEventListener('click', nextScene);
+            document.getElementById('prevBtn').addEventListener('click', prevScene);
+            document.getElementById('playBtn').addEventListener('click', togglePlay);
+        });
+    </script>
+</body>
+</html>
