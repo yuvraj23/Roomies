@@ -3,22 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Merge Sort Tree Visualization</title>
+    <title>Merge Sort Animation</title>
     <style>
         body {
             font-family: 'Courier New', monospace;
             margin: 0;
             padding: 20px;
-            background: linear-gradient(135deg, #0f0f23, #1a1a2e, #16213e);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             min-height: 100vh;
-            overflow-x: auto;
         }
 
         .container {
-            max-width: 100%;
+            max-width: 1400px;
             margin: 0 auto;
-            min-width: 1200px;
         }
 
         .header {
@@ -26,794 +24,588 @@
             margin-bottom: 30px;
         }
 
-        .input-section {
+        .controls {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
-        .input-section input {
-            padding: 10px;
-            font-size: 16px;
-            border: none;
-            border-radius: 5px;
-            margin-right: 10px;
-            font-family: 'Courier New', monospace;
-            width: 400px;
-        }
-
-        .input-section button {
-            padding: 10px 20px;
-            font-size: 16px;
+        button {
             background: #4CAF50;
             color: white;
             border: none;
+            padding: 10px 20px;
+            margin: 5px;
             border-radius: 5px;
             cursor: pointer;
-            font-family: 'Courier New', monospace;
-        }
-
-        .input-section button:hover {
-            background: #45a049;
-        }
-
-        .controls {
-            text-align: center;
-            margin: 20px 0;
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .controls button {
-            padding: 8px 16px;
             font-size: 14px;
-            background: #2196F3;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-family: 'Courier New', monospace;
+            transition: all 0.3s;
         }
 
-        .controls button:hover {
-            background: #1976D2;
+        button:hover {
+            background: #45a049;
+            transform: translateY(-2px);
         }
 
-        .controls button:disabled {
+        button:disabled {
             background: #666;
             cursor: not-allowed;
+            transform: none;
         }
 
-        .speed-control {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin: 10px 0;
-            justify-content: center;
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
         }
 
-        .speed-control input {
-            width: 200px;
-        }
-
-        .tree-container {
-            width: 100%;
-            height: 700px;
-            position: relative;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            overflow: auto;
-            margin: 20px 0;
-        }
-
-        .tree-node {
-            position: absolute;
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            border: 2px solid rgba(255, 255, 255, 0.2);
+        .recursion-tree {
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 10px;
+            padding: 20px;
+            min-height: 600px;
+            position: relative;
+            overflow: auto;
+        }
+
+        .call-stack {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            height: fit-content;
+        }
+
+        .node {
+            position: absolute;
+            background: #2196F3;
+            border-radius: 8px;
             padding: 8px 12px;
-            font-size: 11px;
-            text-align: center;
             min-width: 120px;
-            max-width: 200px;
-            backdrop-filter: blur(5px);
+            text-align: center;
+            border: 2px solid #fff;
+            font-size: 12px;
             transition: all 0.5s ease;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
 
-        .tree-node:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-        }
-
-        .tree-node.splitting {
-            border-color: #FF9800;
-            background: linear-gradient(145deg, rgba(255, 152, 0, 0.3), rgba(255, 152, 0, 0.1));
+        .node.active {
+            background: #FF5722;
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 87, 34, 0.8);
             animation: pulse 1s infinite;
         }
 
-        .tree-node.merging {
-            border-color: #4CAF50;
-            background: linear-gradient(145deg, rgba(76, 175, 80, 0.3), rgba(76, 175, 80, 0.1));
-            animation: merge-glow 1s infinite;
+        .node.completed {
+            background: #4CAF50;
+            border-color: #66BB6A;
         }
 
-        .tree-node.completed {
-            border-color: #2196F3;
-            background: linear-gradient(145deg, rgba(33, 150, 243, 0.3), rgba(33, 150, 243, 0.1));
-        }
-
-        .tree-node.current {
-            border-color: #FFD700;
-            background: linear-gradient(145deg, rgba(255, 215, 0, 0.4), rgba(255, 215, 0, 0.2));
-            transform: scale(1.1);
-            box-shadow: 0 0 25px rgba(255, 215, 0, 0.6);
+        .node.merging {
+            background: #FF9800;
+            animation: shake 0.5s ease-in-out;
         }
 
         @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+            0%, 100% { transform: scale(1.1); }
+            50% { transform: scale(1.2); }
         }
 
-        @keyframes merge-glow {
-            0%, 100% { box-shadow: 0 0 10px rgba(76, 175, 80, 0.5); }
-            50% { box-shadow: 0 0 20px rgba(76, 175, 80, 0.8); }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
         }
 
-        .node-array {
-            font-weight: bold;
-            color: #FFD700;
-            margin-bottom: 4px;
-            word-wrap: break-word;
-        }
-
-        .node-range {
-            font-size: 10px;
-            color: #B0BEC5;
-            margin-bottom: 2px;
-        }
-
-        .node-status {
-            font-size: 9px;
-            color: #81C784;
-            font-style: italic;
-        }
-
-        .tree-line {
+        .connection {
             position: absolute;
-            background: linear-gradient(45deg, #64B5F6, #42A5F5);
+            background: #fff;
             height: 2px;
             transform-origin: left center;
-            border-radius: 1px;
-            box-shadow: 0 0 5px rgba(100, 181, 246, 0.5);
             transition: all 0.5s ease;
+            z-index: -1;
         }
 
-        .tree-line.active {
-            background: linear-gradient(45deg, #FFD700, #FFC107);
-            box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+        .connection.active {
+            background: #FF5722;
             height: 3px;
         }
 
-        .status-bar {
+        .stack-frame {
+            background: rgba(33, 150, 243, 0.2);
+            border: 1px solid #2196F3;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 5px 0;
+            transition: all 0.3s;
+        }
+
+        .stack-frame.active {
+            background: rgba(255, 87, 34, 0.3);
+            border-color: #FF5722;
+            transform: translateX(10px);
+        }
+
+        .array-display {
+            display: flex;
+            gap: 2px;
+            margin: 5px 0;
+            flex-wrap: wrap;
+        }
+
+        .array-item {
+            background: #666;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            min-width: 20px;
             text-align: center;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            margin: 20px 0;
-            backdrop-filter: blur(10px);
+        }
+
+        .array-item.highlight {
+            background: #FF5722;
+            animation: flash 0.5s;
+        }
+
+        @keyframes flash {
+            0%, 100% { background: #FF5722; }
+            50% { background: #FF8A65; }
         }
 
         .merge-visualization {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
-            padding: 30px;
-            border-radius: 15px;
-            border: 2px solid #4CAF50;
-            z-index: 1000;
-            backdrop-filter: blur(20px);
-            max-width: 80%;
-            max-height: 80%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            min-height: 200px;
         }
 
-        .merge-step {
+        .merge-arrays {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 15px 0;
-            flex-wrap: wrap;
-            gap: 10px;
+            justify-content: space-around;
+            margin-bottom: 20px;
         }
 
-        .merge-array {
-            display: flex;
-            gap: 3px;
-            margin: 0 10px;
-        }
-
-        .merge-element {
-            padding: 8px 12px;
-            background: rgba(33, 150, 243, 0.3);
-            border: 1px solid #2196F3;
-            border-radius: 5px;
-            font-size: 12px;
-            min-width: 30px;
+        .merge-result {
             text-align: center;
+            margin-top: 20px;
         }
 
-        .merge-element.comparing {
-            background: rgba(255, 152, 0, 0.5);
-            border-color: #FF9800;
-            animation: pulse 0.5s infinite;
+        .code-highlight {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 20px;
+            font-family: monospace;
         }
 
-        .merge-element.selected {
-            background: rgba(76, 175, 80, 0.5);
-            border-color: #4CAF50;
+        .code-line {
+            padding: 2px 0;
+            transition: all 0.3s;
         }
 
-        .close-merge {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
+        .code-line.highlight {
+            background: rgba(255, 87, 34, 0.3);
+            border-left: 3px solid #FF5722;
+            padding-left: 10px;
         }
 
-        .legend {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin: 20px 0;
-            flex-wrap: wrap;
+        .status {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            min-height: 25px;
         }
 
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 12px;
-        }
-
-        .legend-color {
-            width: 20px;
-            height: 20px;
-            border-radius: 4px;
-            border: 2px solid;
-        }
-
-        .legend-splitting .legend-color {
-            background: rgba(255, 152, 0, 0.3);
-            border-color: #FF9800;
-        }
-
-        .legend-merging .legend-color {
-            background: rgba(76, 175, 80, 0.3);
-            border-color: #4CAF50;
-        }
-
-        .legend-current .legend-color {
-            background: rgba(255, 215, 0, 0.4);
-            border-color: #FFD700;
-        }
-
-        .legend-completed .legend-color {
-            background: rgba(33, 150, 243, 0.3);
-            border-color: #2196F3;
+        h3 {
+            margin-top: 0;
+            color: #FFD700;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🌳 Merge Sort Tree Visualization</h1>
-            <p>Watch the divide and conquer algorithm in action with a beautiful tree structure</p>
-        </div>
-
-        <div class="input-section">
-            <input type="text" id="arrayInput" placeholder="Enter numbers separated by commas (e.g., 45,-3,0,99,23,7)" 
-                   value="45,-3,0,99,23,7,-15,88">
-            <button onclick="startVisualization()">🚀 Sort with Tree</button>
-        </div>
-
-        <div class="legend">
-            <div class="legend-item legend-current">
-                <div class="legend-color"></div>
-                <span>Current Node</span>
-            </div>
-            <div class="legend-item legend-splitting">
-                <div class="legend-color"></div>
-                <span>Splitting</span>
-            </div>
-            <div class="legend-item legend-merging">
-                <div class="legend-color"></div>
-                <span>Merging</span>
-            </div>
-            <div class="legend-item legend-completed">
-                <div class="legend-color"></div>
-                <span>Completed</span>
-            </div>
-        </div>
-
-        <div class="speed-control">
-            <label>Animation Speed:</label>
-            <input type="range" id="speedSlider" min="200" max="3000" value="1200" step="200">
-            <span id="speedValue">1200ms</span>
+            <h1>🌲 Merge Sort Recursion Tree Animation</h1>
+            <div class="status" id="status">Ready to start animation</div>
         </div>
 
         <div class="controls">
-            <button id="playBtn" onclick="playAnimation()">▶️ Play</button>
-            <button id="pauseBtn" onclick="pauseAnimation()" disabled>⏸️ Pause</button>
-            <button id="stepBtn" onclick="stepAnimation()">⏭️ Step</button>
-            <button id="resetBtn" onclick="resetAnimation()">🔄 Reset</button>
-            <button id="showMergeBtn" onclick="showCurrentMerge()" disabled>🔍 Show Merge Details</button>
+            <button onclick="startAnimation()">▶️ Start Animation</button>
+            <button onclick="resetAnimation()">🔄 Reset</button>
+            <button onclick="toggleSpeed()">⚡ Speed: Normal</button>
         </div>
 
-        <div class="status-bar" id="statusBar">
-            Ready to start - Enter an array and click "Sort with Tree"
+        <div class="main-content">
+            <div class="recursion-tree" id="tree">
+                <h3>Recursion Tree & Execution</h3>
+            </div>
+            
+            <div class="call-stack">
+                <h3>Call Stack</h3>
+                <div id="stack"></div>
+            </div>
         </div>
 
-        <div class="tree-container" id="treeContainer">
-            <!-- Tree nodes will be rendered here -->
+        <div class="merge-visualization">
+            <h3>Current Merge Operation</h3>
+            <div id="merge-display">
+                <p>No merge operation in progress</p>
+            </div>
         </div>
 
-        <div class="merge-visualization" id="mergeVisualization">
-            <button class="close-merge" onclick="closeMergeVisualization()">×</button>
-            <h3>Merge Process Details</h3>
-            <div id="mergeSteps"></div>
+        <div class="code-highlight">
+            <h3>Code Execution</h3>
+            <div id="code-display">
+                <div class="code-line">mergeSort(arr, low, high) {</div>
+                <div class="code-line">  if (low >= high) return [arr[low]];</div>
+                <div class="code-line">  mid = (low + high) / 2;</div>
+                <div class="code-line">  firstHalf = mergeSort(arr, low, mid);</div>
+                <div class="code-line">  secondHalf = mergeSort(arr, mid+1, high);</div>
+                <div class="code-line">  return merge(firstHalf, secondHalf);</div>
+                <div class="code-line">}</div>
+            </div>
         </div>
     </div>
 
     <script>
-        let executionSteps = [];
-        let currentStep = 0;
-        let isPlaying = false;
-        let animationInterval;
-        let animationSpeed = 1200;
-        let treeNodes = new Map();
+        // Original array from your code
+        const originalArray = [45, -3, 0, 99, 23, 7, -15, 88];
+        let animationSpeed = 1000;
+        let isAnimating = false;
+        let animationStep = 0;
+        let callStack = [];
         let nodeCounter = 0;
-        let treeLines = [];
-
-        // Update speed control
-        document.getElementById('speedSlider').addEventListener('input', function() {
-            animationSpeed = parseInt(this.value);
-            document.getElementById('speedValue').textContent = animationSpeed + 'ms';
-        });
+        let nodes = {};
+        let connections = [];
 
         class TreeNode {
-            constructor(arr, low, high, level, parent = null) {
+            constructor(arr, low, high, parent = null) {
                 this.id = nodeCounter++;
-                this.arr = [...arr];
+                this.arr = arr;
                 this.low = low;
                 this.high = high;
-                this.level = level;
                 this.parent = parent;
-                this.leftChild = null;
-                this.rightChild = null;
+                this.left = null;
+                this.right = null;
                 this.result = null;
-                this.status = 'pending'; // pending, splitting, merging, completed
-                this.x = 0;
-                this.y = 0;
+                this.completed = false;
+                this.level = parent ? parent.level + 1 : 0;
             }
         }
 
-        function mergeSort(arr, low, high, level = 0, parent = null) {
-            const node = new TreeNode(arr, low, high, level, parent);
-            treeNodes.set(node.id, node);
+        function createVisualNode(node, x, y) {
+            const nodeEl = document.createElement('div');
+            nodeEl.className = 'node';
+            nodeEl.id = `node-${node.id}`;
+            nodeEl.innerHTML = `
+                <div>[${node.low}, ${node.high}]</div>
+                <div class="array-display">
+                    ${node.arr.slice(node.low, node.high + 1).map(n => 
+                        `<span class="array-item">${n}</span>`
+                    ).join('')}
+                </div>
+            `;
+            nodeEl.style.left = x + 'px';
+            nodeEl.style.top = y + 'px';
+            
+            document.getElementById('tree').appendChild(nodeEl);
+            nodes[node.id] = {node, element: nodeEl, x, y};
+        }
 
-            // Add step for entering this call
-            executionSteps.push({
-                type: 'enter',
-                node: node,
-                action: `Split array [${low}..${high}]: [${arr.slice(low, high + 1).join(', ')}]`,
-                array: arr.slice(low, high + 1)
+        function createConnection(fromNode, toNode) {
+            const from = nodes[fromNode.id];
+            const to = nodes[toNode.id];
+            
+            const connection = document.createElement('div');
+            connection.className = 'connection';
+            
+            const dx = to.x - from.x;
+            const dy = to.y - from.y;
+            const length = Math.sqrt(dx * dx + dy * dy);
+            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+            
+            connection.style.left = (from.x + 60) + 'px';
+            connection.style.top = (from.y + 30) + 'px';
+            connection.style.width = length + 'px';
+            connection.style.transform = `rotate(${angle}deg)`;
+            
+            document.getElementById('tree').appendChild(connection);
+            connections.push(connection);
+        }
+
+        function buildTree() {
+            const root = new TreeNode(originalArray, 0, originalArray.length - 1);
+            const queue = [root];
+            const levels = [];
+            
+            while (queue.length > 0) {
+                const node = queue.shift();
+                
+                if (!levels[node.level]) levels[node.level] = [];
+                levels[node.level].push(node);
+                
+                if (node.low < node.high) {
+                    const mid = Math.floor((node.low + node.high) / 2);
+                    node.left = new TreeNode(originalArray, node.low, mid, node);
+                    node.right = new TreeNode(originalArray, mid + 1, node.high, node);
+                    queue.push(node.left, node.right);
+                }
+            }
+            
+            // Position nodes
+            levels.forEach((level, levelIndex) => {
+                const y = 50 + levelIndex * 120;
+                const totalWidth = 1000;
+                const spacing = totalWidth / (level.length + 1);
+                
+                level.forEach((node, index) => {
+                    const x = spacing * (index + 1) - 60;
+                    createVisualNode(node, x, y);
+                    
+                    if (node.parent) {
+                        createConnection(node.parent, node);
+                    }
+                });
             });
+            
+            return root;
+        }
 
+        function updateStatus(message) {
+            document.getElementById('status').textContent = message;
+        }
+
+        function highlightCode(lineIndex) {
+            const lines = document.querySelectorAll('.code-line');
+            lines.forEach(line => line.classList.remove('highlight'));
+            if (lineIndex >= 0 && lineIndex < lines.length) {
+                lines[lineIndex].classList.add('highlight');
+            }
+        }
+
+        function updateCallStack() {
+            const stackEl = document.getElementById('stack');
+            stackEl.innerHTML = '';
+            
+            callStack.forEach((frame, index) => {
+                const frameEl = document.createElement('div');
+                frameEl.className = `stack-frame ${index === callStack.length - 1 ? 'active' : ''}`;
+                frameEl.innerHTML = `
+                    <strong>mergeSort(${frame.low}, ${frame.high})</strong>
+                    <div class="array-display">
+                        ${frame.arr.slice(frame.low, frame.high + 1).map(n => 
+                            `<span class="array-item">${n}</span>`
+                        ).join('')}
+                    </div>
+                `;
+                stackEl.appendChild(frameEl);
+            });
+        }
+
+        function activateNode(nodeId) {
+            Object.values(nodes).forEach(({element}) => {
+                element.classList.remove('active', 'merging');
+            });
+            
+            if (nodes[nodeId]) {
+                nodes[nodeId].element.classList.add('active');
+            }
+        }
+
+        function completeNode(nodeId) {
+            if (nodes[nodeId]) {
+                nodes[nodeId].element.classList.remove('active', 'merging');
+                nodes[nodeId].element.classList.add('completed');
+            }
+        }
+
+        function showMergeOperation(left, right, result) {
+            const mergeEl = document.getElementById('merge-display');
+            mergeEl.innerHTML = `
+                <div class="merge-arrays">
+                    <div>
+                        <strong>Left Array:</strong>
+                        <div class="array-display">
+                            ${left.map(n => `<span class="array-item">${n}</span>`).join('')}
+                        </div>
+                    </div>
+                    <div>
+                        <strong>Right Array:</strong>
+                        <div class="array-display">
+                            ${right.map(n => `<span class="array-item">${n}</span>`).join('')}
+                        </div>
+                    </div>
+                </div>
+                <div class="merge-result">
+                    <strong>Merged Result:</strong>
+                    <div class="array-display">
+                        ${result.map(n => `<span class="array-item highlight">${n}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        async function animateMergeSort(node) {
+            if (!node) return [];
+            
+            // Add to call stack
+            callStack.push({
+                arr: originalArray,
+                low: node.low,
+                high: node.high
+            });
+            updateCallStack();
+            activateNode(node.id);
+            
+            await sleep(animationSpeed);
+            
             // Base case
-            if (low >= high) {
-                const singleElement = [arr[low]];
-                node.result = singleElement;
-                node.status = 'completed';
+            if (node.low >= node.high) {
+                highlightCode(1);
+                updateStatus(`Base case: returning [${originalArray[node.low]}]`);
                 
-                executionSteps.push({
-                    type: 'base_case',
-                    node: node,
-                    action: `Base case reached: [${singleElement[0]}]`,
-                    result: singleElement
-                });
+                const result = [originalArray[node.low]];
+                node.result = result;
                 
-                return singleElement;
+                await sleep(animationSpeed);
+                completeNode(node.id);
+                callStack.pop();
+                updateCallStack();
+                
+                return result;
             }
-
-            // Mark as splitting
-            node.status = 'splitting';
-            executionSteps.push({
-                type: 'splitting',
-                node: node,
-                action: `Splitting [${low}..${high}] into two halves`
-            });
-
-            const mid = Math.floor((low + high) / 2);
-
-            // Recursive calls
-            const leftResult = mergeSort(arr, low, mid, level + 1, node);
-            const rightResult = mergeSort(arr, mid + 1, high, level + 1, node);
-
-            // Set children
-            const leftChild = Array.from(treeNodes.values()).find(n => 
-                n.parent === node && n.low === low && n.high === mid);
-            const rightChild = Array.from(treeNodes.values()).find(n => 
-                n.parent === node && n.low === mid + 1 && n.high === high);
             
-            if (leftChild) node.leftChild = leftChild;
-            if (rightChild) node.rightChild = rightChild;
-
-            // Mark as merging
-            node.status = 'merging';
-            executionSteps.push({
-                type: 'merging',
-                node: node,
-                action: `Merging [${leftResult.join(', ')}] and [${rightResult.join(', ')}]`,
-                leftArray: leftResult,
-                rightArray: rightResult
-            });
-
-            // Merge process
-            const merged = merge2SortedArray(leftResult, rightResult);
-            node.result = merged;
-            node.status = 'completed';
-
-            executionSteps.push({
-                type: 'merge_complete',
-                node: node,
-                action: `Merge complete: [${merged.join(', ')}]`,
-                result: merged
-            });
-
-            return merged;
+            // Calculate mid
+            highlightCode(2);
+            const mid = Math.floor((node.low + node.high) / 2);
+            updateStatus(`Splitting: mid = ${mid}`);
+            await sleep(animationSpeed);
+            
+            // Recursive call for left half
+            highlightCode(3);
+            updateStatus(`Recursively sorting left half [${node.low}, ${mid}]`);
+            await sleep(animationSpeed);
+            
+            const leftResult = await animateMergeSort(node.left);
+            
+            // Recursive call for right half
+            highlightCode(4);
+            updateStatus(`Recursively sorting right half [${mid + 1}, ${node.high}]`);
+            await sleep(animationSpeed);
+            
+            const rightResult = await animateMergeSort(node.right);
+            
+            // Merge step
+            highlightCode(5);
+            activateNode(node.id);
+            nodes[node.id].element.classList.add('merging');
+            updateStatus(`Merging left and right halves`);
+            
+            const mergedResult = merge(leftResult, rightResult);
+            showMergeOperation(leftResult, rightResult, mergedResult);
+            
+            await sleep(animationSpeed * 1.5);
+            
+            node.result = mergedResult;
+            completeNode(node.id);
+            callStack.pop();
+            updateCallStack();
+            
+            return mergedResult;
         }
 
-        function merge2SortedArray(list1, list2) {
-            let indexl1 = 0, indexl2 = 0, indexAns = 0;
-            const ansList = new Array(list1.length + list2.length);
-
-            while (indexl1 < list1.length && indexl2 < list2.length) {
-                if (list1[indexl1] <= list2[indexl2]) {
-                    ansList[indexAns] = list1[indexl1];
-                    indexl1++;
+        function merge(left, right) {
+            const result = [];
+            let i = 0, j = 0;
+            
+            while (i < left.length && j < right.length) {
+                if (left[i] <= right[j]) {
+                    result.push(left[i]);
+                    i++;
                 } else {
-                    ansList[indexAns] = list2[indexl2];
-                    indexl2++;
+                    result.push(right[j]);
+                    j++;
                 }
-                indexAns++;
-            }
-
-            while (indexl1 < list1.length) {
-                ansList[indexAns++] = list1[indexl1++];
-            }
-
-            while (indexl2 < list2.length) {
-                ansList[indexAns++] = list2[indexl2++];
-            }
-
-            return ansList;
-        }
-
-        function calculateNodePositions() {
-            const container = document.getElementById('treeContainer');
-            const containerWidth = container.clientWidth;
-            const containerHeight = container.clientHeight;
-            
-            // Group nodes by level
-            const levelNodes = new Map();
-            treeNodes.forEach(node => {
-                if (!levelNodes.has(node.level)) {
-                    levelNodes.set(node.level, []);
-                }
-                levelNodes.get(node.level).push(node);
-            });
-
-            // Calculate positions
-            const maxLevel = Math.max(...Array.from(levelNodes.keys()));
-            const levelHeight = containerHeight / (maxLevel + 2);
-
-            levelNodes.forEach((nodes, level) => {
-                const y = 50 + level * levelHeight;
-                const spacing = containerWidth / (nodes.length + 1);
-                
-                nodes.forEach((node, index) => {
-                    node.x = spacing * (index + 1) - 60; // Adjust for node width
-                    node.y = y;
-                });
-            });
-        }
-
-        function renderTree() {
-            const container = document.getElementById('treeContainer');
-            const currentStepObj = executionSteps[currentStep];
-            
-            // Clear existing content
-            container.innerHTML = '';
-            
-            // Calculate positions
-            calculateNodePositions();
-            
-            // Draw lines first (so they appear behind nodes)
-            drawTreeLines(container);
-            
-            // Draw nodes
-            treeNodes.forEach(node => {
-                const nodeElement = document.createElement('div');
-                nodeElement.className = 'tree-node';
-                nodeElement.id = `node-${node.id}`;
-                
-                // Set position
-                nodeElement.style.left = node.x + 'px';
-                nodeElement.style.top = node.y + 'px';
-                
-                // Set status class
-                if (currentStepObj && currentStepObj.node === node) {
-                    nodeElement.classList.add('current');
-                } else if (node.status === 'splitting') {
-                    nodeElement.classList.add('splitting');
-                } else if (node.status === 'merging') {
-                    nodeElement.classList.add('merging');
-                } else if (node.status === 'completed') {
-                    nodeElement.classList.add('completed');
-                }
-                
-                // Set content
-                const arrayDisplay = node.result ? 
-                    node.result.join(', ') : 
-                    node.arr.slice(node.low, node.high + 1).join(', ');
-                
-                nodeElement.innerHTML = `
-                    <div class="node-array">[${arrayDisplay}]</div>
-                    <div class="node-range">Range: [${node.low}..${node.high}]</div>
-                    <div class="node-status">${node.status}</div>
-                `;
-                
-                container.appendChild(nodeElement);
-            });
-        }
-
-        function drawTreeLines(container) {
-            treeNodes.forEach(node => {
-                if (node.leftChild) {
-                    drawLine(container, node, node.leftChild);
-                }
-                if (node.rightChild) {
-                    drawLine(container, node, node.rightChild);
-                }
-            });
-        }
-
-        function drawLine(container, parent, child) {
-            const line = document.createElement('div');
-            line.className = 'tree-line';
-            
-            const parentCenterX = parent.x + 60; // Half of node width
-            const parentCenterY = parent.y + 25; // Half of node height
-            const childCenterX = child.x + 60;
-            const childCenterY = child.y + 25;
-            
-            const deltaX = childCenterX - parentCenterX;
-            const deltaY = childCenterY - parentCenterY;
-            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-            const angle = Math.atan2(deltaY, deltaX) * 180 / Math.PI;
-            
-            line.style.left = parentCenterX + 'px';
-            line.style.top = parentCenterY + 'px';
-            line.style.width = distance + 'px';
-            line.style.transform = `rotate(${angle}deg)`;
-            
-            // Highlight active connections
-            const currentStepObj = executionSteps[currentStep];
-            if (currentStepObj && 
-                (currentStepObj.node === parent || currentStepObj.node === child)) {
-                line.classList.add('active');
             }
             
-            container.appendChild(line);
-        }
-
-        function updateStatusBar() {
-            const statusBar = document.getElementById('statusBar');
-            const currentStepObj = executionSteps[currentStep];
-            
-            if (!currentStepObj) {
-                statusBar.textContent = 'Ready to start';
-                return;
+            while (i < left.length) {
+                result.push(left[i]);
+                i++;
             }
             
-            const stepInfo = `Step ${currentStep + 1}/${executionSteps.length}: ${currentStepObj.action}`;
-            statusBar.textContent = stepInfo;
+            while (j < right.length) {
+                result.push(right[j]);
+                j++;
+            }
+            
+            return result;
         }
 
-        function showCurrentMerge() {
-            const currentStepObj = executionSteps[currentStep];
-            if (!currentStepObj || currentStepObj.type !== 'merging') return;
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function startAnimation() {
+            if (isAnimating) return;
             
-            const mergeViz = document.getElementById('mergeVisualization');
-            const mergeSteps = document.getElementById('mergeSteps');
+            isAnimating = true;
+            document.querySelector('button').disabled = true;
             
-            // Show detailed merge process
-            const left = currentStepObj.leftArray;
-            const right = currentStepObj.rightArray;
-            const merged = merge2SortedArrayDetailed(left, right);
+            resetAnimation();
+            const root = buildTree();
             
-            mergeSteps.innerHTML = '';
-            merged.steps.forEach((step, index) => {
-                const stepDiv = document.createElement('div');
-                stepDiv.className = 'merge-step';
-                stepDiv.innerHTML = `
-                    <div class="merge-array">
-                        ${step.left.map((val, i) => 
-                            `<div class="merge-element ${i === step.leftIndex ? 'comparing' : ''}">${val}</div>`
-                        ).join('')}
+            updateStatus("Starting merge sort animation...");
+            await sleep(1000);
+            
+            const result = await animateMergeSort(root);
+            
+            updateStatus(`✅ Sorting complete! Final result: [${result.join(', ')}]`);
+            highlightCode(-1);
+            
+            document.getElementById('merge-display').innerHTML = `
+                <div class="merge-result">
+                    <strong>🎉 Final Sorted Array:</strong>
+                    <div class="array-display">
+                        ${result.map(n => `<span class="array-item highlight">${n}</span>`).join('')}
                     </div>
-                    <span>+</span>
-                    <div class="merge-array">
-                        ${step.right.map((val, i) => 
-                            `<div class="merge-element ${i === step.rightIndex ? 'comparing' : ''}">${val}</div>`
-                        ).join('')}
-                    </div>
-                    <span>→</span>
-                    <div class="merge-array">
-                        ${step.result.map((val, i) => 
-                            `<div class="merge-element ${i === step.result.length - 1 ? 'selected' : ''}">${val}</div>`
-                        ).join('')}
-                    </div>
-                `;
-                mergeSteps.appendChild(stepDiv);
-            });
+                </div>
+            `;
             
-            mergeViz.style.display = 'block';
-        }
-
-        function merge2SortedArrayDetailed(list1, list2) {
-            let indexl1 = 0, indexl2 = 0, indexAns = 0;
-            const ansList = [];
-            const steps = [];
-
-            while (indexl1 < list1.length && indexl2 < list2.length) {
-                const step = {
-                    left: [...list1],
-                    right: [...list2],
-                    leftIndex: indexl1,
-                    rightIndex: indexl2,
-                    result: [...ansList]
-                };
-
-                if (list1[indexl1] <= list2[indexl2]) {
-                    ansList[indexAns] = list1[indexl1];
-                    indexl1++;
-                } else {
-                    ansList[indexAns] = list2[indexl2];
-                    indexl2++;
-                }
-                indexAns++;
-                
-                step.result = [...ansList];
-                steps.push(step);
-            }
-
-            while (indexl1 < list1.length) {
-                ansList[indexAns++] = list1[indexl1++];
-            }
-
-            while (indexl2 < list2.length) {
-                ansList[indexAns++] = list2[indexl2++];
-            }
-
-            return { result: ansList, steps };
-        }
-
-        function closeMergeVisualization() {
-            document.getElementById('mergeVisualization').style.display = 'none';
-        }
-
-        function updateVisualization() {
-            renderTree();
-            updateStatusBar();
-            
-            // Update merge button state
-            const currentStepObj = executionSteps[currentStep];
-            const showMergeBtn = document.getElementById('showMergeBtn');
-            showMergeBtn.disabled = !currentStepObj || currentStepObj.type !== 'merging';
-        }
-
-        function startVisualization() {
-            const input = document.getElementById('arrayInput').value.trim();
-            if (!input) {
-                alert('Please enter an array');
-                return;
-            }
-            
-            try {
-                const arr = input.split(',').map(x => parseInt(x.trim()));
-                if (arr.some(isNaN)) {
-                    alert('Please enter valid numbers');
-                    return;
-                }
-                
-                // Reset everything
-                executionSteps = [];
-                currentStep = 0;
-                nodeCounter = 0;
-                treeNodes.clear();
-                
-                // Generate execution steps
-                mergeSort(arr, 0, arr.length - 1);
-                
-                // Reset animation
-                resetAnimation();
-                updateControls();
-                
-            } catch (error) {
-                alert('Error parsing array: ' + error.message);
-            }
-        }
-
-        function playAnimation() {
-            if (currentStep >= executionSteps.length - 1) return;
-            
-            isPlaying = true;
-            updateControls();
-            
-            animationInterval = setInterval(() => {
-                if (currentStep < executionSteps.length - 1) {
-                    currentStep++;
-                    updateVisualization();
-                } else {
-                    pauseAnimation();
-                }
-            }, animationSpeed);
-        }
-
-        function pauseAnimation() {
-            isPlaying = false;
-            clearInterval(animationInterval);
-            updateControls();
-        }
-
-        function stepAnimation() {
-            if (currentStep < executionSteps.length - 1) {
-                currentStep++;
-                updateVisualization();
-                updateControls();
-            }
+            isAnimating = false;
+            document.querySelector('button').disabled = false;
         }
 
         function resetAnimation() {
-            pauseAnimation();
-            currentStep = 0;
-            updateVisualization();
-            updateControls();
+            document.getElementById('tree').innerHTML = '<h3>Recursion Tree & Execution</h3>';
+            document.getElementById('stack').innerHTML = '';
+            document.getElementById('merge-display').innerHTML = '<p>No merge operation in progress</p>';
+            
+            nodes = {};
+            connections = [];
+            callStack = [];
+            nodeCounter = 0;
+            
+            highlightCode(-1);
+            updateStatus("Ready to start animation");
         }
 
-        function updateControls() {
-            const atEnd = currentStep >= executionSteps.length - 1;
-            document.getElementById('playBtn').disabled = isPlaying || atEnd;
-            document.getElementById('pauseBtn').disabled = !isPlaying;
-            document.getElementById('stepBtn').disabled = isPlaying || atEnd;
+        function toggleSpeed() {
+            const button = document.querySelector('button[onclick="toggleSpeed()"]');
+            if (animationSpeed === 1000) {
+                animationSpeed = 500;
+                button.textContent = '⚡ Speed: Fast';
+            } else if (animationSpeed === 500) {
+                animationSpeed = 200;
+                button.textContent = '⚡ Speed: Very Fast';
+            } else {
+                animationSpeed = 1000;
+                button.textContent = '⚡ Speed: Normal';
+            }
         }
 
         // Initialize
-        window.onload = function() {
-            startVisualization();
-        };
+        resetAnimation();
     </script>
 </body>
 </html>
