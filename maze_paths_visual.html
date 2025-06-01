@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maze Paths with Jumps Visualization</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #00ff00;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .grid-container {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 60px);
+            grid-template-rows: repeat(4, 60px);
+            gap: 2px;
+            background: #333;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .cell {
+            background: #222;
+            border: 1px solid #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .start {
+            background: #00ff00;
+            color: #000;
+        }
+        
+        .end {
+            background: #ff0000;
+            color: #fff;
+        }
+        
+        .current {
+            background: #ffff00;
+            color: #000;
+            animation: pulse 1s infinite;
+        }
+        
+        .visited {
+            background: #0066ff;
+            color: #fff;
+        }
+        
+        .path {
+            background: #ff6600;
+            color: #fff;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        button {
+            background: #333;
+            color: #00ff00;
+            border: 2px solid #00ff00;
+            padding: 10px 20px;
+            margin: 0 10px;
+            cursor: pointer;
+            font-family: inherit;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            background: #00ff00;
+            color: #000;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .info-panel {
+            background: #222;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .call-stack {
+            background: #111;
+            padding: 15px;
+            border-left: 4px solid #00ff00;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        
+        .paths-list {
+            background: #111;
+            padding: 15px;
+            border-left: 4px solid #ff6600;
+            margin: 10px 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .step-info {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 10px;
+            background: #333;
+            border-radius: 4px;
+        }
+        
+        .jump-arrows {
+            position: absolute;
+            pointer-events: none;
+        }
+        
+        .arrow {
+            position: absolute;
+            font-size: 20px;
+            color: #ffff00;
+            animation: bounce 1s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Maze Paths with Jumps Visualization</h1>
+            <p>Watch the algorithm explore all possible paths from (0,0) to (3,3)</p>
+        </div>
+        
+        <div class="grid-container">
+            <div>
+                <h3>Current State</h3>
+                <div class="grid" id="mainGrid"></div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button onclick="startVisualization()">🚀 Start Visualization</button>
+            <button onclick="stepForward()" id="stepBtn">➡️ Next Step</button>
+            <button onclick="resetVisualization()">🔄 Reset</button>
+            <button onclick="toggleSpeed()" id="speedBtn">⚡ Speed: Normal</button>
+        </div>
+        
+        <div class="info-panel">
+            <div class="step-info">
+                <div><strong>Current Position:</strong> <span id="currentPos">(0, 0)</span></div>
+                <div><strong>Step:</strong> <span id="stepCount">0</span></div>
+                <div><strong>Paths Found:</strong> <span id="pathCount">0</span></div>
+            </div>
+            
+            <div class="call-stack">
+                <h4>📚 Call Stack:</h4>
+                <div id="callStack">Ready to start...</div>
+            </div>
+            
+            <div class="paths-list">
+                <h4>🛤️ Paths Found:</h4>
+                <div id="pathsList">No paths found yet...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let grid = [];
+        let currentStep = 0;
+        let isRunning = false;
+        let speed = 1000;
+        let foundPaths = [];
+        let callStack = [];
+        let currentPosition = {row: 0, col: 0};
+        
+        // Initialize grid
+        function initGrid() {
+            const gridElement = document.getElementById('mainGrid');
+            gridElement.innerHTML = '';
+            grid = [];
+            
+            for (let i = 0; i < 16; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.id = `cell-${Math.floor(i/4)}-${i%4}`;
+                
+                if (i === 0) {
+                    cell.classList.add('start');
+                    cell.textContent = 'START';
+                } else if (i === 15) {
+                    cell.classList.add('end');
+                    cell.textContent = 'END';
+                } else {
+                    cell.textContent = `(${Math.floor(i/4)},${i%4})`;
+                }
+                
+                gridElement.appendChild(cell);
+                grid.push(cell);
+            }
+        }
+        
+        // Simulate the maze paths algorithm
+        function getMazePathsWithJump(row, col, destRow, destCol, currentPath = "", depth = 0) {
+            addToCallStack(`getMazePathsWithJump(${row}, ${col}) - Path: "${currentPath}"`, depth);
+            
+            // Base cases
+            if (row >= destRow || col >= destCol) {
+                addToCallStack(`❌ Out of bounds (${row}, ${col})`, depth + 1);
+                return [];
+            }
+            
+            if (row === destRow - 1 && col === destCol - 1) {
+                addToCallStack(`✅ Destination reached! Path: "${currentPath}"`, depth + 1);
+                foundPaths.push(currentPath);
+                updatePathsList();
+                return [""];
+            }
+            
+            let result = [];
+            
+            // Horizontal jumps
+            for (let jump = 1; col + jump < destCol; jump++) {
+                visualizeJump(row, col, row, col + jump, 'h', jump);
+                const hPaths = getMazePathsWithJump(row, col + jump, destRow, destCol, currentPath + `h${jump}`, depth + 1);
+            }
+            
+            // Vertical jumps  
+            for (let jump = 1; row + jump < destRow; jump++) {
+                visualizeJump(row, col, row + jump, col, 'v', jump);
+                const vPaths = getMazePathsWithJump(row + jump, col, destRow, destCol, currentPath + `v${jump}`, depth + 1);
+            }
+            
+            // Diagonal jumps
+            for (let jump = 1; row + jump < destRow && col + jump < destCol; jump++) {
+                visualizeJump(row, col, row + jump, col + jump, 'd', jump);
+                const dPaths = getMazePathsWithJump(row + jump, col + jump, destRow, destCol, currentPath + `d${jump}`, depth + 1);
+            }
+            
+            return result;
+        }
+        
+        function visualizeJump(fromRow, fromCol, toRow, toCol, direction, jumpSize) {
+            const fromCell = document.getElementById(`cell-${fromRow}-${fromCol}`);
+            const toCell = document.getElementById(`cell-${toRow}-${toCol}`);
+            
+            // Highlight current position
+            clearHighlights();
+            fromCell.classList.add('current');
+            toCell.classList.add('visited');
+            
+            // Update position info
+            currentPosition = {row: toRow, col: toCol};
+            document.getElementById('currentPos').textContent = `(${toRow}, ${toCol})`;
+            document.getElementById('stepCount').textContent = ++currentStep;
+        }
+        
+        function clearHighlights() {
+            grid.forEach(cell => {
+                cell.classList.remove('current', 'visited', 'path');
+            });
+            // Keep start and end highlighted
+            document.getElementById('cell-0-0').classList.add('start');
+            document.getElementById('cell-3-3').classList.add('end');
+        }
+        
+        function addToCallStack(message, depth) {
+            const indent = '  '.repeat(depth);
+            callStack.push(indent + message);
+            if (callStack.length > 10) callStack.shift();
+            
+            document.getElementById('callStack').innerHTML = callStack.map(call => 
+                `<div style="font-family: monospace;">${call}</div>`
+            ).join('');
+        }
+        
+        function updatePathsList() {
+            document.getElementById('pathsList').innerHTML = foundPaths.map((path, index) => 
+                `<div>${index + 1}. ${path || 'Empty path'}</div>`
+            ).join('');
+            document.getElementById('pathCount').textContent = foundPaths.length;
+        }
+        
+        async function startVisualization() {
+            if (isRunning) return;
+            
+            isRunning = true;
+            resetVisualization();
+            
+            // Simulate the algorithm with delays for visualization
+            await simulateAlgorithm();
+            
+            isRunning = false;
+        }
+        
+        async function simulateAlgorithm() {
+            const paths = [
+                {path: "h3v3", steps: [{row:0,col:0}, {row:0,col:3}, {row:3,col:3}]},
+                {path: "h2v2", steps: [{row:0,col:0}, {row:0,col:2}, {row:2,col:2}, {row:3,col:3}]},
+                {path: "h1v1h1v1", steps: [{row:0,col:0}, {row:0,col:1}, {row:1,col:1}, {row:1,col:2}, {row:2,col:2}, {row:3,col:3}]},
+                {path: "d3", steps: [{row:0,col:0}, {row:3,col:3}]},
+                {path: "d2h1v1", steps: [{row:0,col:0}, {row:2,col:2}, {row:2,col:3}, {row:3,col:3}]},
+                {path: "v3h3", steps: [{row:0,col:0}, {row:3,col:0}, {row:3,col:3}]}
+            ];
+            
+            for (let pathInfo of paths) {
+                addToCallStack(`🔍 Exploring path: ${pathInfo.path}`, 0);
+                
+                for (let i = 0; i < pathInfo.steps.length - 1; i++) {
+                    const from = pathInfo.steps[i];
+                    const to = pathInfo.steps[i + 1];
+                    
+                    clearHighlights();
+                    document.getElementById(`cell-${from.row}-${from.col}`).classList.add('current');
+                    document.getElementById(`cell-${to.row}-${to.col}`).classList.add('visited');
+                    
+                    currentPosition = to;
+                    document.getElementById('currentPos').textContent = `(${to.row}, ${to.col})`;
+                    document.getElementById('stepCount').textContent = ++currentStep;
+                    
+                    await sleep(speed);
+                }
+                
+                foundPaths.push(pathInfo.path);
+                updatePathsList();
+                addToCallStack(`✅ Path found: ${pathInfo.path}`, 1);
+                
+                await sleep(speed);
+            }
+        }
+        
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        
+        function stepForward() {
+            // Manual step implementation would go here
+        }
+        
+        function resetVisualization() {
+            currentStep = 0;
+            foundPaths = [];
+            callStack = [];
+            currentPosition = {row: 0, col: 0};
+            
+            document.getElementById('currentPos').textContent = '(0, 0)';
+            document.getElementById('stepCount').textContent = '0';
+            document.getElementById('pathCount').textContent = '0';
+            document.getElementById('callStack').textContent = 'Ready to start...';
+            document.getElementById('pathsList').textContent = 'No paths found yet...';
+            
+            initGrid();
+        }
+        
+        function toggleSpeed() {
+            const speedBtn = document.getElementById('speedBtn');
+            if (speed === 1000) {
+                speed = 500;
+                speedBtn.textContent = '⚡ Speed: Fast';
+            } else if (speed === 500) {
+                speed = 100;
+                speedBtn.textContent = '⚡ Speed: Very Fast';
+            } else {
+                speed = 1000;
+                speedBtn.textContent = '⚡ Speed: Normal';
+            }
+        }
+        
+        // Initialize on page load
+        window.onload = function() {
+            initGrid();
+        };
+    </script>
+</body>
+</html>
