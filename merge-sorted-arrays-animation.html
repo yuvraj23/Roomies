@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merge Two Sorted Arrays</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Charter', 'Georgia', serif;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #1a1a1a;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.02em;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .algorithm-section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            border-left: 4px solid #667eea;
+            padding-left: 16px;
+        }
+
+        .arrays-container {
+            display: grid;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .array-wrapper {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .array-wrapper.active {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8f0ff 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
+        }
+
+        .array-label {
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #495057;
+            font-size: 1rem;
+        }
+
+        .array {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .array-element {
+            min-width: 50px;
+            height: 50px;
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .array-element::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+            transition: left 0.5s;
+        }
+
+        .array-element.highlight {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+        }
+
+        .array-element.highlight::before {
+            left: 100%;
+        }
+
+        .array-element.selected {
+            border-color: #28a745;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            animation: pulse 0.6s ease-in-out;
+        }
+
+        .array-element.processed {
+            opacity: 0.5;
+            background: #e9ecef;
+            color: #6c757d;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        .result-array {
+            background: linear-gradient(135deg, #f8fff8 0%, #e8f5e8 100%);
+            border: 2px solid #28a745;
+        }
+
+        .pointer {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #667eea;
+            background: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid #667eea;
+            white-space: nowrap;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #495057;
+            border: 2px solid #dee2e6;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #e9ecef;
+            border-color: #adb5bd;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .status {
+            text-align: center;
+            margin: 20px 0;
+            padding: 16px;
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+
+        .complexity-info {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 30px;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .complexity-info h3 {
+            color: #17a2b8;
+            margin-bottom: 12px;
+            font-size: 1.2rem;
+        }
+
+        .complexity-info p {
+            line-height: 1.6;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 20px 0;
+            justify-content: center;
+        }
+
+        .speed-control label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .speed-control input {
+            width: 120px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .array-element {
+                min-width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+            
+            .controls {
+                gap: 12px;
+            }
+            
+            .btn {
+                padding: 10px 16px;
+                font-size: 0.9rem;
+                min-width: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Merge Two Sorted Arrays</h1>
+            <p>Watch how the algorithm efficiently combines two sorted arrays into one</p>
+        </div>
+        
+        <div class="content">
+            <div class="algorithm-section">
+                <h2 class="section-title">Algorithm Visualization</h2>
+                
+                <div class="arrays-container">
+                    <div class="array-wrapper" id="array1-wrapper">
+                        <div class="array-label">Array 1: [6, 7, 8, 9, 10, 11]</div>
+                        <div class="array" id="array1"></div>
+                    </div>
+                    
+                    <div class="array-wrapper" id="array2-wrapper">
+                        <div class="array-label">Array 2: [2, 4, 6]</div>
+                        <div class="array" id="array2"></div>
+                    </div>
+                    
+                    <div class="array-wrapper result-array" id="result-wrapper">
+                        <div class="array-label">Merged Result</div>
+                        <div class="array" id="result"></div>
+                    </div>
+                </div>
+                
+                <div class="status" id="status">
+                    Ready to start merging! Click "Start Animation" to begin.
+                </div>
+                
+                <div class="speed-control">
+                    <label for="speed">Animation Speed:</label>
+                    <input type="range" id="speed" min="100" max="2000" value="800" step="100">
+                    <span id="speed-value">800ms</span>
+                </div>
+                
+                <div class="controls">
+                    <button class="btn btn-primary" id="startBtn">▶️ Start Animation</button>
+                    <button class="btn btn-secondary" id="stepBtn" disabled>👆 Next Step</button>
+                    <button class="btn btn-secondary" id="resetBtn">🔄 Reset</button>
+                </div>
+                
+                <div class="complexity-info">
+                    <h3>Algorithm Complexity</h3>
+                    <p><strong>Time Complexity:</strong> O(m + n) - where m and n are the lengths of the two arrays</p>
+                    <p><strong>Space Complexity:</strong> O(m + n) - for the result array</p>
+                    <p><strong>How it works:</strong> Compare elements from both arrays, pick the smaller one, and advance the respective pointer. Continue until all elements are processed.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class MergeSortedArraysVisualizer {
+            constructor() {
+                this.array1 = [6, 7, 8, 9, 10, 11];
+                this.array2 = [2, 4, 6];
+                this.result = [];
+                this.index1 = 0;
+                this.index2 = 0;
+                this.resultIndex = 0;
+                this.isAnimating = false;
+                this.speed = 800;
+                this.stepMode = false;
+                
+                this.initializeElements();
+                this.setupEventListeners();
+                this.renderArrays();
+            }
+            
+            initializeElements() {
+                this.array1Container = document.getElementById('array1');
+                this.array2Container = document.getElementById('array2');
+                this.resultContainer = document.getElementById('result');
+                this.statusElement = document.getElementById('status');
+                this.startBtn = document.getElementById('startBtn');
+                this.stepBtn = document.getElementById('stepBtn');
+                this.resetBtn = document.getElementById('resetBtn');
+                this.speedSlider = document.getElementById('speed');
+                this.speedValue = document.getElementById('speed-value');
+            }
+            
+            setupEventListeners() {
+                this.startBtn.addEventListener('click', () => this.startAnimation());
+                this.stepBtn.addEventListener('click', () => this.nextStep());
+                this.resetBtn.addEventListener('click', () => this.reset());
+                this.speedSlider.addEventListener('input', (e) => {
+                    this.speed = parseInt(e.target.value);
+                    this.speedValue.textContent = `${this.speed}ms`;
+                });
+            }
+            
+            renderArrays() {
+                this.renderArray(this.array1, this.array1Container, 'arr1');
+                this.renderArray(this.array2, this.array2Container, 'arr2');
+                this.renderArray(this.result, this.resultContainer, 'result');
+            }
+            
+            renderArray(array, container, prefix) {
+                container.innerHTML = '';
+                array.forEach((value, index) => {
+                    const element = document.createElement('div');
+                    element.className = 'array-element';
+                    element.textContent = value;
+                    element.id = `${prefix}-${index}`;
+                    element.style.position = 'relative';
+                    container.appendChild(element);
+                });
+            }
+            
+            async startAnimation() {
+                if (this.isAnimating) return;
+                
+                this.isAnimating = true;
+                this.stepMode = false;
+                this.startBtn.disabled = true;
+                this.stepBtn.disabled = true;
+                this.resetBtn.disabled = false;
+                
+                await this.runMergeAnimation();
+                
+                this.isAnimating = false;
+                this.startBtn.disabled = false;
+                this.stepBtn.disabled = false;
+            }
+            
+            async runMergeAnimation() {
+                while (this.index1 < this.array1.length && this.index2 < this.array2.length) {
+                    await this.animateComparison();
+                    await this.animateSelection();
+                    
+                    if (!this.isAnimating) break;
+                    await this.sleep(this.speed);
+                }
+                
+                // Handle remaining elements
+                while (this.index1 < this.array1.length && this.isAnimating) {
+                    await this.animateRemainingFromArray1();
+                    await this.sleep(this.speed / 2);
+                }
+                
+                while (this.index2 < this.array2.length && this.isAnimating) {
+                    await this.animateRemainingFromArray2();
+                    await this.sleep(this.speed / 2);
+                }
+                
+                if (this.isAnimating) {
+                    this.updateStatus('✅ Merge complete! All elements have been successfully combined.');
+                    await this.celebrateCompletion();
+                }
+            }
+            
+            async animateComparison() {
+                // Highlight current elements being compared
+                this.highlightElement(`arr1-${this.index1}`, true);
+                this.highlightElement(`arr2-${this.index2}`, true);
+                
+                // Activate the arrays being compared
+                document.getElementById('array1-wrapper').classList.add('active');
+                document.getElementById('array2-wrapper').classList.add('active');
+                
+                const val1 = this.array1[this.index1];
+                const val2 = this.array2[this.index2];
+                
+                this.updateStatus(`🤔 Comparing: ${val1} vs ${val2}. Which is smaller?`);
+                await this.sleep(this.speed);
+            }
+            
+            async animateSelection() {
+                const val1 = this.array1[this.index1];
+                const val2 = this.array2[this.index2];
+                
+                if (val1 <= val2) {
+                    // Select from array1
+                    this.highlightElement(`arr1-${this.index1}`, false);
+                    this.selectElement(`arr1-${this.index1}`);
+                    this.result.push(val1);
+                    this.updateStatus(`✅ Selected ${val1} from Array 1 (${val1} ≤ ${val2})`);
+                    this.index1++;
+                } else {
+                    // Select from array2
+                    this.highlightElement(`arr2-${this.index2}`, false);
+                    this.selectElement(`arr2-${this.index2}`);
+                    this.result.push(val2);
+                    this.updateStatus(`✅ Selected ${val2} from Array 2 (${val2} < ${val1})`);
+                    this.index2++;
+                }
+                
+                // Update result array
+                this.renderArray(this.result, this.resultContainer, 'result');
+                
+                // Clear highlights from non-selected element
+                this.highlightElement(`arr1-${this.index1 - (val1 <= val2 ? 0 : -1)}`, false);
+                this.highlightElement(`arr2-${this.index2 - (val1 <= val2 ? -1 : 0)}`, false);
+                
+                // Deactivate arrays
+                document.getElementById('array1-wrapper').classList.remove('active');
+                document.getElementById('array2-wrapper').classList.remove('active');
+                
+                this.resultIndex++;
+                await this.sleep(this.speed / 2);
+            }
+            
+            async animateRemainingFromArray1() {
+                const val = this.array1[this.index1];
+                this.result.push(val);
+                this.selectElement(`arr1-${this.index1}`);
+                this.updateStatus(`📝 Copying remaining element ${val} from Array 1`);
+                this.renderArray(this.result, this.resultContainer, 'result');
+                this.index1++;
+            }
+            
+            async animateRemainingFromArray2() {
+                const val = this.array2[this.index2];
+                this.result.push(val);
+                this.selectElement(`arr2-${this.index2}`);
+                this.updateStatus(`📝 Copying remaining element ${val} from Array 2`);
+                this.renderArray(this.result, this.resultContainer, 'result');
+                this.index2++;
+            }
+            
+            highlightElement(id, highlight) {
+                const element = document.getElementById(id);
+                if (element) {
+                    if (highlight) {
+                        element.classList.add('highlight');
+                    } else {
+                        element.classList.remove('highlight');
+                    }
+                }
+            }
+            
+            selectElement(id) {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.classList.add('selected');
+                    setTimeout(() => {
+                        element.classList.add('processed');
+                        element.classList.remove('selected');
+                    }, 300);
+                }
+            }
+            
+            async celebrateCompletion() {
+                // Animate all result elements
+                const resultElements = this.resultContainer.querySelectorAll('.array-element');
+                for (let i = 0; i < resultElements.length; i++) {
+                    resultElements[i].style.animation = 'pulse 0.6s ease-in-out';
+                    await this.sleep(100);
+                }
+                
+                setTimeout(() => {
+                    resultElements.forEach(el => el.style.animation = '');
+                }, 1000);
+            }
+            
+            updateStatus(message) {
+                this.statusElement.textContent = message;
+                this.statusElement.style.animation = 'none';
+                setTimeout(() => {
+                    this.statusElement.style.animation = 'pulse 0.3s ease-in-out';
+                }, 10);
+            }
+            
+            nextStep() {
+                if (!this.stepMode) {
+                    this.stepMode = true;
+                    this.startBtn.disabled = true;
+                }
+                
+                // Implement step-by-step logic here
+                // This would be similar to the animation but without delays
+            }
+            
+            reset() {
+                this.isAnimating = false;
+                this.stepMode = false;
+                this.index1 = 0;
+                this.index2 = 0;
+                this.resultIndex = 0;
+                this.result = [];
+                
+                this.startBtn.disabled = false;
+                this.stepBtn.disabled = true;
+                this.resetBtn.disabled = false;
+                
+                // Clear all highlights and selections
+                document.querySelectorAll('.array-element').forEach(el => {
+                    el.classList.remove('highlight', 'selected', 'processed');
+                });
+                
+                document.querySelectorAll('.array-wrapper').forEach(wrapper => {
+                    wrapper.classList.remove('active');
+                });
+                
+                this.renderArrays();
+                this.updateStatus('Ready to start merging! Click "Start Animation" to begin.');
+            }
+            
+            sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+        }
+        
+        // Initialize the visualizer when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new MergeSortedArraysVisualizer();
+        });
+    </script>
+</body>
+</html>
