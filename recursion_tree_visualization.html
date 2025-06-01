@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recursive String Decoding Visualizer</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .input-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .input-section input {
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            margin-right: 10px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .input-section button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+        }
+
+        .input-section button:hover {
+            background: #45a049;
+        }
+
+        .visualization {
+            display: flex;
+            gap: 20px;
+            height: 600px;
+        }
+
+        .tree-container, .stack-container {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            overflow: auto;
+        }
+
+        .tree-container h3, .stack-container h3 {
+            margin-top: 0;
+            text-align: center;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+
+        .tree-node {
+            position: relative;
+            margin: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .tree-node.active {
+            border-color: #FFD700;
+            background: rgba(255, 215, 0, 0.3);
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+
+        .tree-node.completed {
+            border-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.3);
+        }
+
+        .tree-node.invalid {
+            border-color: #f44336;
+            background: rgba(244, 67, 54, 0.3);
+        }
+
+        .node-info {
+            font-size: 12px;
+        }
+
+        .node-call {
+            font-weight: bold;
+            color: #FFD700;
+        }
+
+        .node-state {
+            margin-top: 5px;
+            font-size: 11px;
+        }
+
+        .stack-frame {
+            margin: 5px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            border-left: 4px solid #4CAF50;
+            transition: all 0.3s ease;
+        }
+
+        .stack-frame.current {
+            background: rgba(255, 215, 0, 0.3);
+            border-left-color: #FFD700;
+            transform: translateX(10px);
+        }
+
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .controls button {
+            margin: 0 10px;
+            padding: 10px 20px;
+            font-size: 14px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+        }
+
+        .controls button:hover {
+            background: #1976D2;
+        }
+
+        .controls button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+
+        .results {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .result-item {
+            padding: 5px;
+            margin: 2px 0;
+            background: rgba(76, 175, 80, 0.3);
+            border-radius: 3px;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .tree-lines {
+            position: absolute;
+            width: 2px;
+            background: #666;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .speed-control {
+            margin: 10px;
+        }
+
+        .speed-control label {
+            margin-right: 10px;
+        }
+
+        .speed-control input {
+            width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌳 Recursive String Decoding Visualizer</h1>
+            <p>Visualize how the recursive algorithm explores all possible decodings</p>
+        </div>
+
+        <div class="input-section">
+            <input type="text" id="inputString" placeholder="Enter digit string (e.g., 123)" value="123">
+            <button onclick="startVisualization()">Visualize Decoding</button>
+        </div>
+
+        <div class="speed-control">
+            <label>Animation Speed:</label>
+            <input type="range" id="speedSlider" min="100" max="2000" value="800" step="100">
+            <span id="speedValue">800ms</span>
+        </div>
+
+        <div class="controls">
+            <button id="playBtn" onclick="playAnimation()">▶️ Play</button>
+            <button id="pauseBtn" onclick="pauseAnimation()" disabled>⏸️ Pause</button>
+            <button id="stepBtn" onclick="stepAnimation()">⏭️ Step</button>
+            <button id="resetBtn" onclick="resetAnimation()">🔄 Reset</button>
+        </div>
+
+        <div class="visualization">
+            <div class="tree-container">
+                <h3>🌳 Recursion Tree</h3>
+                <div id="treeView"></div>
+            </div>
+            <div class="stack-container">
+                <h3>📚 Call Stack</h3>
+                <div id="stackView"></div>
+            </div>
+        </div>
+
+        <div class="results">
+            <h3>✅ Valid Decodings Found:</h3>
+            <div id="resultsView"></div>
+        </div>
+    </div>
+
+    <script>
+        let executionSteps = [];
+        let currentStep = 0;
+        let isPlaying = false;
+        let animationInterval;
+        let animationSpeed = 800;
+
+        // Update speed control
+        document.getElementById('speedSlider').addEventListener('input', function() {
+            animationSpeed = parseInt(this.value);
+            document.getElementById('speedValue').textContent = animationSpeed + 'ms';
+        });
+
+        class TreeNode {
+            constructor(question, answer, parent = null) {
+                this.question = question;
+                this.answer = answer;
+                this.parent = parent;
+                this.children = [];
+                this.id = Math.random().toString(36).substr(2, 9);
+                this.status = 'pending'; // pending, active, completed, invalid
+                this.result = null;
+            }
+        }
+
+        function printEncoding(question, answer, parentNode = null) {
+            const node = new TreeNode(question, answer, parentNode);
+            if (parentNode) {
+                parentNode.children.push(node);
+            }
+
+            // Add step for entering this function call
+            executionSteps.push({
+                type: 'enter',
+                node: node,
+                question: question,
+                answer: answer,
+                action: `Call printEncoding("${question}", "${answer}")`
+            });
+
+            // Base Case: If the remaining string is empty
+            if (question === '') {
+                executionSteps.push({
+                    type: 'base_case',
+                    node: node,
+                    question: question,
+                    answer: answer,
+                    action: `Found valid decoding: "${answer}"`
+                });
+                node.status = 'completed';
+                node.result = answer;
+                return node;
+            }
+
+            // Check first character
+            const firstChar = question.charAt(0);
+            if (firstChar === '0') {
+                executionSteps.push({
+                    type: 'invalid',
+                    node: node,
+                    question: question,
+                    answer: answer,
+                    action: `Invalid: starts with '0'`
+                });
+                node.status = 'invalid';
+                return node;
+            }
+
+            // Try single digit
+            const singleDigitValue = parseInt(firstChar);
+            const singleDigitLetter = String.fromCharCode('A'.charCodeAt(0) + singleDigitValue - 1);
+            
+            executionSteps.push({
+                type: 'try_single',
+                node: node,
+                question: question,
+                answer: answer,
+                action: `Try single digit: '${firstChar}' → '${singleDigitLetter}'`
+            });
+
+            const singleChild = printEncoding(question.substring(1), answer + singleDigitLetter, node);
+
+            // Try two digits if possible
+            if (question.length >= 2) {
+                const firstTwoChars = question.substring(0, 2);
+                const twoDigitValue = parseInt(firstTwoChars);
+                
+                if (twoDigitValue >= 10 && twoDigitValue <= 26) {
+                    const twoDigitLetter = String.fromCharCode('A'.charCodeAt(0) + twoDigitValue - 1);
+                    
+                    executionSteps.push({
+                        type: 'try_double',
+                        node: node,
+                        question: question,
+                        answer: answer,
+                        action: `Try two digits: '${firstTwoChars}' → '${twoDigitLetter}'`
+                    });
+
+                    const doubleChild = printEncoding(question.substring(2), answer + twoDigitLetter, node);
+                }
+            }
+
+            executionSteps.push({
+                type: 'exit',
+                node: node,
+                question: question,
+                answer: answer,
+                action: `Exit printEncoding("${question}", "${answer}")`
+            });
+
+            node.status = 'completed';
+            return node;
+        }
+
+        function startVisualization() {
+            const input = document.getElementById('inputString').value.trim();
+            if (!input || !/^\d+$/.test(input)) {
+                alert('Please enter a valid digit string');
+                return;
+            }
+
+            // Reset everything
+            executionSteps = [];
+            currentStep = 0;
+            document.getElementById('treeView').innerHTML = '';
+            document.getElementById('stackView').innerHTML = '';
+            document.getElementById('resultsView').innerHTML = '';
+
+            // Generate execution steps
+            const rootNode = printEncoding(input, '');
+            
+            // Reset animation
+            resetAnimation();
+            updateControls();
+        }
+
+        function renderTree(step) {
+            const treeView = document.getElementById('treeView');
+            const allNodes = getAllNodes();
+            
+            treeView.innerHTML = '';
+            
+            if (allNodes.length === 0) return;
+
+            const nodeElements = new Map();
+            
+            function renderNodeRecursive(node, level = 0, parentElement = treeView) {
+                const nodeDiv = document.createElement('div');
+                nodeDiv.className = 'tree-node';
+                nodeDiv.style.marginLeft = (level * 20) + 'px';
+                nodeDiv.id = 'node-' + node.id;
+                
+                // Set node status based on current step
+                if (step && step.node === node) {
+                    nodeDiv.classList.add('active');
+                } else if (node.status === 'completed') {
+                    nodeDiv.classList.add('completed');
+                } else if (node.status === 'invalid') {
+                    nodeDiv.classList.add('invalid');
+                }
+
+                nodeDiv.innerHTML = `
+                    <div class="node-info">
+                        <div class="node-call">printEncoding("${node.question}", "${node.answer}")</div>
+                        <div class="node-state">
+                            Question: "${node.question}" | Answer: "${node.answer}"
+                            ${node.result ? `<br>Result: "${node.result}"` : ''}
+                        </div>
+                    </div>
+                `;
+
+                parentElement.appendChild(nodeDiv);
+                nodeElements.set(node.id, nodeDiv);
+
+                // Render children
+                node.children.forEach(child => {
+                    renderNodeRecursive(child, level + 1, parentElement);
+                });
+            }
+
+            renderNodeRecursive(allNodes[0]);
+        }
+
+        function renderStack(step) {
+            const stackView = document.getElementById('stackView');
+            const callStack = getCallStack(step);
+            
+            stackView.innerHTML = '';
+            
+            callStack.forEach((call, index) => {
+                const frameDiv = document.createElement('div');
+                frameDiv.className = 'stack-frame';
+                if (index === callStack.length - 1) {
+                    frameDiv.classList.add('current');
+                }
+                
+                frameDiv.innerHTML = `
+                    <strong>printEncoding("${call.question}", "${call.answer}")</strong>
+                    <br><small>Level ${index + 1}</small>
+                `;
+                
+                stackView.appendChild(frameDiv);
+            });
+        }
+
+        function renderResults() {
+            const resultsView = document.getElementById('resultsView');
+            const results = getValidResults();
+            
+            resultsView.innerHTML = '';
+            
+            if (results.length === 0) {
+                resultsView.innerHTML = '<em>No valid decodings found yet...</em>';
+                return;
+            }
+
+            results.forEach(result => {
+                const resultDiv = document.createElement('div');
+                resultDiv.className = 'result-item';
+                resultDiv.textContent = result;
+                resultsView.appendChild(resultDiv);
+            });
+        }
+
+        function getAllNodes() {
+            const nodes = [];
+            function collectNodes(steps) {
+                const seenNodes = new Set();
+                steps.forEach(step => {
+                    if (step.node && !seenNodes.has(step.node.id)) {
+                        nodes.push(step.node);
+                        seenNodes.add(step.node.id);
+                    }
+                });
+            }
+            collectNodes(executionSteps.slice(0, currentStep + 1));
+            return nodes;
+        }
+
+        function getCallStack(currentStepObj) {
+            const stack = [];
+            const steps = executionSteps.slice(0, currentStep + 1);
+            
+            steps.forEach(step => {
+                if (step.type === 'enter') {
+                    stack.push({ question: step.question, answer: step.answer });
+                } else if (step.type === 'exit') {
+                    stack.pop();
+                }
+            });
+            
+            return stack;
+        }
+
+        function getValidResults() {
+            const results = [];
+            const steps = executionSteps.slice(0, currentStep + 1);
+            
+            steps.forEach(step => {
+                if (step.type === 'base_case') {
+                    results.push(step.answer);
+                }
+            });
+            
+            return results;
+        }
+
+        function updateVisualization() {
+            const currentStepObj = executionSteps[currentStep];
+            renderTree(currentStepObj);
+            renderStack(currentStepObj);
+            renderResults();
+        }
+
+        function playAnimation() {
+            if (currentStep >= executionSteps.length - 1) return;
+            
+            isPlaying = true;
+            updateControls();
+            
+            animationInterval = setInterval(() => {
+                if (currentStep < executionSteps.length - 1) {
+                    currentStep++;
+                    updateVisualization();
+                } else {
+                    pauseAnimation();
+                }
+            }, animationSpeed);
+        }
+
+        function pauseAnimation() {
+            isPlaying = false;
+            clearInterval(animationInterval);
+            updateControls();
+        }
+
+        function stepAnimation() {
+            if (currentStep < executionSteps.length - 1) {
+                currentStep++;
+                updateVisualization();
+            }
+        }
+
+        function resetAnimation() {
+            pauseAnimation();
+            currentStep = 0;
+            updateVisualization();
+        }
+
+        function updateControls() {
+            document.getElementById('playBtn').disabled = isPlaying || currentStep >= executionSteps.length - 1;
+            document.getElementById('pauseBtn').disabled = !isPlaying;
+            document.getElementById('stepBtn').disabled = isPlaying || currentStep >= executionSteps.length - 1;
+        }
+
+        // Initialize
+        window.onload = function() {
+            startVisualization();
+        };
+    </script>
+</body>
+</html>
