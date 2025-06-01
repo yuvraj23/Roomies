@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insertion Sort Animation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: white;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        button:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .array-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            height: 300px;
+            margin: 40px 0;
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .array-element {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 8px;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .bar {
+            width: 50px;
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            padding-bottom: 5px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .number {
+            margin-top: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .current {
+            transform: scale(1.1) translateY(-10px);
+        }
+
+        .current .bar {
+            background: linear-gradient(45deg, #ff6b6b, #ffa500);
+            box-shadow: 0 8px 25px rgba(255,107,107,0.4);
+            animation: pulse 0.8s ease-in-out infinite alternate;
+        }
+
+        .comparing {
+            transform: scale(1.05) translateY(-5px);
+        }
+
+        .comparing .bar {
+            background: linear-gradient(45deg, #ffd93d, #ff6b6b);
+            box-shadow: 0 6px 20px rgba(255,217,61,0.4);
+        }
+
+        .sorted {
+            transform: scale(1.02);
+        }
+
+        .sorted .bar {
+            background: linear-gradient(45deg, #56ab2f, #a8e6cf);
+            box-shadow: 0 4px 15px rgba(86,171,47,0.3);
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+
+        .info-panel {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .step-info {
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4facfe;
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0 10px;
+        }
+
+        .speed-slider {
+            width: 100px;
+        }
+
+        @media (max-width: 768px) {
+            .array-container {
+                height: 250px;
+                padding: 10px;
+            }
+            
+            .bar {
+                width: 40px;
+                font-size: 12px;
+            }
+            
+            .array-element {
+                margin: 0 4px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Insertion Sort Visualization</h1>
+        
+        <div class="controls">
+            <button onclick="startSort()" id="sortBtn">Start Sort</button>
+            <button onclick="pauseResume()" id="pauseBtn" disabled>Pause</button>
+            <button onclick="reset()" id="resetBtn">Reset</button>
+            <button onclick="randomizeArray()" id="randomBtn">New Array</button>
+            <div class="speed-control">
+                <span>Speed:</span>
+                <input type="range" id="speedSlider" class="speed-slider" min="50" max="2000" value="800" oninput="updateSpeed()">
+                <span id="speedLabel">Normal</span>
+            </div>
+        </div>
+
+        <div class="array-container" id="arrayContainer"></div>
+
+        <div class="info-panel">
+            <div class="step-info" id="stepInfo">Click "Start Sort" to begin the insertion sort animation</div>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value" id="comparisons">0</div>
+                    <div>Comparisons</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="swaps">0</div>
+                    <div>Shifts</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="currentStep">0</div>
+                    <div>Step</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let arr = [-3, 0, -1, 8, 7, -5, 2];
+        let originalArr = [...arr];
+        let isRunning = false;
+        let isPaused = false;
+        let animationSpeed = 800;
+        let stats = { comparisons: 0, swaps: 0, currentStep: 0 };
+
+        function createArrayElements() {
+            const container = document.getElementById('arrayContainer');
+            container.innerHTML = '';
+            
+            const maxVal = Math.max(...arr.map(Math.abs));
+            
+            arr.forEach((val, index) => {
+                const element = document.createElement('div');
+                element.className = 'array-element';
+                element.id = `element-${index}`;
+                
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                
+                // Calculate height based on absolute value, minimum 30px
+                const height = Math.max(30, (Math.abs(val) / maxVal) * 200);
+                bar.style.height = `${height}px`;
+                
+                // Different colors for positive and negative
+                if (val < 0) {
+                    bar.style.background = 'linear-gradient(45deg, #ff4757, #ff6b81)';
+                } else if (val === 0) {
+                    bar.style.background = 'linear-gradient(45deg, #747d8c, #a4b0be)';
+                } else {
+                    bar.style.background = 'linear-gradient(45deg, #4facfe, #00f2fe)';
+                }
+                
+                const number = document.createElement('div');
+                number.className = 'number';
+                number.textContent = val;
+                
+                element.appendChild(bar);
+                element.appendChild(number);
+                container.appendChild(element);
+            });
+        }
+
+        function updateStats() {
+            document.getElementById('comparisons').textContent = stats.comparisons;
+            document.getElementById('swaps').textContent = stats.swaps;
+            document.getElementById('currentStep').textContent = stats.currentStep;
+        }
+
+        function updateStepInfo(message) {
+            document.getElementById('stepInfo').textContent = message;
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function clearHighlights() {
+            document.querySelectorAll('.array-element').forEach(el => {
+                el.classList.remove('current', 'comparing', 'sorted');
+            });
+        }
+
+        function highlightElement(index, className) {
+            const element = document.getElementById(`element-${index}`);
+            if (element) {
+                element.classList.add(className);
+            }
+        }
+
+        async function insertionSort() {
+            updateStepInfo("Starting Insertion Sort...");
+            await sleep(animationSpeed);
+            
+            // Mark first element as sorted
+            highlightElement(0, 'sorted');
+            updateStepInfo("First element is already sorted");
+            await sleep(animationSpeed);
+            
+            for (let i = 1; i < arr.length; i++) {
+                if (!isRunning) return;
+                
+                stats.currentStep++;
+                updateStats();
+                
+                clearHighlights();
+                // Mark sorted portion
+                for (let k = 0; k < i; k++) {
+                    highlightElement(k, 'sorted');
+                }
+                
+                const currentElement = arr[i];
+                highlightElement(i, 'current');
+                updateStepInfo(`Inserting ${currentElement} into sorted portion`);
+                await sleep(animationSpeed);
+                
+                let j = i - 1;
+                
+                // Find the correct position
+                while (j >= 0 && isRunning) {
+                    if (isPaused) {
+                        await new Promise(resolve => {
+                            const checkPause = () => {
+                                if (!isPaused || !isRunning) resolve();
+                                else setTimeout(checkPause, 100);
+                            };
+                            checkPause();
+                        });
+                    }
+                    
+                    stats.comparisons++;
+                    updateStats();
+                    
+                    highlightElement(j, 'comparing');
+                    updateStepInfo(`Comparing ${currentElement} with ${arr[j]}`);
+                    await sleep(animationSpeed);
+                    
+                    if (currentElement < arr[j]) {
+                        // Shift element to the right
+                        arr[j + 1] = arr[j];
+                        stats.swaps++;
+                        updateStats();
+                        
+                        updateStepInfo(`${arr[j]} > ${currentElement}, shifting right`);
+                        
+                        // Update visual
+                        const element = document.getElementById(`element-${j + 1}`);
+                        const number = element.querySelector('.number');
+                        number.textContent = arr[j];
+                        
+                        await sleep(animationSpeed);
+                        j--;
+                    } else {
+                        updateStepInfo(`${currentElement} >= ${arr[j]}, found position`);
+                        await sleep(animationSpeed);
+                        break;
+                    }
+                }
+                
+                // Insert the element
+                arr[j + 1] = currentElement;
+                const insertElement = document.getElementById(`element-${j + 1}`);
+                const insertNumber = insertElement.querySelector('.number');
+                insertNumber.textContent = currentElement;
+                
+                updateStepInfo(`Inserted ${currentElement} at position ${j + 1}`);
+                await sleep(animationSpeed);
+                
+                clearHighlights();
+                // Mark all processed elements as sorted
+                for (let k = 0; k <= i; k++) {
+                    highlightElement(k, 'sorted');
+                }
+                await sleep(animationSpeed);
+            }
+            
+            updateStepInfo("🎉 Insertion Sort Complete! Array is now sorted.");
+            isRunning = false;
+            document.getElementById('sortBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+        }
+
+        async function startSort() {
+            if (isRunning) return;
+            
+            isRunning = true;
+            isPaused = false;
+            stats = { comparisons: 0, swaps: 0, currentStep: 0 };
+            updateStats();
+            
+            document.getElementById('sortBtn').disabled = true;
+            document.getElementById('pauseBtn').disabled = false;
+            document.getElementById('pauseBtn').textContent = 'Pause';
+            
+            await insertionSort();
+        }
+
+        function pauseResume() {
+            if (!isRunning) return;
+            
+            isPaused = !isPaused;
+            document.getElementById('pauseBtn').textContent = isPaused ? 'Resume' : 'Pause';
+            
+            if (!isPaused) {
+                updateStepInfo(document.getElementById('stepInfo').textContent.replace(' (Paused)', ''));
+            } else {
+                updateStepInfo(document.getElementById('stepInfo').textContent + ' (Paused)');
+            }
+        }
+
+        function reset() {
+            isRunning = false;
+            isPaused = false;
+            arr = [...originalArr];
+            stats = { comparisons: 0, swaps: 0, currentStep: 0 };
+            
+            createArrayElements();
+            updateStats();
+            updateStepInfo("Click 'Start Sort' to begin the insertion sort animation");
+            
+            document.getElementById('sortBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+            document.getElementById('pauseBtn').textContent = 'Pause';
+        }
+
+        function randomizeArray() {
+            if (isRunning) return;
+            
+            // Generate random array with values between -10 and 10
+            arr = Array.from({length: 7}, () => Math.floor(Math.random() * 21) - 10);
+            originalArr = [...arr];
+            
+            createArrayElements();
+            stats = { comparisons: 0, swaps: 0, currentStep: 0 };
+            updateStats();
+            updateStepInfo("New random array generated! Click 'Start Sort' to begin.");
+        }
+
+        function updateSpeed() {
+            const slider = document.getElementById('speedSlider');
+            const label = document.getElementById('speedLabel');
+            
+            animationSpeed = parseInt(slider.value);
+            
+            if (animationSpeed <= 200) label.textContent = 'Very Fast';
+            else if (animationSpeed <= 500) label.textContent = 'Fast';
+            else if (animationSpeed <= 1000) label.textContent = 'Normal';
+            else if (animationSpeed <= 1500) label.textContent = 'Slow';
+            else label.textContent = 'Very Slow';
+        }
+
+        // Initialize
+        createArrayElements();
+        updateStats();
+    </script>
+</body>
+</html>
