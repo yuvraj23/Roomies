@@ -52,6 +52,14 @@
             transform: none;
         }
 
+        button.fullscreen-btn {
+            background: #9C27B0;
+        }
+
+        button.fullscreen-btn:hover {
+            background: #7B1FA2;
+        }
+
         .main-content {
             display: grid;
             grid-template-columns: 1fr 300px;
@@ -221,6 +229,135 @@
             margin-top: 0;
             color: #FFD700;
         }
+
+        /* Fullscreen Modal Styles */
+        .fullscreen-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 1000;
+            overflow: auto;
+        }
+
+        .fullscreen-modal.active {
+            display: block;
+        }
+
+        .fullscreen-content {
+            padding: 20px;
+            color: white;
+            font-family: 'Courier New', monospace;
+            height: calc(100vh - 40px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .fullscreen-header {
+            text-align: center;
+            margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+
+        .fullscreen-controls {
+            text-align: center;
+            margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+
+        .fullscreen-main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+            min-height: 0;
+        }
+
+        .fullscreen-tree {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            position: relative;
+            overflow: auto;
+        }
+
+        .fullscreen-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .fullscreen-stack {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            flex: 1;
+            overflow: auto;
+        }
+
+        .fullscreen-merge {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 200px;
+        }
+
+        .fullscreen-code {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            padding: 15px;
+            font-family: monospace;
+            margin-top: 20px;
+            flex-shrink: 0;
+        }
+
+        .close-fullscreen {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            z-index: 1001;
+        }
+
+        .close-fullscreen:hover {
+            background: #d32f2f;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1200px) {
+            .fullscreen-main {
+                grid-template-columns: 1fr;
+                grid-template-rows: 1fr auto;
+            }
+            
+            .fullscreen-sidebar {
+                flex-direction: row;
+                gap: 10px;
+            }
+            
+            .fullscreen-stack, .fullscreen-merge {
+                flex: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .fullscreen-sidebar {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
 <body>
@@ -234,6 +371,7 @@
             <button onclick="startAnimation()">▶️ Start Animation</button>
             <button onclick="resetAnimation()">🔄 Reset</button>
             <button onclick="toggleSpeed()">⚡ Speed: Normal</button>
+            <button class="fullscreen-btn" onclick="openFullscreen()">🔍 View Fullscreen</button>
         </div>
 
         <div class="main-content">
@@ -268,6 +406,57 @@
         </div>
     </div>
 
+    <!-- Fullscreen Modal -->
+    <div class="fullscreen-modal" id="fullscreenModal">
+        <button class="close-fullscreen" onclick="closeFullscreen()">✕</button>
+        
+        <div class="fullscreen-content">
+            <div class="fullscreen-header">
+                <h1>🌲 Merge Sort Recursion Tree Animation - Fullscreen View</h1>
+                <div class="status" id="fullscreen-status">Ready to start animation</div>
+            </div>
+
+            <div class="fullscreen-controls">
+                <button onclick="startFullscreenAnimation()">▶️ Start Animation</button>
+                <button onclick="resetFullscreenAnimation()">🔄 Reset</button>
+                <button onclick="toggleFullscreenSpeed()">⚡ Speed: Normal</button>
+            </div>
+
+            <div class="fullscreen-main">
+                <div class="fullscreen-tree" id="fullscreen-tree">
+                    <h3>Recursion Tree & Execution</h3>
+                </div>
+                
+                <div class="fullscreen-sidebar">
+                    <div class="fullscreen-stack">
+                        <h3>Call Stack</h3>
+                        <div id="fullscreen-stack"></div>
+                    </div>
+                    
+                    <div class="fullscreen-merge">
+                        <h3>Current Merge Operation</h3>
+                        <div id="fullscreen-merge-display">
+                            <p>No merge operation in progress</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fullscreen-code">
+                <h3>Code Execution</h3>
+                <div id="fullscreen-code-display">
+                    <div class="code-line">mergeSort(arr, low, high) {</div>
+                    <div class="code-line">  if (low >= high) return [arr[low]];</div>
+                    <div class="code-line">  mid = (low + high) / 2;</div>
+                    <div class="code-line">  firstHalf = mergeSort(arr, low, mid);</div>
+                    <div class="code-line">  secondHalf = mergeSort(arr, mid+1, high);</div>
+                    <div class="code-line">  return merge(firstHalf, secondHalf);</div>
+                    <div class="code-line">}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Original array from your code
         const originalArray = [45, -3, 0, 99, 23, 7, -15, 88];
@@ -278,6 +467,12 @@
         let nodeCounter = 0;
         let nodes = {};
         let connections = [];
+        let isFullscreen = false;
+
+        // Fullscreen variables
+        let fullscreenNodes = {};
+        let fullscreenConnections = [];
+        let fullscreenCallStack = [];
 
         class TreeNode {
             constructor(arr, low, high, parent = null) {
@@ -294,10 +489,10 @@
             }
         }
 
-        function createVisualNode(node, x, y) {
+        function createVisualNode(node, x, y, isFullscreenMode = false) {
             const nodeEl = document.createElement('div');
             nodeEl.className = 'node';
-            nodeEl.id = `node-${node.id}`;
+            nodeEl.id = `${isFullscreenMode ? 'fullscreen-' : ''}node-${node.id}`;
             nodeEl.innerHTML = `
                 <div>[${node.low}, ${node.high}]</div>
                 <div class="array-display">
@@ -309,13 +504,21 @@
             nodeEl.style.left = x + 'px';
             nodeEl.style.top = y + 'px';
             
-            document.getElementById('tree').appendChild(nodeEl);
-            nodes[node.id] = {node, element: nodeEl, x, y};
+            const treeContainer = isFullscreenMode ? 
+                document.getElementById('fullscreen-tree') : 
+                document.getElementById('tree');
+            treeContainer.appendChild(nodeEl);
+            
+            const nodeStorage = isFullscreenMode ? fullscreenNodes : nodes;
+            nodeStorage[node.id] = {node, element: nodeEl, x, y};
         }
 
-        function createConnection(fromNode, toNode) {
-            const from = nodes[fromNode.id];
-            const to = nodes[toNode.id];
+        function createConnection(fromNode, toNode, isFullscreenMode = false) {
+            const nodeStorage = isFullscreenMode ? fullscreenNodes : nodes;
+            const connectionStorage = isFullscreenMode ? fullscreenConnections : connections;
+            
+            const from = nodeStorage[fromNode.id];
+            const to = nodeStorage[toNode.id];
             
             const connection = document.createElement('div');
             connection.className = 'connection';
@@ -330,14 +533,22 @@
             connection.style.width = length + 'px';
             connection.style.transform = `rotate(${angle}deg)`;
             
-            document.getElementById('tree').appendChild(connection);
-            connections.push(connection);
+            const treeContainer = isFullscreenMode ? 
+                document.getElementById('fullscreen-tree') : 
+                document.getElementById('tree');
+            treeContainer.appendChild(connection);
+            connectionStorage.push(connection);
         }
 
-        function buildTree() {
+        function buildTree(isFullscreenMode = false) {
             const root = new TreeNode(originalArray, 0, originalArray.length - 1);
             const queue = [root];
             const levels = [];
+            
+            // Reset node counter for consistent IDs
+            if (isFullscreenMode) {
+                nodeCounter = 0;
+            }
             
             while (queue.length > 0) {
                 const node = queue.shift();
@@ -353,18 +564,19 @@
                 }
             }
             
-            // Position nodes
+            // Position nodes with better spacing for fullscreen
+            const baseWidth = isFullscreenMode ? 1400 : 1000;
             levels.forEach((level, levelIndex) => {
                 const y = 50 + levelIndex * 120;
-                const totalWidth = 1000;
+                const totalWidth = baseWidth;
                 const spacing = totalWidth / (level.length + 1);
                 
                 level.forEach((node, index) => {
                     const x = spacing * (index + 1) - 60;
-                    createVisualNode(node, x, y);
+                    createVisualNode(node, x, y, isFullscreenMode);
                     
                     if (node.parent) {
-                        createConnection(node.parent, node);
+                        createConnection(node.parent, node, isFullscreenMode);
                     }
                 });
             });
@@ -372,25 +584,29 @@
             return root;
         }
 
-        function updateStatus(message) {
-            document.getElementById('status').textContent = message;
+        function updateStatus(message, isFullscreenMode = false) {
+            const statusId = isFullscreenMode ? 'fullscreen-status' : 'status';
+            document.getElementById(statusId).textContent = message;
         }
 
-        function highlightCode(lineIndex) {
-            const lines = document.querySelectorAll('.code-line');
+        function highlightCode(lineIndex, isFullscreenMode = false) {
+            const codeDisplayId = isFullscreenMode ? 'fullscreen-code-display' : 'code-display';
+            const lines = document.querySelectorAll(`#${codeDisplayId} .code-line`);
             lines.forEach(line => line.classList.remove('highlight'));
             if (lineIndex >= 0 && lineIndex < lines.length) {
                 lines[lineIndex].classList.add('highlight');
             }
         }
 
-        function updateCallStack() {
-            const stackEl = document.getElementById('stack');
+        function updateCallStack(isFullscreenMode = false) {
+            const stackId = isFullscreenMode ? 'fullscreen-stack' : 'stack';
+            const currentStack = isFullscreenMode ? fullscreenCallStack : callStack;
+            const stackEl = document.getElementById(stackId);
             stackEl.innerHTML = '';
             
-            callStack.forEach((frame, index) => {
+            currentStack.forEach((frame, index) => {
                 const frameEl = document.createElement('div');
-                frameEl.className = `stack-frame ${index === callStack.length - 1 ? 'active' : ''}`;
+                frameEl.className = `stack-frame ${index === currentStack.length - 1 ? 'active' : ''}`;
                 frameEl.innerHTML = `
                     <strong>mergeSort(${frame.low}, ${frame.high})</strong>
                     <div class="array-display">
@@ -403,25 +619,28 @@
             });
         }
 
-        function activateNode(nodeId) {
-            Object.values(nodes).forEach(({element}) => {
+        function activateNode(nodeId, isFullscreenMode = false) {
+            const nodeStorage = isFullscreenMode ? fullscreenNodes : nodes;
+            Object.values(nodeStorage).forEach(({element}) => {
                 element.classList.remove('active', 'merging');
             });
             
-            if (nodes[nodeId]) {
-                nodes[nodeId].element.classList.add('active');
+            if (nodeStorage[nodeId]) {
+                nodeStorage[nodeId].element.classList.add('active');
             }
         }
 
-        function completeNode(nodeId) {
-            if (nodes[nodeId]) {
-                nodes[nodeId].element.classList.remove('active', 'merging');
-                nodes[nodeId].element.classList.add('completed');
+        function completeNode(nodeId, isFullscreenMode = false) {
+            const nodeStorage = isFullscreenMode ? fullscreenNodes : nodes;
+            if (nodeStorage[nodeId]) {
+                nodeStorage[nodeId].element.classList.remove('active', 'merging');
+                nodeStorage[nodeId].element.classList.add('completed');
             }
         }
 
-        function showMergeOperation(left, right, result) {
-            const mergeEl = document.getElementById('merge-display');
+        function showMergeOperation(left, right, result, isFullscreenMode = false) {
+            const mergeDisplayId = isFullscreenMode ? 'fullscreen-merge-display' : 'merge-display';
+            const mergeEl = document.getElementById(mergeDisplayId);
             mergeEl.innerHTML = `
                 <div class="merge-arrays">
                     <div>
@@ -446,71 +665,74 @@
             `;
         }
 
-        async function animateMergeSort(node) {
+        async function animateMergeSort(node, isFullscreenMode = false) {
             if (!node) return [];
             
+            const currentStack = isFullscreenMode ? fullscreenCallStack : callStack;
+            
             // Add to call stack
-            callStack.push({
+            currentStack.push({
                 arr: originalArray,
                 low: node.low,
                 high: node.high
             });
-            updateCallStack();
-            activateNode(node.id);
+            updateCallStack(isFullscreenMode);
+            activateNode(node.id, isFullscreenMode);
             
             await sleep(animationSpeed);
             
             // Base case
             if (node.low >= node.high) {
-                highlightCode(1);
-                updateStatus(`Base case: returning [${originalArray[node.low]}]`);
+                highlightCode(1, isFullscreenMode);
+                updateStatus(`Base case: returning [${originalArray[node.low]}]`, isFullscreenMode);
                 
                 const result = [originalArray[node.low]];
                 node.result = result;
                 
                 await sleep(animationSpeed);
-                completeNode(node.id);
-                callStack.pop();
-                updateCallStack();
+                completeNode(node.id, isFullscreenMode);
+                currentStack.pop();
+                updateCallStack(isFullscreenMode);
                 
                 return result;
             }
             
             // Calculate mid
-            highlightCode(2);
+            highlightCode(2, isFullscreenMode);
             const mid = Math.floor((node.low + node.high) / 2);
-            updateStatus(`Splitting: mid = ${mid}`);
+            updateStatus(`Splitting: mid = ${mid}`, isFullscreenMode);
             await sleep(animationSpeed);
             
             // Recursive call for left half
-            highlightCode(3);
-            updateStatus(`Recursively sorting left half [${node.low}, ${mid}]`);
+            highlightCode(3, isFullscreenMode);
+            updateStatus(`Recursively sorting left half [${node.low}, ${mid}]`, isFullscreenMode);
             await sleep(animationSpeed);
             
-            const leftResult = await animateMergeSort(node.left);
+            const leftResult = await animateMergeSort(node.left, isFullscreenMode);
             
             // Recursive call for right half
-            highlightCode(4);
-            updateStatus(`Recursively sorting right half [${mid + 1}, ${node.high}]`);
+            highlightCode(4, isFullscreenMode);
+            updateStatus(`Recursively sorting right half [${mid + 1}, ${node.high}]`, isFullscreenMode);
             await sleep(animationSpeed);
             
-            const rightResult = await animateMergeSort(node.right);
+            const rightResult = await animateMergeSort(node.right, isFullscreenMode);
             
             // Merge step
-            highlightCode(5);
-            activateNode(node.id);
-            nodes[node.id].element.classList.add('merging');
-            updateStatus(`Merging left and right halves`);
+            highlightCode(5, isFullscreenMode);
+            activateNode(node.id, isFullscreenMode);
+            const nodeStorage = isFullscreenMode ? fullscreenNodes : nodes;
+            nodeStorage[node.id].element.classList.add('merging');
+            updateStatus(`Merging left and right halves`, isFullscreenMode);
             
             const mergedResult = merge(leftResult, rightResult);
-            showMergeOperation(leftResult, rightResult, mergedResult);
+            showMergeOperation(leftResult, rightResult, mergedResult, isFullscreenMode);
             
             await sleep(animationSpeed * 1.5);
             
             node.result = mergedResult;
-            completeNode(node.id);
-            callStack.pop();
-            updateCallStack();
+            completeNode(node.id, isFullscreenMode);
+            currentStack.pop();
+            updateCallStack(isFullscreenMode);
             
             return mergedResult;
         }
@@ -576,6 +798,36 @@
             document.querySelector('button').disabled = false;
         }
 
+        async function startFullscreenAnimation() {
+            if (isAnimating) return;
+            
+            isAnimating = true;
+            document.querySelector('.fullscreen-controls button').disabled = true;
+            
+            resetFullscreenAnimation();
+            const root = buildTree(true);
+            
+            updateStatus("Starting merge sort animation...", true);
+            await sleep(1000);
+            
+            const result = await animateMergeSort(root, true);
+            
+            updateStatus(`✅ Sorting complete! Final result: [${result.join(', ')}]`, true);
+            highlightCode(-1, true);
+            
+            document.getElementById('fullscreen-merge-display').innerHTML = `
+                <div class="merge-result">
+                    <strong>🎉 Final Sorted Array:</strong>
+                    <div class="array-display">
+                        ${result.map(n => `<span class="array-item highlight">${n}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+            
+            isAnimating = false;
+            document.querySelector('.fullscreen-controls button').disabled = false;
+        }
+
         function resetAnimation() {
             document.getElementById('tree').innerHTML = '<h3>Recursion Tree & Execution</h3>';
             document.getElementById('stack').innerHTML = '';
@@ -588,6 +840,20 @@
             
             highlightCode(-1);
             updateStatus("Ready to start animation");
+        }
+
+        function resetFullscreenAnimation() {
+            document.getElementById('fullscreen-tree').innerHTML = '<h3>Recursion Tree & Execution</h3>';
+            document.getElementById('fullscreen-stack').innerHTML = '';
+            document.getElementById('fullscreen-merge-display').innerHTML = '<p>No merge operation in progress</p>';
+            
+            fullscreenNodes = {};
+            fullscreenConnections = [];
+            fullscreenCallStack = [];
+            nodeCounter = 0;
+            
+            highlightCode(-1, true);
+            updateStatus("Ready to start animation", true);
         }
 
         function toggleSpeed() {
@@ -604,8 +870,17 @@
             }
         }
 
-        // Initialize
-        resetAnimation();
-    </script>
-</body>
-</html>
+        function toggleFullscreenSpeed() {
+            const button = document.querySelector('button[onclick="toggleFullscreenSpeed()"]');
+            if (animationSpeed === 1000) {
+                animationSpeed = 500;
+                button.textContent = '⚡ Speed: Fast';
+            } else if (animationSpeed === 500) {
+                animationSpeed = 200;
+                button.textContent = '⚡ Speed: Very Fast';
+            } else {
+                animationSpeed = 1000;
+                button.textContent = '⚡ Speed: Normal';
+            }
+            
+            // Update the main speed button too
