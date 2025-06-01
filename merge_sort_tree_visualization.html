@@ -884,3 +884,49 @@
             }
             
             // Update the main speed button too
+            const mainButton = document.querySelector('button[onclick="toggleSpeed()"]');
+            if (mainButton) {
+                mainButton.textContent = button.textContent;
+            }
+        }
+
+        function openFullscreen() {
+            const modal = document.getElementById('fullscreenModal');
+            modal.classList.add('active');
+            isFullscreen = true;
+            resetFullscreenAnimation();
+        }
+
+        function closeFullscreen() {
+            const modal = document.getElementById('fullscreenModal');
+            modal.classList.remove('active');
+            isFullscreen = false;
+        }
+
+        // Initialize
+        resetAnimation();
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && isFullscreen) {
+                closeFullscreen();
+            }
+            if (e.key === 'F11') {
+                e.preventDefault();
+                if (isFullscreen) {
+                    closeFullscreen();
+                } else {
+                    openFullscreen();
+                }
+            }
+        });
+
+        // Handle fullscreen modal clicks outside content
+        document.getElementById('fullscreenModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeFullscreen();
+            }
+        });
+    </script>
+</body>
+</html>
