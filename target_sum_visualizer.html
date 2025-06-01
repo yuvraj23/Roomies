@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Target Sum Subsets Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: auto;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        button:hover:not(:disabled) {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        input {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-size: 16px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+            max-width: 200px;
+        }
+
+        input::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .input-group label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: flex;
+            gap: 20px;
+            min-height: 700px;
+        }
+
+        .tree-section {
+            flex: 3;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            overflow: auto;
+        }
+
+        .info-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .tree-container {
+            min-width: 1000px;
+            min-height: 600px;
+            position: relative;
+        }
+
+        .tree-node {
+            position: absolute;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 12px;
+            padding: 10px 12px;
+            text-align: center;
+            min-width: 100px;
+            max-width: 150px;
+            backdrop-filter: blur(10px);
+            transition: all 0.5s ease;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .tree-node:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(255,255,255,0.2);
+        }
+
+        .tree-node.current {
+            background: linear-gradient(45deg, #ff6b6b, #ffa500);
+            box-shadow: 0 8px 25px rgba(255,107,107,0.4);
+            animation: pulse 1s ease-in-out infinite alternate;
+            transform: scale(1.1);
+            z-index: 10;
+        }
+
+        .tree-node.valid-subset {
+            background: linear-gradient(45deg, #56ab2f, #a8e6cf);
+            box-shadow: 0 6px 20px rgba(86,171,47,0.4);
+            border: 3px solid #56ab2f;
+            font-weight: bold;
+        }
+
+        .tree-node.pruned {
+            background: linear-gradient(45deg, #ff4757, #c44569);
+            opacity: 0.7;
+            border: 2px solid #ff4757;
+        }
+
+        .tree-node.completed {
+            background: rgba(255,255,255,0.3);
+            opacity: 0.8;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1.1); }
+            to { transform: scale(1.15); }
+        }
+
+        .node-info {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .node-index {
+            font-size: 10px;
+            color: #ffeb3b;
+            font-weight: bold;
+        }
+
+        .node-sum {
+            font-size: 14px;
+            color: #4facfe;
+            font-weight: bold;
+        }
+
+        .node-path {
+            font-size: 11px;
+            color: white;
+            word-break: break-all;
+            max-height: 30px;
+            overflow: hidden;
+        }
+
+        .tree-line {
+            position: absolute;
+            z-index: -1;
+            transition: all 0.3s ease;
+        }
+
+        .tree-line.include {
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+            height: 3px;
+            box-shadow: 0 0 10px rgba(79,172,254,0.5);
+        }
+
+        .tree-line.exclude {
+            background: linear-gradient(90deg, #ff6b6b, #ffa500);
+            height: 2px;
+            box-shadow: 0 0 8px rgba(255,107,107,0.3);
+        }
+
+        .tree-line.active {
+            height: 4px;
+            box-shadow: 0 0 15px currentColor;
+        }
+
+        .line-label {
+            position: absolute;
+            font-size: 10px;
+            font-weight: bold;
+            color: white;
+            background: rgba(0,0,0,0.5);
+            padding: 2px 6px;
+            border-radius: 4px;
+            z-index: 5;
+        }
+
+        .array-display {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .array-item {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .array-item.current-index {
+            background: linear-gradient(45deg, #ff6b6b, #ffa500);
+            border-color: #ff6b6b;
+            transform: scale(1.1);
+        }
+
+        .array-item.included {
+            background: linear-gradient(45deg, #56ab2f, #a8e6cf);
+            border-color: #56ab2f;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .stat {
+            text-align: center;
+            background: rgba(255,255,255,0.1);
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #4facfe;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .current-state {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .state-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .state-label {
+            opacity: 0.8;
+        }
+
+        .state-value {
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+        }
+
+        .results-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .result-item {
+            background: rgba(86,171,47,0.2);
+            margin: 5px 0;
+            padding: 10px 12px;
+            border-radius: 6px;
+            border-left: 4px solid #56ab2f;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            opacity: 0.6;
+        }
+
+        .result-item.new {
+            animation: slideInResult 0.5s ease;
+            opacity: 1;
+            background: rgba(86,171,47,0.3);
+        }
+
+        @keyframes slideInResult {
+            from {
+                transform: translateX(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        @media (max-width: 1400px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .tree-container {
+                min-width: auto;
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .tree-node {
+                min-width: 80px;
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Target Sum Subsets Visualizer</h1>
+        
+        <div class="controls">
+            <div class="input-group">
+                <label>Array (comma-separated)</label>
+                <input type="text" id="arrayInput" placeholder="1,2,3,4,5" value="1,2,3,4,5,6">
+            </div>
+            <div class="input-group">
+                <label>Target Sum</label>
+                <input type="number" id="targetInput" placeholder="15" value="10">
+            </div>
+            <button onclick="startVisualization()" id="startBtn">Find Subsets</button>
+            <button onclick="pauseResume()" id="pauseBtn" disabled>Pause</button>
+            <button onclick="reset()" id="resetBtn">Reset</button>
+            <div class="speed-control">
+                <span>Speed:</span>
+                <input type="range" id="speedSlider" min="200" max="2000" value="800">
+                <span id="speedLabel">Normal</span>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="tree-section">
+                <h3 style="margin-bottom: 15px; text-align: center;">Decision Tree (Include/Exclude)</h3>
+                <div class="array-display" id="arrayDisplay"></div>
+                <div class="tree-container" id="treeContainer"></div>
+            </div>
+            
+            <div class="info-section">
+                <div class="panel">
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-value" id="totalCalls">0</div>
+                            <div class="stat-label">Function Calls</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="validSubsets">0</div>
+                            <div class="stat-label">Valid Subsets</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="currentDepth">0</div>
+                            <div class="stat-label">Current Depth</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="prunedBranches">0</div>
+                            <div class="stat-label">Pruned Branches</div>
+                        </div>
+                    </div>
+                    
+                    <div class="current-state">
+                        <div class="state-row">
+                            <span class="state-label">Index:</span>
+                            <span class="state-value" id="currentIndex">-</span>
+                        </div>
+                        <div class="state-row">
+                            <span class="state-label">Current Sum:</span>
+                            <span class="state-value" id="currentSum">0</span>
+                        </div>
+                        <div class="state-row">
+                            <span class="state-label">Target:</span>
+                            <span class="state-value" id="targetDisplay">0</span>
+                        </div>
+                        <div class="state-row">
+                            <span class="state-label">Path:</span>
+                            <span class="state-value" id="currentPath">""</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="panel">
+                    <h4 style="margin-bottom: 15px;">Valid Subsets Found:</h4>
+                    <div class="results-list" id="resultsList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isRunning = false;
+        let isPaused = false;
+        let animationSpeed = 800;
+        let nodeCounter = 0;
+        let treeNodes = [];
+        let stats = { totalCalls: 0, validSubsets: 0, currentDepth: 0, prunedBranches: 0 };
+        let currentArray = [];
+        let targetSum = 0;
+        let results = [];
+
+        class TreeNode {
+            constructor(index, sum, path, level, parent = null) {
+                this.id = nodeCounter++;
+                this.index = index;
+                this.sum = sum;
+                this.path = path;
+                this.level = level;
+                this.parent = parent;
+                this.children = [];
+                this.element = null;
+                this.x = 0;
+                this.y = 0;
+                this.isValid = false;
+                this.isPruned = false;
+            }
+        }
+
+        function updateSpeed() {
+            const slider = document.getElementById('speedSlider');
+            const label = document.getElementById('speedLabel');
+            
+            animationSpeed = parseInt(slider.value);
+            
+            if (animationSpeed <= 400) label.textContent = 'Very Fast';
+            else if (animationSpeed <= 800) label.textContent = 'Fast';
+            else if (animationSpeed <= 1200) label.textContent = 'Normal';
+            else if (animationSpeed <= 1600) label.textContent = 'Slow';
+            else label.textContent = 'Very Slow';
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function parseArrayInput() {
+            const input = document.getElementById('arrayInput').value.trim();
+            const target = parseInt(document.getElementById('targetInput').value) || 0;
+            
+            if (!input) return null;
+            
+            try {
+                const arr = input.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+                if (arr.length === 0 || arr.length > 8) {
+                    alert('Please enter 1-8 valid numbers separated by commas');
+                    return null;
+                }
+                return { array: arr, target };
+            } catch (e) {
+                alert('Invalid input format. Use comma-separated numbers.');
+                return null;
+            }
+        }
+
+        function createArrayDisplay(arr) {
+            const container = document.getElementById('arrayDisplay');
+            container.innerHTML = '';
+            
+            arr.forEach((num, index) => {
+                const item = document.createElement('div');
+                item.className = 'array-item';
+                item.id = `array-item-${index}`;
+                item.textContent = num;
+                container.appendChild(item);
+            });
+        }
+
+        function updateArrayDisplay(currentIndex, includedIndices) {
+            // Reset all items
+            document.querySelectorAll('.array-item').forEach(item => {
+                item.classList.remove('current-index', 'included');
+            });
+            
+            // Highlight current index
+            if (currentIndex < currentArray.length) {
+                const currentItem = document.getElementById(`array-item-${currentIndex}`);
+                if (currentItem) currentItem.classList.add('current-index');
+            }
+            
+            // Highlight included indices
+            includedIndices.forEach(index => {
+                const item = document.getElementById(`array-item-${index}`);
+                if (item) item.classList.add('included');
+            });
+        }
+
+        function getIncludedIndices(path) {
+            if (!path) return [];
+            const indices = [];
+            const numbers = path.split(',').filter(s => s.trim());
+            
+            let pathIndex = 0;
+            for (let i = 0; i < currentArray.length && pathIndex < numbers.length; i++) {
+                if (currentArray[i].toString() === numbers[pathIndex].trim()) {
+                    indices.push(i);
+                    pathIndex++;
+                }
+            }
+            return indices;
+        }
+
+        function createTreeNode(node) {
+            const element = document.createElement('div');
+            element.className = 'tree-node';
+            element.id = `node-${node.id}`;
+            
+            const info = document.createElement('div');
+            info.className = 'node-info';
+            
+            const indexDiv = document.createElement('div');
+            indexDiv.className = 'node-index';
+            indexDiv.textContent = `i=${node.index}`;
+            
+            const sumDiv = document.createElement('div');
+            sumDiv.className = 'node-sum';
+            sumDiv.textContent = `sum=${node.sum}`;
+            
+            const pathDiv = document.createElement('div');
+            pathDiv.className = 'node-path';
+            pathDiv.textContent = node.path || '""';
+            
+            info.appendChild(indexDiv);
+            info.appendChild(sumDiv);
+            info.appendChild(pathDiv);
+            element.appendChild(info);
+            
+            node.element = element;
+            return element;
+        }
+
+        function positionNodes(root, containerWidth) {
+            const levels = {};
+            
+            function traverse(node) {
+                if (!levels[node.level]) levels[node.level] = [];
+                levels[node.level].push(node);
+                node.children.forEach(child => traverse(child));
+            }
+            traverse(root);
+            
+            Object.keys(levels).forEach(level => {
+                const nodes = levels[level];
+                const y = parseInt(level) * 100 + 80;
+                const totalWidth = Math.max(containerWidth - 100, nodes.length * 120);
+                const spacing = Math.max(120, totalWidth / Math.max(nodes.length, 1));
+                
+                nodes.forEach((node, index) => {
+                    node.x = (index * spacing) + (containerWidth - (nodes.length - 1) * spacing) / 2 - 50;
+                    node.y = y;
+                    
+                    if (node.element) {
+                        node.element.style.left = `${Math.max(0, node.x)}px`;
+                        node.element.style.top = `${node.y}px`;
+                    }
+                });
+            });
+        }
+
+        function drawLines(container) {
+            container.querySelectorAll('.tree-line, .line-label').forEach(el => el.remove());
+            
+            treeNodes.forEach(node => {
+                node.children.forEach((child, index) => {
+                    const line = document.createElement('div');
+                    line.className = `tree-line ${index === 0 ? 'include' : 'exclude'}`;
+                    
+                    const x1 = node.x + 50;
+                    const y1 = node.y + 40;
+                    const x2 = child.x + 50;
+                    const y2 = child.y;
+                    
+                    const length = Math.sqrt((x2-x1)**2 + (y2-y1)**2);
+                    const angle = Math.atan2(y2-y1, x2-x1) * 180 / Math.PI;
+                    
+                    line.style.width = `${length}px`;
+                    line.style.left = `${x1}px`;
+                    line.style.top = `${y1}px`;
+                    line.style.transformOrigin = '0 0';
+                    line.style.transform = `rotate(${angle}deg)`;
+                    
+                    // Add label
+                    const label = document.createElement('div');
+                    label.className = 'line-label';
+                    label.textContent = index === 0 ? 'Include' : 'Exclude';
+                    label.style.left = `${x1 + length/2 - 20}px`;
+                    label.style.top = `${y1 + (y2-y1)/2 - 10}px`;
+                    
+                    container.appendChild(line);
+                    container.appendChild(label);
+                });
+            });
+        }
+
+        function updateStats() {
+            document.getElementById('totalCalls').textContent = stats.totalCalls;
+            document.getElementById('validSubsets').textContent = stats.validSubsets;
+            document.getElementById('currentDepth').textContent = stats.currentDepth;
+            document.getElementById('prunedBranches').textContent = stats.prunedBranches;
+        }
+
+        function updateCurrentState(index, sum, path) {
+            document.getElementById('currentIndex').textContent = index;
+            document.getElementById('currentSum').textContent = sum;
+            document.getElementById('currentPath').textContent = `"${path}"`;
+            document.getElementById('targetDisplay').textContent = targetSum;
+            stats.currentDepth = Math.max(stats.currentDepth, index);
+        }
+
+        function addResult(path, sum) {
+            const resultsList = document.getElementById('resultsList');
+            const resultItem = document.createElement('div');
+            resultItem.className = 'result-item new';
+            resultItem.textContent = `${path} = ${sum}`;
+            resultsList.appendChild(resultItem);
+            
+            setTimeout(() => {
+                resultItem.classList.remove('new');
+            }, 500);
+            
+            resultsList.scrollTop = resultsList.scrollHeight;
+        }
+
+        async function printTargetSum(arr, target, sum, path, ind, parentNode = null, level = 0) {
+            if (!isRunning) return;
+            
+            while (isPaused && isRunning) {
+                await sleep(100);
+            }
+            
+            stats.totalCalls++;
+            updateStats();
+            updateCurrentState(ind, sum, path);
+            
+            // Create tree node
+            const node = new TreeNode(ind, sum, path, level, parentNode);
+            treeNodes.push(node);
+            
+            if (parentNode) {
+                parentNode.children.push(node);
+            }
+            
+            // Create visual element
+            const container = document.getElementById('treeContainer');
+            const element = createTreeNode(node);
+            container.appendChild(element);
+            
+            // Position and draw
+            const root = treeNodes[0];
+            positionNodes(root, container.offsetWidth);
+            drawLines(container);
+            
+            // Update array display
+            updateArrayDisplay(ind, getIncludedIndices(path));
+            
+            // Highlight current node
+            document.querySelectorAll('.tree-node').forEach(n => n.classList.remove('current'));
+            element.classList.add('current');
+            
+            await sleep(animationSpeed);
+            
+            // Base case: End of array
+            if (arr.length === ind) {
+                if (target === sum) {
+                    node.isValid = true;
+                    element.classList.remove('current');
+                    element.classList.add('valid-subset');
+                    
+                    stats.validSubsets++;
+                    updateStats();
+                    addResult(path || '(empty)', sum);
+                    
+                    await sleep(animationSpeed);
+                } else {
+                    element.classList.remove('current');
+                    element.classList.add('completed');
+                }
+                return;
+            }
+            
+            // Early termination: Sum reached target
+            if (sum === target) {
+                node.isValid = true;
+                element.classList.remove('current');
+                element.classList.add('valid-subset');
+                
+                stats.validSubsets++;
+                updateStats();
+                addResult(path || '(empty)', sum);
+                
+                await sleep(animationSpeed);
+                return;
+            }
+            
+            // Pruning: Sum exceeds target
+            if (sum > target) {
+                node.isPruned = true;
+                element.classList.remove('current');
+                element.classList.add('pruned');
+                
+                stats.prunedBranches++;
+                updateStats();
+                
+                await sleep(animationSpeed / 2);
+                return;
+            }
+            
+            // Include current number
+            const newPath = path ? path + arr[ind] + "," : arr[ind] + ",";
+            await printTargetSum(arr, target, sum + arr[ind], newPath, ind + 1, node, level + 1);
+            
+            // Exclude current number
+            if (isRunning) {
+                await printTargetSum(arr, target, sum, path, ind + 1, node, level + 1);
+            }
+            
+            // Mark as completed
+            element.classList.remove('current');
+            element.classList.add('completed');
+        }
+
+        async function startVisualization() {
+            const input = parseArrayInput();
+            if (!input) return;
+            
+            if (isRunning) return;
+            
+            reset();
+            
+            currentArray = input.array;
+            targetSum = input.target;
+            
+            createArrayDisplay(currentArray);
+            
+            isRunning = true;
+            isPaused = false;
+            
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('pauseBtn').disabled = false;
+            document.getElementById('pauseBtn').textContent = 'Pause';
+            
+            await printTargetSum(currentArray, targetSum, 0, "", 0);
+            
+            isRunning = false;
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+            
+            updateCurrentState('Complete', '-', `Found ${stats.validSubsets} subsets`);
+        }
+
+        function pauseResume() {
+            if (!isRunning) return;
+            
+            isPaused = !isPaused;
+            document.getElementById('pauseBtn').textContent = isPaused ? 'Resume' : 'Pause';
+        }
+
+        function reset() {
+            isRunning = false;
+            isPaused = false;
+            nodeCounter = 0;
+            treeNodes = [];
+            stats = { totalCalls: 0, validSubsets: 0, currentDepth: 0, prunedBranches: 0 };
+            results = [];
+            
+            document.getElementById('treeContainer').innerHTML = '';
+            document.getElementById('resultsList').innerHTML = '';
+            document.getElementById('arrayDisplay').innerHTML = '';
+            updateStats();
+            updateCurrentState('-', '0', '');
+            
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+            document.getElementById('pauseBtn').textContent = 'Pause';
+        }
+
+        // Initialize
+        updateSpeed();
+        updateStats();
+        updateCurrentState('-', '0', '');
+        
+        document.getElementById('speedSlider').addEventListener('input', updateSpeed);
+    </script>
+</body>
+</html>
