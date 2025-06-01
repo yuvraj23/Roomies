@@ -66,16 +66,21 @@
         }
         
         .tree-container {
-            display: flex;
-            justify-content: center;
             margin-top: 30px;
             min-height: 500px;
-        }
-        
-        .tree-svg {
+            max-height: 700px;
+            overflow: auto;
             background: rgba(255,255,255,0.05);
             border-radius: 15px;
             backdrop-filter: blur(5px);
+            padding: 20px;
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+        
+        .tree-svg {
+            display: block;
+            min-width: 1000px;
+            min-height: 600px;
         }
         
         .node {
@@ -330,19 +335,31 @@
         
         function buildTreeLayout() {
             const nodes = new Map();
-            const maxLevel = Math.max(...animationData.filter(d => d.type === 'call').map(d => d.level));
+            const callNodes = animationData.filter(d => d.type === 'call');
+            const maxLevel = Math.max(...callNodes.map(d => d.level));
             const levelCounts = new Array(maxLevel + 1).fill(0);
             
             // Count nodes per level
-            animationData.filter(d => d.type === 'call').forEach(d => {
+            callNodes.forEach(d => {
                 levelCounts[d.level]++;
             });
             
             const levelCounters = new Array(maxLevel + 1).fill(0);
+            const maxWidth = Math.max(...levelCounts);
+            const nodeSpacing = Math.max(120, 800 / Math.max(maxWidth, 1));
+            const totalWidth = Math.max(1000, maxWidth * nodeSpacing + 200);
+            const totalHeight = Math.max(600, (maxLevel + 1) * 100 + 200);
             
-            animationData.filter(d => d.type === 'call').forEach(d => {
-                const x = (levelCounters[d.level] + 1) * (1000 / (levelCounts[d.level] + 1));
-                const y = 80 + d.level * 90;
+            // Update SVG dimensions
+            const svg = document.getElementById('treeSvg');
+            svg.setAttribute('width', totalWidth);
+            svg.setAttribute('height', totalHeight);
+            
+            callNodes.forEach(d => {
+                const nodesInLevel = levelCounts[d.level];
+                const startX = (totalWidth - (nodesInLevel - 1) * nodeSpacing) / 2;
+                const x = startX + levelCounters[d.level] * nodeSpacing;
+                const y = 80 + d.level * 100;
                 
                 nodes.set(d.nodeId, {
                     ...d,
