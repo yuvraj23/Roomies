@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>String Permutation Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: auto;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        button:hover:not(:disabled) {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        input {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-size: 16px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+            max-width: 200px;
+        }
+
+        input::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .main-content {
+            display: flex;
+            gap: 20px;
+            min-height: 600px;
+        }
+
+        .tree-section {
+            flex: 2;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            overflow: auto;
+        }
+
+        .results-section {
+            flex: 1;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .tree-container {
+            min-width: 800px;
+            min-height: 500px;
+            position: relative;
+        }
+
+        .tree-node {
+            position: absolute;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 12px;
+            padding: 12px 16px;
+            text-align: center;
+            min-width: 120px;
+            backdrop-filter: blur(10px);
+            transition: all 0.5s ease;
+            cursor: pointer;
+        }
+
+        .tree-node:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(255,255,255,0.2);
+        }
+
+        .tree-node.current {
+            background: linear-gradient(45deg, #ff6b6b, #ffa500);
+            box-shadow: 0 8px 25px rgba(255,107,107,0.4);
+            animation: pulse 1s ease-in-out infinite alternate;
+            transform: scale(1.1);
+        }
+
+        .tree-node.completed {
+            background: linear-gradient(45deg, #56ab2f, #a8e6cf);
+            box-shadow: 0 4px 15px rgba(86,171,47,0.3);
+        }
+
+        .tree-node.result {
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            box-shadow: 0 6px 20px rgba(79,172,254,0.4);
+            font-weight: bold;
+            border: 3px solid #4facfe;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1.1); }
+            to { transform: scale(1.15); }
+        }
+
+        .node-question {
+            font-size: 14px;
+            color: #ffeb3b;
+            margin-bottom: 5px;
+        }
+
+        .node-answer {
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .tree-line {
+            position: absolute;
+            background: rgba(255,255,255,0.4);
+            z-index: -1;
+            transition: all 0.3s ease;
+        }
+
+        .tree-line.active {
+            background: #4facfe;
+            box-shadow: 0 0 10px #4facfe;
+        }
+
+        .results-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .result-item {
+            background: rgba(255,255,255,0.1);
+            margin: 8px 0;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border-left: 4px solid #4facfe;
+            transition: all 0.3s ease;
+            opacity: 0.6;
+        }
+
+        .result-item.new {
+            animation: slideInResult 0.5s ease;
+            opacity: 1;
+            background: rgba(79,172,254,0.2);
+        }
+
+        @keyframes slideInResult {
+            from {
+                transform: translateX(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .stat {
+            text-align: center;
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            min-width: 100px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4facfe;
+        }
+
+        .current-state {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .state-label {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .state-value {
+            font-size: 18px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+        }
+
+        .question-value {
+            color: #ffeb3b;
+        }
+
+        .answer-value {
+            color: #4facfe;
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .tree-container {
+                min-width: auto;
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .tree-node {
+                min-width: 100px;
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 String Permutation Visualizer</h1>
+        
+        <div class="controls">
+            <input type="text" id="inputString" placeholder="Enter string (max 4 chars)" maxlength="4" value="abc">
+            <button onclick="startVisualization()" id="startBtn">Generate Permutations</button>
+            <button onclick="pauseResume()" id="pauseBtn" disabled>Pause</button>
+            <button onclick="reset()" id="resetBtn">Reset</button>
+            <div class="speed-control">
+                <span>Speed:</span>
+                <input type="range" id="speedSlider" min="200" max="2000" value="1000">
+                <span id="speedLabel">Normal</span>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="tree-section">
+                <h3 style="margin-bottom: 20px; text-align: center;">Recursion Tree</h3>
+                <div class="tree-container" id="treeContainer"></div>
+            </div>
+            
+            <div class="results-section">
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-value" id="totalCalls">0</div>
+                        <div>Function Calls</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="permutationsFound">0</div>
+                        <div>Permutations</div>
+                    </div>
+                </div>
+                
+                <div class="current-state">
+                    <div class="state-label">Current Question:</div>
+                    <div class="state-value question-value" id="currentQuestion">-</div>
+                    <div class="state-label" style="margin-top: 10px;">Current Answer:</div>
+                    <div class="state-value answer-value" id="currentAnswer">-</div>
+                </div>
+                
+                <h4 style="margin-bottom: 15px;">Generated Permutations:</h4>
+                <div class="results-list" id="resultsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isRunning = false;
+        let isPaused = false;
+        let animationSpeed = 1000;
+        let nodeCounter = 0;
+        let callStack = [];
+        let results = [];
+        let treeNodes = [];
+        let stats = { totalCalls: 0, permutationsFound: 0 };
+
+        class TreeNode {
+            constructor(question, answer, level, parent = null) {
+                this.id = nodeCounter++;
+                this.question = question;
+                this.answer = answer;
+                this.level = level;
+                this.parent = parent;
+                this.children = [];
+                this.element = null;
+                this.x = 0;
+                this.y = 0;
+            }
+        }
+
+        function updateSpeed() {
+            const slider = document.getElementById('speedSlider');
+            const label = document.getElementById('speedLabel');
+            
+            animationSpeed = parseInt(slider.value);
+            
+            if (animationSpeed <= 400) label.textContent = 'Very Fast';
+            else if (animationSpeed <= 800) label.textContent = 'Fast';
+            else if (animationSpeed <= 1200) label.textContent = 'Normal';
+            else if (animationSpeed <= 1600) label.textContent = 'Slow';
+            else label.textContent = 'Very Slow';
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function createTreeNode(node) {
+            const element = document.createElement('div');
+            element.className = 'tree-node';
+            element.id = `node-${node.id}`;
+            
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'node-question';
+            questionDiv.textContent = `"${node.question}"`;
+            
+            const answerDiv = document.createElement('div');
+            answerDiv.className = 'node-answer';
+            answerDiv.textContent = `"${node.answer}"`;
+            
+            element.appendChild(questionDiv);
+            element.appendChild(answerDiv);
+            
+            node.element = element;
+            return element;
+        }
+
+        function positionNodes(root, containerWidth) {
+            const levels = {};
+            
+            // Group nodes by level
+            function traverse(node) {
+                if (!levels[node.level]) levels[node.level] = [];
+                levels[node.level].push(node);
+                node.children.forEach(child => traverse(child));
+            }
+            traverse(root);
+            
+            // Position nodes
+            Object.keys(levels).forEach(level => {
+                const nodes = levels[level];
+                const y = parseInt(level) * 120 + 50;
+                const totalWidth = Math.max(containerWidth - 200, nodes.length * 140);
+                const spacing = totalWidth / Math.max(nodes.length + 1, 2);
+                
+                nodes.forEach((node, index) => {
+                    node.x = spacing * (index + 1) - 60;
+                    node.y = y;
+                    
+                    if (node.element) {
+                        node.element.style.left = `${node.x}px`;
+                        node.element.style.top = `${node.y}px`;
+                    }
+                });
+            });
+        }
+
+        function drawLines(container) {
+            // Remove existing lines
+            container.querySelectorAll('.tree-line').forEach(line => line.remove());
+            
+            treeNodes.forEach(node => {
+                node.children.forEach(child => {
+                    const line = document.createElement('div');
+                    line.className = 'tree-line';
+                    
+                    const x1 = node.x + 60;
+                    const y1 = node.y + 40;
+                    const x2 = child.x + 60;
+                    const y2 = child.y;
+                    
+                    const length = Math.sqrt((x2-x1)**2 + (y2-y1)**2);
+                    const angle = Math.atan2(y2-y1, x2-x1) * 180 / Math.PI;
+                    
+                    line.style.width = `${length}px`;
+                    line.style.height = '2px';
+                    line.style.left = `${x1}px`;
+                    line.style.top = `${y1}px`;
+                    line.style.transformOrigin = '0 0';
+                    line.style.transform = `rotate(${angle}deg)`;
+                    
+                    container.appendChild(line);
+                });
+            });
+        }
+
+        function updateStats() {
+            document.getElementById('totalCalls').textContent = stats.totalCalls;
+            document.getElementById('permutationsFound').textContent = stats.permutationsFound;
+        }
+
+        function updateCurrentState(question, answer) {
+            document.getElementById('currentQuestion').textContent = `"${question}"`;
+            document.getElementById('currentAnswer').textContent = `"${answer}"`;
+        }
+
+        function addResult(permutation) {
+            const resultsList = document.getElementById('resultsList');
+            const resultItem = document.createElement('div');
+            resultItem.className = 'result-item new';
+            resultItem.textContent = `${stats.permutationsFound}. "${permutation}"`;
+            resultsList.appendChild(resultItem);
+            
+            // Remove 'new' class after animation
+            setTimeout(() => {
+                resultItem.classList.remove('new');
+            }, 500);
+            
+            // Scroll to bottom
+            resultsList.scrollTop = resultsList.scrollHeight;
+        }
+
+        async function printPermutations(question, answer, parentNode = null, level = 0) {
+            if (!isRunning) return;
+            
+            // Handle pause
+            while (isPaused && isRunning) {
+                await sleep(100);
+            }
+            
+            stats.totalCalls++;
+            updateStats();
+            updateCurrentState(question, answer);
+            
+            // Create tree node
+            const node = new TreeNode(question, answer, level, parentNode);
+            treeNodes.push(node);
+            
+            if (parentNode) {
+                parentNode.children.push(node);
+            }
+            
+            // Create visual element
+            const container = document.getElementById('treeContainer');
+            const element = createTreeNode(node);
+            container.appendChild(element);
+            
+            // Position and draw
+            const root = treeNodes[0];
+            positionNodes(root, container.offsetWidth);
+            drawLines(container);
+            
+            // Highlight current node
+            document.querySelectorAll('.tree-node').forEach(n => n.classList.remove('current'));
+            element.classList.add('current');
+            
+            await sleep(animationSpeed);
+            
+            // Base case
+            if (question.length === 0) {
+                results.push(answer);
+                stats.permutationsFound++;
+                updateStats();
+                addResult(answer);
+                
+                element.classList.remove('current');
+                element.classList.add('result');
+                
+                await sleep(animationSpeed);
+                return;
+            }
+            
+            // Recursive case
+            for (let i = 0; i < question.length; i++) {
+                if (!isRunning) return;
+                
+                const ch = question.charAt(i);
+                const resOfQuestion = question.substring(0, i) + question.substring(i + 1);
+                
+                await printPermutations(resOfQuestion, answer + ch, node, level + 1);
+            }
+            
+            // Mark as completed
+            element.classList.remove('current');
+            element.classList.add('completed');
+        }
+
+        async function startVisualization() {
+            const input = document.getElementById('inputString').value.trim();
+            
+            if (!input || input.length > 4) {
+                alert('Please enter a string with 1-4 characters');
+                return;
+            }
+            
+            if (isRunning) return;
+            
+            reset();
+            
+            isRunning = true;
+            isPaused = false;
+            
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('pauseBtn').disabled = false;
+            document.getElementById('pauseBtn').textContent = 'Pause';
+            
+            await printPermutations(input, "");
+            
+            isRunning = false;
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+            
+            updateCurrentState("Completed!", `Found ${stats.permutationsFound} permutations`);
+        }
+
+        function pauseResume() {
+            if (!isRunning) return;
+            
+            isPaused = !isPaused;
+            document.getElementById('pauseBtn').textContent = isPaused ? 'Resume' : 'Pause';
+        }
+
+        function reset() {
+            isRunning = false;
+            isPaused = false;
+            nodeCounter = 0;
+            callStack = [];
+            results = [];
+            treeNodes = [];
+            stats = { totalCalls: 0, permutationsFound: 0 };
+            
+            document.getElementById('treeContainer').innerHTML = '';
+            document.getElementById('resultsList').innerHTML = '';
+            updateStats();
+            updateCurrentState('-', '-');
+            
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+            document.getElementById('pauseBtn').textContent = 'Pause';
+        }
+
+        // Initialize
+        updateSpeed();
+        updateStats();
+        updateCurrentState('-', '-');
+        
+        // Update speed on slider change
+        document.getElementById('speedSlider').addEventListener('input', updateSpeed);
+    </script>
+</body>
+</html>
