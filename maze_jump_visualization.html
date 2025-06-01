@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maze Path with Jumps Visualizer</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .input-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .input-section input, .input-section select {
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            margin: 0 5px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .input-section button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+        }
+
+        .input-section button:hover {
+            background: #45a049;
+        }
+
+        .visualization {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            height: 600px;
+        }
+
+        .grid-container, .tree-container, .stack-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            overflow: auto;
+        }
+
+        .grid-container h3, .tree-container h3, .stack-container h3 {
+            margin-top: 0;
+            text-align: center;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+
+        .maze-grid {
+            display: grid;
+            gap: 2px;
+            margin: 20px auto;
+            width: fit-content;
+        }
+
+        .grid-cell {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .grid-cell.start {
+            background: #4CAF50;
+            border-color: #2E7D32;
+        }
+
+        .grid-cell.destination {
+            background: #f44336;
+            border-color: #C62828;
+        }
+
+        .grid-cell.current {
+            background: #FFD700;
+            border-color: #FFA000;
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.7);
+        }
+
+        .grid-cell.path {
+            background: #2196F3;
+            border-color: #1565C0;
+        }
+
+        .grid-cell.visited {
+            background: rgba(156, 39, 176, 0.5);
+            border-color: #7B1FA2;
+        }
+
+        .jump-arrow {
+            position: absolute;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .arrow-line {
+            stroke: #FFD700;
+            stroke-width: 3;
+            marker-end: url(#arrowhead);
+            filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.8));
+        }
+
+        .tree-node {
+            margin: 5px 0;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            font-size: 11px;
+        }
+
+        .tree-node.active {
+            border-color: #FFD700;
+            background: rgba(255, 215, 0, 0.3);
+            transform: translateX(5px);
+        }
+
+        .tree-node.completed {
+            border-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.3);
+        }
+
+        .tree-node.invalid {
+            border-color: #f44336;
+            background: rgba(244, 67, 54, 0.3);
+        }
+
+        .stack-frame {
+            margin: 3px 0;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 5px;
+            border-left: 4px solid #4CAF50;
+            font-size: 11px;
+            transition: all 0.3s ease;
+        }
+
+        .stack-frame.current {
+            background: rgba(255, 215, 0, 0.3);
+            border-left-color: #FFD700;
+            transform: translateX(5px);
+        }
+
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .controls button {
+            padding: 8px 16px;
+            font-size: 14px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+        }
+
+        .controls button:hover {
+            background: #1976D2;
+        }
+
+        .controls button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+            justify-content: center;
+        }
+
+        .speed-control input {
+            width: 150px;
+        }
+
+        .results {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .result-path {
+            display: inline-block;
+            margin: 5px;
+            padding: 5px 10px;
+            background: rgba(76, 175, 80, 0.4);
+            border-radius: 5px;
+            border: 1px solid #4CAF50;
+        }
+
+        .current-state {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(255, 215, 0, 0.2);
+            border-radius: 5px;
+            border: 1px solid #FFD700;
+            text-align: center;
+        }
+
+        .jump-info {
+            font-size: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 2px 4px;
+            border-radius: 3px;
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏃‍♂️ Maze Path with Jumps Visualizer</h1>
+            <p>Watch how the algorithm finds all paths using variable-length jumps in 3 directions</p>
+        </div>
+
+        <div class="input-section">
+            <label>Grid Size:</label>
+            <select id="gridRows">
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
+            <span>×</span>
+            <select id="gridCols">
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
+            <button onclick="startVisualization()">🚀 Find All Paths</button>
+        </div>
+
+        <div class="speed-control">
+            <label>Speed:</label>
+            <input type="range" id="speedSlider" min="100" max="2000" value="600" step="100">
+            <span id="speedValue">600ms</span>
+        </div>
+
+        <div class="controls">
+            <button id="playBtn" onclick="playAnimation()">▶️ Play</button>
+            <button id="pauseBtn" onclick="pauseAnimation()" disabled>⏸️ Pause</button>
+            <button id="stepBtn" onclick="stepAnimation()">⏭️ Step</button>
+            <button id="resetBtn" onclick="resetAnimation()">🔄 Reset</button>
+        </div>
+
+        <div class="current-state" id="currentState">
+            Ready to start - Click "Find All Paths" to begin
+        </div>
+
+        <div class="visualization">
+            <div class="grid-container">
+                <h3>🎯 Maze Grid</h3>
+                <div id="mazeGrid"></div>
+                <svg id="jumpArrows" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#FFD700" />
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+            
+            <div class="tree-container">
+                <h3>🌳 Recursion Tree</h3>
+                <div id="treeView"></div>
+            </div>
+            
+            <div class="stack-container">
+                <h3>📚 Call Stack</h3>
+                <div id="stackView"></div>
+            </div>
+        </div>
+
+        <div class="results">
+            <h3>✅ Valid Paths Found:</h3>
+            <div id="resultsView">No paths found yet...</div>
+        </div>
+    </div>
+
+    <script>
+        let executionSteps = [];
+        let currentStep = 0;
+        let isPlaying = false;
+        let animationInterval;
+        let animationSpeed = 600;
+        let gridRows = 3;
+        let gridCols = 3;
+        let nodeCounter = 0;
+
+        // Update speed control
+        document.getElementById('speedSlider').addEventListener('input', function() {
+            animationSpeed = parseInt(this.value);
+            document.getElementById('speedValue').textContent = animationSpeed + 'ms';
+        });
+
+        class TreeNode {
+            constructor(row, col, destRow, destCol, path, jumpType = '', jumpSize = 0) {
+                this.row = row;
+                this.col = col;
+                this.destRow = destRow;
+                this.destCol = destCol;
+                this.path = path;
+                this.jumpType = jumpType;
+                this.jumpSize = jumpSize;
+                this.id = nodeCounter++;
+                this.children = [];
+                this.status = 'pending';
+                this.level = 0;
+            }
+        }
+
+        function printMazeWithJump(row, col, destRow, destCol, paths, parentNode = null, level = 0) {
+            const node = new TreeNode(row, col, destRow, destCol, paths);
+            node.level = level;
+            
+            if (parentNode) {
+                parentNode.children.push(node);
+            }
+
+            // Add step for entering this function call
+            executionSteps.push({
+                type: 'enter',
+                node: node,
+                row: row,
+                col: col,
+                path: paths,
+                action: `Enter: (${row},${col}) path="${paths}"`
+            });
+
+            // Base Case 1: Invalid move
+            if (row > destRow || col > destCol) {
+                executionSteps.push({
+                    type: 'invalid',
+                    node: node,
+                    row: row,
+                    col: col,
+                    path: paths,
+                    action: `Invalid: Out of bounds (${row},${col})`
+                });
+                node.status = 'invalid';
+                return node;
+            }
+
+            // Base Case 2: Reached destination
+            if (row === destRow && col === destCol) {
+                executionSteps.push({
+                    type: 'success',
+                    node: node,
+                    row: row,
+                    col: col,
+                    path: paths,
+                    action: `Success: Found path "${paths}"`
+                });
+                node.status = 'completed';
+                return node;
+            }
+
+            // Try vertical jumps
+            for (let jump = 1; row + jump <= destRow; jump++) {
+                executionSteps.push({
+                    type: 'try_vertical',
+                    node: node,
+                    row: row,
+                    col: col,
+                    path: paths,
+                    jumpSize: jump,
+                    targetRow: row + jump,
+                    targetCol: col,
+                    action: `Try vertical jump ${jump}: (${row},${col}) → (${row + jump},${col})`
+                });
+                
+                printMazeWithJump(row + jump, col, destRow, destCol, paths + "v" + jump, node, level + 1);
+            }
+
+            // Try horizontal jumps
+            for (let jump = 1; col + jump <= destCol; jump++) {
+                executionSteps.push({
+                    type: 'try_horizontal',
+                    node: node,
+                    row: row,
+                    col: col,
+                    path: paths,
+                    jumpSize: jump,
+                    targetRow: row,
+                    targetCol: col + jump,
+                    action: `Try horizontal jump ${jump}: (${row},${col}) → (${row},${col + jump})`
+                });
+                
+                printMazeWithJump(row, col + jump, destRow, destCol, paths + "h" + jump, node, level + 1);
+            }
+
+            // Try diagonal jumps
+            for (let jump = 1; row + jump <= destRow && col + jump <= destCol; jump++) {
+                executionSteps.push({
+                    type: 'try_diagonal',
+                    node: node,
+                    row: row,
+                    col: col,
+                    path: paths,
+                    jumpSize: jump,
+                    targetRow: row + jump,
+                    targetCol: col + jump,
+                    action: `Try diagonal jump ${jump}: (${row},${col}) → (${row + jump},${col + jump})`
+                });
+                
+                printMazeWithJump(row + jump, col + jump, destRow, destCol, paths + "d" + jump, node, level + 1);
+            }
+
+            executionSteps.push({
+                type: 'exit',
+                node: node,
+                row: row,
+                col: col,
+                path: paths,
+                action: `Exit: (${row},${col}) path="${paths}"`
+            });
+
+            return node;
+        }
+
+        function createMazeGrid() {
+            const container = document.getElementById('mazeGrid');
+            container.innerHTML = '';
+            container.style.gridTemplateColumns = `repeat(${gridCols}, 1fr)`;
+            
+            for (let row = 0; row < gridRows; row++) {
+                for (let col = 0; col < gridCols; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    cell.id = `cell-${row}-${col}`;
+                    cell.textContent = `${row},${col}`;
+                    
+                    if (row === 0 && col === 0) {
+                        cell.classList.add('start');
+                        cell.textContent = 'START';
+                    } else if (row === gridRows - 1 && col === gridCols - 1) {
+                        cell.classList.add('destination');
+                        cell.textContent = 'END';
+                    }
+                    
+                    container.appendChild(cell);
+                }
+            }
+        }
+
+        function updateMazeGrid(step) {
+            // Clear all dynamic classes
+            document.querySelectorAll('.grid-cell').forEach(cell => {
+                cell.classList.remove('current', 'path', 'visited');
+            });
+
+            if (!step) return;
+
+            // Highlight current position
+            const currentCell = document.getElementById(`cell-${step.row}-${step.col}`);
+            if (currentCell) {
+                currentCell.classList.add('current');
+            }
+
+            // Show jump arrow if it's a jump attempt
+            if (step.type.startsWith('try_') && step.targetRow !== undefined) {
+                drawJumpArrow(step.row, step.col, step.targetRow, step.targetCol, step.type, step.jumpSize);
+            } else {
+                clearJumpArrows();
+            }
+
+            // Highlight path for successful paths
+            if (step.type === 'success' && step.path) {
+                highlightPath(step.path);
+            }
+        }
+
+        function drawJumpArrow(fromRow, fromCol, toRow, toCol, jumpType, jumpSize) {
+            clearJumpArrows();
+            
+            const fromCell = document.getElementById(`cell-${fromRow}-${fromCol}`);
+            const toCell = document.getElementById(`cell-${toRow}-${toCol}`);
+            
+            if (!fromCell || !toCell) return;
+
+            const fromRect = fromCell.getBoundingClientRect();
+            const toRect = toCell.getBoundingClientRect();
+            const containerRect = document.getElementById('mazeGrid').getBoundingClientRect();
+
+            const x1 = fromRect.left + fromRect.width / 2 - containerRect.left;
+            const y1 = fromRect.top + fromRect.height / 2 - containerRect.top;
+            const x2 = toRect.left + toRect.width / 2 - containerRect.left;
+            const y2 = toRect.top + toRect.height / 2 - containerRect.top;
+
+            const svg = document.getElementById('jumpArrows');
+            svg.innerHTML = `
+                <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#FFD700" />
+                    </marker>
+                </defs>
+                <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="arrow-line" />
+                <text x="${(x1 + x2) / 2}" y="${(y1 + y2) / 2 - 10}" fill="#FFD700" font-size="12" text-anchor="middle">
+                    ${jumpType.replace('try_', '').charAt(0)}${jumpSize}
+                </text>
+            `;
+        }
+
+        function clearJumpArrows() {
+            const svg = document.getElementById('jumpArrows');
+            svg.innerHTML = `
+                <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#FFD700" />
+                    </marker>
+                </defs>
+            `;
+        }
+
+        function highlightPath(pathString) {
+            let row = 0, col = 0;
+            const pathCells = [{row: 0, col: 0}];
+            
+            let i = 0;
+            while (i < pathString.length) {
+                const direction = pathString[i];
+                i++;
+                let jumpSize = '';
+                while (i < pathString.length && !isNaN(pathString[i])) {
+                    jumpSize += pathString[i];
+                    i++;
+                }
+                const jump = parseInt(jumpSize);
+                
+                if (direction === 'v') row += jump;
+                else if (direction === 'h') col += jump;
+                else if (direction === 'd') { row += jump; col += jump; }
+                
+                pathCells.push({row, col});
+            }
+            
+            pathCells.forEach(pos => {
+                const cell = document.getElementById(`cell-${pos.row}-${pos.col}`);
+                if (cell && !cell.classList.contains('current')) {
+                    cell.classList.add('path');
+                }
+            });
+        }
+
+        function renderTree() {
+            const treeView = document.getElementById('treeView');
+            treeView.innerHTML = '';
+            
+            const currentStepObj = executionSteps[currentStep];
+            const relevantSteps = executionSteps.slice(0, currentStep + 1);
+            const allNodes = new Set();
+            
+            relevantSteps.forEach(step => {
+                if (step.node) allNodes.add(step.node);
+            });
+            
+            Array.from(allNodes).forEach(node => {
+                const nodeDiv = document.createElement('div');
+                nodeDiv.className = 'tree-node';
+                nodeDiv.style.marginLeft = (node.level * 15) + 'px';
+                
+                if (currentStepObj && currentStepObj.node === node) {
+                    nodeDiv.classList.add('active');
+                } else if (node.status === 'completed') {
+                    nodeDiv.classList.add('completed');
+                } else if (node.status === 'invalid') {
+                    nodeDiv.classList.add('invalid');
+                }
+                
+                nodeDiv.innerHTML = `
+                    <strong>(${node.row},${node.col})</strong> "${node.path}"
+                    <br><small>Level ${node.level}</small>
+                `;
+                
+                treeView.appendChild(nodeDiv);
+            });
+        }
+
+        function renderStack() {
+            const stackView = document.getElementById('stackView');
+            stackView.innerHTML = '';
+            
+            const callStack = getCallStack();
+            
+            callStack.forEach((call, index) => {
+                const frameDiv = document.createElement('div');
+                frameDiv.className = 'stack-frame';
+                if (index === callStack.length - 1) {
+                    frameDiv.classList.add('current');
+                }
+                
+                frameDiv.innerHTML = `
+                    <strong>printMaze(${call.row}, ${call.col})</strong>
+                    <br>Path: "${call.path}"
+                    <br><small>Level ${index + 1}</small>
+                `;
+                
+                stackView.appendChild(frameDiv);
+            });
+        }
+
+        function getCallStack() {
+            const stack = [];
+            const steps = executionSteps.slice(0, currentStep + 1);
+            
+            steps.forEach(step => {
+                if (step.type === 'enter') {
+                    stack.push({ row: step.row, col: step.col, path: step.path });
+                } else if (step.type === 'exit') {
+                    stack.pop();
+                }
+            });
+            
+            return stack;
+        }
+
+        function renderResults() {
+            const resultsView = document.getElementById('resultsView');
+            const results = getValidPaths();
+            
+            if (results.length === 0) {
+                resultsView.innerHTML = 'No paths found yet...';
+                return;
+            }
+            
+            resultsView.innerHTML = '';
+            results.forEach(path => {
+                const pathDiv = document.createElement('div');
+                pathDiv.className = 'result-path';
+                pathDiv.textContent = path || '(empty path)';
+                resultsView.appendChild(pathDiv);
+            });
+        }
+
+        function getValidPaths() {
+            const paths = [];
+            const steps = executionSteps.slice(0, currentStep + 1);
+            
+            steps.forEach(step => {
+                if (step.type === 'success') {
+                    paths.push(step.path);
+                }
+            });
+            
+            return paths;
+        }
+
+        function updateCurrentState() {
+            const stateDiv = document.getElementById('currentState');
+            const currentStepObj = executionSteps[currentStep];
+            
+            if (!currentStepObj) {
+                stateDiv.textContent = 'Ready to start';
+                return;
+            }
+            
+            stateDiv.textContent = `Step ${currentStep + 1}/${executionSteps.length}: ${currentStepObj.action}`;
+        }
+
+        function updateVisualization() {
+            const currentStepObj = executionSteps[currentStep];
+            updateMazeGrid(currentStepObj);
+            renderTree();
+            renderStack();
+            renderResults();
+            updateCurrentState();
+        }
+
+        function startVisualization() {
+            gridRows = parseInt(document.getElementById('gridRows').value);
+            gridCols = parseInt(document.getElementById('gridCols').value);
+            
+            // Reset everything
+            executionSteps = [];
+            currentStep = 0;
+            nodeCounter = 0;
+            
+            // Create new grid
+            createMazeGrid();
+            
+            // Generate execution steps
+            printMazeWithJump(0, 0, gridRows - 1, gridCols - 1, '');
+            
+            // Reset animation
+            resetAnimation();
+            updateControls();
+        }
+
+        function playAnimation() {
+            if (currentStep >= executionSteps.length - 1) return;
+            
+            isPlaying = true;
+            updateControls();
+            
+            animationInterval = setInterval(() => {
+                if (currentStep < executionSteps.length - 1) {
+                    currentStep++;
+                    updateVisualization();
+                } else {
+                    pauseAnimation();
+                }
+            }, animationSpeed);
+        }
+
+        function pauseAnimation() {
+            isPlaying = false;
+            clearInterval(animationInterval);
+            updateControls();
+        }
+
+        function stepAnimation() {
+            if (currentStep < executionSteps.length - 1) {
+                currentStep++;
+                updateVisualization();
+                updateControls();
+            }
+        }
+
+        function resetAnimation() {
+            pauseAnimation();
+            currentStep = 0;
+            updateVisualization();
+            updateControls();
+        }
+
+        function updateControls() {
+            const atEnd = currentStep >= executionSteps.length - 1;
+            document.getElementById('playBtn').disabled = isPlaying || atEnd;
+            document.getElementById('pauseBtn').disabled = !isPlaying;
+            document.getElementById('stepBtn').disabled = isPlaying || atEnd;
+        }
+
+        // Initialize
+        window.onload = function() {
+            createMazeGrid();
+            startVisualization();
+        };
+    </script>
+</body>
+</html>
