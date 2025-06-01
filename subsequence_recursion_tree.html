@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Print Subsequences Recursion Tree</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .controls {
+            text-align: center;
+            margin-bottom: 30px;
+            background: rgba(255,255,255,0.15);
+            padding: 25px;
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .input-group {
+            margin: 15px 0;
+        }
+        
+        input {
+            padding: 12px 18px;
+            border: none;
+            border-radius: 10px;
+            margin: 0 10px;
+            font-size: 16px;
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            font-family: 'Courier New', monospace;
+        }
+        
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(45deg, #ff9a9e, #fecfef);
+            color: #333;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 0 8px;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 154, 158, 0.4);
+        }
+        
+        button:disabled {
+            background: #666;
+            color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .tree-container {
+            margin-top: 30px;
+            min-height: 500px;
+            max-height: 800px;
+            overflow: auto;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+        
+        .tree-svg {
+            display: block;
+            min-width: 1200px;
+            min-height: 700px;
+        }
+        
+        .node {
+            cursor: pointer;
+        }
+        
+        .node-circle {
+            fill: #4facfe;
+            stroke: #00f2fe;
+            stroke-width: 2;
+            transition: all 0.4s;
+            filter: drop-shadow(0 0 5px rgba(79, 172, 254, 0.3));
+        }
+        
+        .node-circle.active {
+            fill: #ff6b6b;
+            stroke: #ee5a24;
+            stroke-width: 4;
+            filter: drop-shadow(0 0 15px #ff6b6b);
+            transform-origin: center;
+            animation: pulse 0.5s ease-in-out;
+        }
+        
+        .node-circle.completed {
+            fill: #26de81;
+            stroke: #20bf6b;
+            stroke-width: 3;
+            filter: drop-shadow(0 0 10px #26de81);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .node-text {
+            fill: white;
+            font-size: 11px;
+            text-anchor: middle;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        .edge {
+            stroke: #a8edea;
+            stroke-width: 2;
+            opacity: 0.7;
+            transition: all 0.4s;
+        }
+        
+        .edge.active {
+            stroke: #ff6b6b;
+            stroke-width: 4;
+            opacity: 1;
+            filter: drop-shadow(0 0 8px #ff6b6b);
+        }
+        
+        .edge.include {
+            stroke: #26de81;
+        }
+        
+        .edge.exclude {
+            stroke: #ffeaa7;
+        }
+        
+        .edge-label {
+            fill: white;
+            font-size: 10px;
+            text-anchor: middle;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+        }
+        
+        .info-panel {
+            background: rgba(0,0,0,0.8);
+            padding: 25px;
+            border-radius: 15px;
+            backdrop-filter: blur(15px);
+            font-size: 14px;
+            margin-top: 25px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.1);
+            padding: 18px;
+            border-radius: 10px;
+        }
+        
+        .info-item {
+            flex: 1;
+            margin: 0 15px;
+        }
+        
+        .stack-info {
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(116, 185, 255, 0.2), rgba(79, 172, 254, 0.2));
+            border-radius: 10px;
+            border: 1px solid rgba(116, 185, 255, 0.3);
+        }
+        
+        .stack-toggle {
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding: 5px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        
+        .stack-toggle:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .stack-content {
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+        
+        .stack-content.collapsed {
+            display: none;
+        }
+        
+        .results {
+            margin-top: 25px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .result-item {
+            display: inline-block;
+            margin: 8px;
+            padding: 8px 15px;
+            background: linear-gradient(45deg, #26de81, #20bf6b);
+            color: white;
+            border-radius: 8px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(38, 222, 129, 0.3);
+            transition: transform 0.2s;
+        }
+        
+        .result-item:hover {
+            transform: translateY(-2px);
+        }
+        
+        .algorithm-info {
+            margin: 20px 0;
+            font-size: 13px;
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #26de81;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="controls">
+            <h1>🌳 Print Subsequences Recursion Tree</h1>
+            <div class="algorithm-info">
+                <strong>Algorithm:</strong> For each character, we make 2 choices: <span style="color: #26de81;">Include it</span> or <span style="color: #ffeaa7;">Exclude it</span>
+                <br><strong>Time Complexity:</strong> O(2^n) | <strong>Space Complexity:</strong> O(n)
+            </div>
+            <div class="input-group">
+                <label>Input String: </label>
+                <input type="text" id="inputStr" value="abc" placeholder="Enter string (e.g., abc)">
+                <button onclick="startAnimation()">🚀 Animate</button>
+                <button onclick="resetAnimation()">🔄 Reset</button>
+                <button onclick="togglePause()" id="pauseBtn">⏸️ Pause</button>
+            </div>
+            <div class="input-group">
+                <label>Animation Speed: </label>
+                <input type="range" id="speedSlider" min="200" max="2000" value="1000" style="width: 250px;">
+                <span id="speedValue">1000ms</span>
+            </div>
+        </div>
+        
+        <div class="tree-container">
+            <svg id="treeSvg" class="tree-svg" width="1200" height="700"></svg>
+        </div>
+        
+        <div class="info-panel">
+            <div class="info-row">
+                <div class="info-item">
+                    <div id="currentCall"><strong>Current Call:</strong> Ready to start</div>
+                </div>
+                <div class="info-item" style="text-align: center;">
+                    <div><strong>Progress:</strong> <span id="progress">0/0</span></div>
+                </div>
+                <div class="info-item" style="text-align: right;">
+                    <div id="decision"><strong>Decision:</strong> -</div>
+                </div>
+            </div>
+            
+            <div class="stack-info">
+                <div class="stack-toggle" onclick="toggleStack()">
+                    <span>📚 Call Stack (Include/Exclude Path)</span>
+                    <span id="stackToggleIcon">▼</span>
+                </div>
+                <div class="stack-content" id="stackContent">
+                    <div id="callStack">Empty</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="results" id="results" style="display: none;">
+            <h3>📝 All Subsequences Generated:</h3>
+            <div id="subsequencesList"></div>
+            <div style="margin-top: 15px; font-size: 14px;">
+                <strong>Total Count:</strong> <span id="totalCount">0</span> subsequences
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let animationData = [];
+        let currentStep = 0;
+        let isPlaying = false;
+        let animationTimeout;
+        let allSubsequences = [];
+        let nodeIdCounter = 0;
+        
+        const svg = document.getElementById('treeSvg');
+        const speedSlider = document.getElementById('speedSlider');
+        const speedValue = document.getElementById('speedValue');
+        
+        speedSlider.addEventListener('input', (e) => {
+            speedValue.textContent = e.target.value + 'ms';
+        });
+        
+        function generateAnimationData(question, answer = '', level = 0, path = []) {
+            const nodeId = nodeIdCounter++;
+            
+            const step = {
+                nodeId,
+                question,
+                answer,
+                level,
+                path: [...path],
+                type: 'call',
+                children: []
+            };
+            
+            animationData.push(step);
+            
+            // Base case
+            if (question.length === 0) {
+                allSubsequences.push(answer);
+                animationData.push({
+                    nodeId,
+                    question,
+                    answer,
+                    level,
+                    type: 'return',
+                    result: `"${answer}"`
+                });
+                return nodeId;
+            }
+            
+            const firstChar = question[0];
+            const remaining = question.substring(1);
+            
+            // Include the character
+            const includeNodeId = generateAnimationData(remaining, answer + firstChar, level + 1, [...path, 'include']);
+            step.children.push({ nodeId: includeNodeId, decision: 'include', char: firstChar });
+            
+            // Exclude the character  
+            const excludeNodeId = generateAnimationData(remaining, answer, level + 1, [...path, 'exclude']);
+            step.children.push({ nodeId: excludeNodeId, decision: 'exclude', char: firstChar });
+            
+            animationData.push({
+                nodeId,
+                question,
+                answer,
+                level,
+                type: 'return',
+                result: 'completed'
+            });
+            
+            return nodeId;
+        }
+        
+        function buildTreeLayout() {
+            const nodes = new Map();
+            const callNodes = animationData.filter(d => d.type === 'call');
+            const maxLevel = Math.max(...callNodes.map(d => d.level));
+            const levelCounts = new Array(maxLevel + 1).fill(0);
+            
+            // Count nodes per level
+            callNodes.forEach(d => {
+                levelCounts[d.level]++;
+            });
+            
+            const levelCounters = new Array(maxLevel + 1).fill(0);
+            const maxWidth = Math.max(...levelCounts);
+            const nodeSpacing = Math.max(150, 1000 / Math.max(maxWidth, 1));
+            const totalWidth = Math.max(1200, maxWidth * nodeSpacing + 300);
+            const totalHeight = Math.max(700, (maxLevel + 1) * 120 + 200);
+            
+            // Update SVG dimensions
+            svg.setAttribute('width', totalWidth);
+            svg.setAttribute('height', totalHeight);
+            
+            callNodes.forEach(d => {
+                const nodesInLevel = levelCounts[d.level];
+                const startX = (totalWidth - (nodesInLevel - 1) * nodeSpacing) / 2;
+                const x = startX + levelCounters[d.level] * nodeSpacing;
+                const y = 80 + d.level * 120;
+                
+                nodes.set(d.nodeId, {
+                    ...d,
+                    x,
+                    y,
+                    id: d.nodeId
+                });
+                
+                levelCounters[d.level]++;
+            });
+            
+            return nodes;
+        }
+        
+        function drawTree() {
+            svg.innerHTML = '';
+            const nodes = buildTreeLayout();
+            
+            // Draw edges with labels
+            nodes.forEach(node => {
+                if (node.children) {
+                    node.children.forEach(child => {
+                        const childNode = nodes.get(child.nodeId);
+                        if (childNode) {
+                            // Draw edge
+                            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                            line.setAttribute('x1', node.x);
+                            line.setAttribute('y1', node.y);
+                            line.setAttribute('x2', childNode.x);
+                            line.setAttribute('y2', childNode.y);
+                            line.setAttribute('class', `edge ${child.decision}`);
+                            line.setAttribute('id', `edge-${node.id}-${child.nodeId}`);
+                            svg.appendChild(line);
+                            
+                            // Draw edge label
+                            const midX = (node.x + childNode.x) / 2;
+                            const midY = (node.y + childNode.y) / 2;
+                            const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                            label.setAttribute('x', midX);
+                            label.setAttribute('y', midY - 5);
+                            label.setAttribute('class', 'edge-label');
+                            label.textContent = child.decision === 'include' ? `+${child.char}` : `-${child.char}`;
+                            svg.appendChild(label);
+                        }
+                    });
+                }
+            });
+            
+            // Draw nodes
+            nodes.forEach(node => {
+                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                g.setAttribute('class', 'node');
+                g.setAttribute('id', `node-${node.id}`);
+                g.setAttribute('transform', `translate(${node.x}, ${node.y})`);
+                
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('r', 30);
+                circle.setAttribute('class', 'node-circle');
+                g.appendChild(circle);
+                
+                const text1 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text1.setAttribute('class', 'node-text');
+                text1.setAttribute('y', '-8');
+                text1.textContent = `"${node.question}"`;
+                g.appendChild(text1);
+                
+                const text2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text2.setAttribute('class', 'node-text');
+                text2.setAttribute('y', '8');
+                text2.textContent = `"${node.answer}"`;
+                g.appendChild(text2);
+                
+                svg.appendChild(g);
+            });
+            
+            return nodes;
+        }
+        
+        function updateDisplay(step) {
+            document.getElementById('currentCall').innerHTML = 
+                `<strong>Current Call:</strong> printSS("${step.question}", "${step.answer}")`;
+            
+            if (step.type === 'call' && step.question.length > 0) {
+                const char = step.question[0];
+                document.getElementById('decision').innerHTML = 
+                    `<strong>Character:</strong> '${char}' → Include or Exclude?`;
+            } else if (step.type === 'return') {
+                document.getElementById('decision').innerHTML = 
+                    step.result === 'completed' ? '<strong>Decision:</strong> Both paths explored' : 
+                    `<strong>Output:</strong> ${step.result}`;
+            }
+            
+            const stack = animationData.slice(0, currentStep + 1)
+                .filter(d => d.type === 'call')
+                .map((d, i) => `${'  '.repeat(i)}└─ printSS("${d.question}", "${d.answer}")`)
+                .join('<br>');
+            
+            document.getElementById('callStack').innerHTML = stack || 'Empty';
+            document.getElementById('progress').textContent = `${currentStep + 1}/${animationData.length}`;
+        }
+        
+        function animateStep() {
+            if (currentStep >= animationData.length) {
+                showResults();
+                return;
+            }
+            
+            const step = animationData[currentStep];
+            const nodeElement = document.getElementById(`node-${step.nodeId}`);
+            
+            if (nodeElement) {
+                const circle = nodeElement.querySelector('.node-circle');
+                
+                if (step.type === 'call') {
+                    circle.classList.add('active');
+                    
+                    // Highlight incoming edge
+                    if (currentStep > 0) {
+                        const edges = document.querySelectorAll(`[id$="-${step.nodeId}"]`);
+                        edges.forEach(edge => edge.classList.add('active'));
+                    }
+                } else {
+                    circle.classList.remove('active');
+                    circle.classList.add('completed');
+                }
+            }
+            
+            updateDisplay(step);
+            currentStep++;
+            
+            if (isPlaying) {
+                animationTimeout = setTimeout(animateStep, parseInt(speedSlider.value));
+            }
+        }
+        
+        function startAnimation() {
+            const input = document.getElementById('inputStr').value.trim();
+            if (!input) {
+                alert('Please enter a string');
+                return;
+            }
+            
+            resetAnimation();
+            animationData = [];
+            allSubsequences = [];
+            currentStep = 0;
+            nodeIdCounter = 0;
+            
+            generateAnimationData(input);
+            drawTree();
+            
+            isPlaying = true;
+            document.getElementById('pauseBtn').textContent = '⏸️ Pause';
+            animateStep();
+        }
+        
+        function resetAnimation() {
+            isPlaying = false;
+            currentStep = 0;
+            clearTimeout(animationTimeout);
+            
+            document.querySelectorAll('.node-circle').forEach(circle => {
+                circle.classList.remove('active', 'completed');
+            });
+            document.querySelectorAll('.edge').forEach(edge => {
+                edge.classList.remove('active');
+            });
+            
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('pauseBtn').textContent = '⏸️ Pause';
+        }
+        
+        function togglePause() {
+            isPlaying = !isPlaying;
+            const btn = document.getElementById('pauseBtn');
+            
+            if (isPlaying) {
+                btn.textContent = '⏸️ Pause';
+                animateStep();
+            } else {
+                btn.textContent = '▶️ Resume';
+                clearTimeout(animationTimeout);
+            }
+        }
+        
+        function toggleStack() {
+            const content = document.getElementById('stackContent');
+            const icon = document.getElementById('stackToggleIcon');
+            
+            content.classList.toggle('collapsed');
+            icon.textContent = content.classList.contains('collapsed') ? '▶' : '▼';
+        }
+        
+        function showResults() {
+            isPlaying = false;
+            const resultsDiv = document.getElementById('results');
+            const subsequencesDiv = document.getElementById('subsequencesList');
+            
+            subsequencesDiv.innerHTML = allSubsequences
+                .map(sub => `<span class="result-item">${sub === '' ? '""' : sub}</span>`)
+                .join('');
+            
+            document.getElementById('totalCount').textContent = allSubsequences.length;
+            resultsDiv.style.display = 'block';
+            document.getElementById('pauseBtn').textContent = '⏸️ Pause';
+        }
+        
+        // Initialize with default input
+        window.addEventListener('load', () => {
+            const input = document.getElementById('inputStr').value;
+            animationData = [];
+            allSubsequences = [];
+            nodeIdCounter = 0;
+            generateAnimationData(input);
+            drawTree();
+        });
+    </script>
+</body>
+</html>
