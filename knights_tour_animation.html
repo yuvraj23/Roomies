@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knight's Tour Animation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .start-btn {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .pause-btn {
+            background: linear-gradient(45deg, #ff9800, #f57f17);
+            color: white;
+        }
+
+        .reset-btn {
+            background: linear-gradient(45deg, #f44336, #d32f2f);
+            color: white;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .board-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .chessboard {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            gap: 2px;
+            background: #333;
+            padding: 10px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .cell {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cell.light {
+            background: linear-gradient(135deg, #f0f0f0, #e0e0e0);
+            color: #333;
+        }
+
+        .cell.dark {
+            background: linear-gradient(135deg, #8B4513, #654321);
+            color: white;
+        }
+
+        .cell.knight {
+            background: linear-gradient(135deg, #FFD700, #FFA500) !important;
+            color: #333;
+            animation: pulse 1s infinite;
+            font-size: 24px;
+        }
+
+        .cell.visited {
+            background: linear-gradient(135deg, #87CEEB, #4682B4) !important;
+            color: white;
+        }
+
+        .cell.current-path {
+            background: linear-gradient(135deg, #98FB98, #32CD32) !important;
+            color: #333;
+            animation: glow 0.5s ease-in-out;
+        }
+
+        .cell.backtrack {
+            background: linear-gradient(135deg, #FFB6C1, #FF69B4) !important;
+            color: #333;
+            animation: backtrack-flash 0.5s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px rgba(50, 205, 50, 0.5); }
+            100% { box-shadow: 0 0 20px rgba(50, 205, 50, 0.8); }
+        }
+
+        @keyframes backtrack-flash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .knight-piece {
+            font-size: 24px;
+            animation: knight-move 0.5s ease-in-out;
+        }
+
+        .cell-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+
+        .step-number {
+            font-size: 14px;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .knight-with-step {
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        @keyframes knight-move {
+            0% { transform: scale(0.8) rotate(-10deg); }
+            50% { transform: scale(1.2) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        .info-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .info-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-card h3 {
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .info-card p {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .speed-control label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .speed-control input {
+            width: 200px;
+        }
+
+        .algorithm-explanation {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            border-left: 5px solid #667eea;
+        }
+
+        .algorithm-explanation h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .algorithm-explanation p {
+            color: #666;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐴 Knight's Tour Visualization</h1>
+        
+        <div class="controls">
+            <button class="start-btn" onclick="startAnimation()">Start Tour</button>
+            <button class="pause-btn" onclick="pauseAnimation()">Pause</button>
+            <button class="reset-btn" onclick="resetBoard()">Reset</button>
+        </div>
+
+        <div class="speed-control">
+            <label for="speed">Animation Speed:</label>
+            <input type="range" id="speed" min="50" max="1000" value="500" onchange="updateSpeed()">
+            <span id="speed-value">500ms</span>
+        </div>
+
+        <div class="board-container">
+            <div class="chessboard" id="chessboard"></div>
+        </div>
+
+        <div class="info-panel">
+            <div class="info-card">
+                <h3>Current Move</h3>
+                <p id="move-count">0</p>
+            </div>
+            <div class="info-card">
+                <h3>Solutions Found</h3>
+                <p id="solutions-count">0</p>
+            </div>
+            <div class="info-card">
+                <h3>Backtracks</h3>
+                <p id="backtrack-count">0</p>
+            </div>
+            <div class="info-card">
+                <h3>Current Position</h3>
+                <p id="current-pos">(0, 0)</p>
+            </div>
+        </div>
+
+        <div class="algorithm-explanation">
+            <h3>How Knight's Tour Works:</h3>
+            <p>
+                The Knight's Tour is a classic backtracking algorithm that attempts to visit every square on a chessboard exactly once using a knight's L-shaped moves. 
+                The algorithm explores all possible paths recursively, marking squares as visited and backtracking when it reaches a dead end. 
+                <strong>Green</strong> shows the current path being explored, <strong>Blue</strong> shows completed squares, 
+                <strong>Pink</strong> indicates backtracking, and <strong>Gold</strong> shows the knight's current position.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        let board = [];
+        let visited = [];
+        let animationRunning = false;
+        let animationSpeed = 500;
+        let moveCount = 0;
+        let solutionsFound = 0;
+        let backtrackCount = 0;
+        let currentRow = 0;
+        let currentCol = 0;
+        let animationTimeout;
+
+        // Knight's possible moves (row, col offsets)
+        const knightMoves = [
+            [2, 1], [1, 2], [-1, 2], [-2, 1],
+            [-2, -1], [-1, -2], [1, -2], [2, -1]
+        ];
+
+        function initializeBoard() {
+            const chessboard = document.getElementById('chessboard');
+            chessboard.innerHTML = '';
+            
+            board = Array(5).fill().map(() => Array(5).fill(0));
+            visited = Array(5).fill().map(() => Array(5).fill(false));
+            
+            for (let i = 0; i < 5; i++) {
+                for (let j = 0; j < 5; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = `cell ${(i + j) % 2 === 0 ? 'light' : 'dark'}`;
+                    cell.id = `cell-${i}-${j}`;
+                    cell.textContent = '';
+                    chessboard.appendChild(cell);
+                }
+            }
+            
+            resetCounters();
+        }
+
+        function resetCounters() {
+            moveCount = 0;
+            solutionsFound = 0;
+            backtrackCount = 0;
+            currentRow = 0;
+            currentCol = 0;
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            document.getElementById('move-count').textContent = moveCount;
+            document.getElementById('solutions-count').textContent = solutionsFound;
+            document.getElementById('backtrack-count').textContent = backtrackCount;
+            document.getElementById('current-pos').textContent = `(${currentRow}, ${currentCol})`;
+        }
+
+        function updateSpeed() {
+            const speedSlider = document.getElementById('speed');
+            animationSpeed = parseInt(speedSlider.value);
+            document.getElementById('speed-value').textContent = `${animationSpeed}ms`;
+        }
+
+        function updateCell(row, col, moveNum, className = '') {
+            const cell = document.getElementById(`cell-${row}-${col}`);
+            if (cell) {
+                // Remove previous special classes
+                cell.classList.remove('knight', 'visited', 'current-path', 'backtrack');
+                
+                if (className) {
+                    cell.classList.add(className);
+                }
+                
+                if (className === 'knight') {
+                    cell.innerHTML = `
+                        <div class="cell-content">
+                            <span class="knight-with-step">♞</span>
+                            <span class="step-number">${moveNum}</span>
+                        </div>
+                    `;
+                } else if (moveNum > 0) {
+                    cell.innerHTML = `<span class="step-number">${moveNum}</span>`;
+                } else {
+                    cell.textContent = '';
+                }
+            }
+        }
+
+        function isValidMove(row, col) {
+            return row >= 0 && row < 5 && col >= 0 && col < 5 && !visited[row][col];
+        }
+
+        async function solveKnightsTour(row, col, moveNum) {
+            if (!animationRunning) return false;
+
+            // Boundary and visited check
+            if (!isValidMove(row, col)) {
+                return false;
+            }
+
+            // Update current position
+            currentRow = row;
+            currentCol = col;
+            
+            // Mark as visited and update display
+            visited[row][col] = true;
+            board[row][col] = moveNum;
+            moveCount = moveNum;
+            
+            updateCell(row, col, moveNum, 'knight');
+            updateDisplay();
+            
+            // Wait for animation
+            await new Promise(resolve => {
+                animationTimeout = setTimeout(resolve, animationSpeed);
+            });
+
+            // Base case: tour complete
+            if (moveNum === 25) {
+                solutionsFound++;
+                updateDisplay();
+                updateCell(row, col, moveNum, 'visited');
+                
+                // Show completion for a moment
+                await new Promise(resolve => {
+                    animationTimeout = setTimeout(resolve, animationSpeed * 2);
+                });
+                
+                // Backtrack to find more solutions
+                visited[row][col] = false;
+                board[row][col] = 0;
+                updateCell(row, col, 0, 'backtrack');
+                backtrackCount++;
+                updateDisplay();
+                
+                await new Promise(resolve => {
+                    animationTimeout = setTimeout(resolve, animationSpeed);
+                });
+                
+                return false;
+            }
+
+            // Try all 8 knight moves
+            let foundSolution = false;
+            for (let i = 0; i < knightMoves.length && animationRunning; i++) {
+                const newRow = row + knightMoves[i][0];
+                const newCol = col + knightMoves[i][1];
+                
+                if (await solveKnightsTour(newRow, newCol, moveNum + 1)) {
+                    foundSolution = true;
+                }
+            }
+
+            // Backtrack
+            if (animationRunning) {
+                visited[row][col] = false;
+                board[row][col] = 0;
+                updateCell(row, col, 0, 'backtrack');
+                backtrackCount++;
+                updateDisplay();
+                
+                await new Promise(resolve => {
+                    animationTimeout = setTimeout(resolve, animationSpeed / 2);
+                });
+                
+                // Clear the backtrack indicator
+                updateCell(row, col, 0);
+            }
+
+            return foundSolution;
+        }
+
+        async function startAnimation() {
+            if (animationRunning) return;
+            
+            animationRunning = true;
+            document.querySelector('.start-btn').disabled = true;
+            document.querySelector('.pause-btn').disabled = false;
+            
+            try {
+                await solveKnightsTour(0, 0, 1);
+            } catch (error) {
+                console.log('Animation stopped');
+            }
+            
+            animationRunning = false;
+            document.querySelector('.start-btn').disabled = false;
+            document.querySelector('.pause-btn').disabled = true;
+        }
+
+        function pauseAnimation() {
+            animationRunning = false;
+            if (animationTimeout) {
+                clearTimeout(animationTimeout);
+            }
+            document.querySelector('.start-btn').disabled = false;
+            document.querySelector('.pause-btn').disabled = true;
+        }
+
+        function resetBoard() {
+            pauseAnimation();
+            initializeBoard();
+        }
+
+        // Initialize the board when page loads
+        window.addEventListener('load', initializeBoard);
+    </script>
+</body>
+</html>
