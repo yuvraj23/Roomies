@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flood Fill Pathfinding Animation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 900px;
+        }
+        
+        h1 {
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .grid-container {
+            display: inline-block;
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+        }
+        
+        .grid {
+            display: grid;
+            gap: 3px;
+            margin: 20px 0;
+            justify-content: center;
+        }
+        
+        .cell {
+            width: 50px;
+            height: 50px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cell::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .cell.animate::before {
+            left: 100%;
+        }
+        
+        .wall {
+            background: #2c3e50;
+            color: #7f8c8d;
+        }
+        
+        .path {
+            background: #ecf0f1;
+            color: #2c3e50;
+        }
+        
+        .start {
+            background: linear-gradient(45deg, #00ff87, #60efff);
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 0 20px rgba(0, 255, 135, 0.5);
+        }
+        
+        .end {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+        }
+        
+        .current {
+            background: linear-gradient(45deg, #ffa726, #ff7043);
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 0 25px rgba(255, 167, 38, 0.6);
+            z-index: 10;
+        }
+        
+        .visited {
+            background: linear-gradient(45deg, #9c27b0, #673ab7);
+            color: white;
+        }
+        
+        .exploring {
+            background: linear-gradient(45deg, #2196f3, #03a9f4);
+            color: white;
+            animation: pulse 0.8s ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .controls {
+            margin: 20px 0;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            margin: 0 10px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .info-panel {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .step-info {
+            font-size: 18px;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            border-left: 4px solid #4ecdc4;
+        }
+        
+        .paths-found {
+            background: rgba(76, 175, 80, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .path-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Flood Fill Pathfinding</h1>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color start"></div>
+                <span>Start</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color end"></div>
+                <span>End</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color current"></div>
+                <span>Current</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color exploring"></div>
+                <span>Exploring</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color visited"></div>
+                <span>Visited</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color wall"></div>
+                <span>Wall</span>
+            </div>
+        </div>
+        
+        <div class="grid-container">
+            <div id="grid" class="grid"></div>
+        </div>
+        
+        <div class="controls">
+            <button onclick="startAnimation()">🚀 Start Animation</button>
+            <button onclick="resetGrid()">🔄 Reset</button>
+            <button onclick="generateNewGrid()">🎲 New Grid</button>
+        </div>
+        
+        <div class="info-panel">
+            <div id="step-info" class="step-info">
+                Click "Start Animation" to see the flood fill algorithm in action!
+            </div>
+            
+            <div id="paths-found" class="paths-found" style="display: none;">
+                <h3>🎯 Paths Found:</h3>
+                <div id="path-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let grid = [
+            [1, 1, 1, 0, 1],
+            [1, 0, 1, 1, 1],
+            [1, 1, 0, 1, 1],
+            [0, 1, 1, 0, 1],
+            [1, 1, 1, 1, 1]
+        ];
+        
+        let visited = [];
+        let animationSteps = [];
+        let currentStep = 0;
+        let isAnimating = false;
+        let foundPaths = [];
+        
+        function initializeGrid() {
+            const gridElement = document.getElementById('grid');
+            gridElement.style.gridTemplateColumns = `repeat(${grid[0].length}, 1fr)`;
+            gridElement.innerHTML = '';
+            
+            for (let i = 0; i < grid.length; i++) {
+                for (let j = 0; j < grid[0].length; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.id = `cell-${i}-${j}`;
+                    
+                    if (grid[i][j] === 0) {
+                        cell.classList.add('wall');
+                        cell.textContent = '⬛';
+                    } else {
+                        cell.classList.add('path');
+                        if (i === 0 && j === 0) {
+                            cell.classList.add('start');
+                            cell.textContent = '🚀';
+                        } else if (i === grid.length - 1 && j === grid[0].length - 1) {
+                            cell.classList.add('end');
+                            cell.textContent = '🎯';
+                        } else {
+                            cell.textContent = `${i},${j}`;
+                        }
+                    }
+                    
+                    gridElement.appendChild(cell);
+                }
+            }
+        }
+        
+        function resetVisited() {
+            visited = [];
+            for (let i = 0; i < grid.length; i++) {
+                visited[i] = [];
+                for (let j = 0; j < grid[0].length; j++) {
+                    visited[i][j] = false;
+                }
+            }
+        }
+        
+        function generateAnimationSteps() {
+            animationSteps = [];
+            foundPaths = [];
+            resetVisited();
+            
+            function floodFill(sr, sc, path) {
+                // Add exploration step
+                animationSteps.push({
+                    type: 'exploring',
+                    row: sr,
+                    col: sc,
+                    message: `🔍 Exploring cell (${sr}, ${sc})`,
+                    path: path
+                });
+                
+                // Check bounds and validity
+                if (sr < 0 || sc < 0 || sr >= grid.length || sc >= grid[0].length || 
+                    grid[sr][sc] === 0 || visited[sr][sc]) {
+                    animationSteps.push({
+                        type: 'invalid',
+                        row: sr,
+                        col: sc,
+                        message: `❌ Invalid cell (${sr}, ${sc}) - ${sr < 0 || sc < 0 || sr >= grid.length || sc >= grid[0].length ? 'Out of bounds' : grid[sr][sc] === 0 ? 'Wall' : 'Already visited'}`,
+                        path: path
+                    });
+                    return;
+                }
+                
+                // Check if reached destination
+                if (sr === grid.length - 1 && sc === grid[0].length - 1) {
+                    const completePath = path + ` => (${sr},${sc})`;
+                    foundPaths.push(completePath);
+                    animationSteps.push({
+                        type: 'found',
+                        row: sr,
+                        col: sc,
+                        message: `🎉 Path found! ${completePath}`,
+                        path: completePath
+                    });
+                    return;
+                }
+                
+                // Mark as visited
+                visited[sr][sc] = true;
+                animationSteps.push({
+                    type: 'visit',
+                    row: sr,
+                    col: sc,
+                    message: `✅ Marked (${sr}, ${sc}) as visited`,
+                    path: path
+                });
+                
+                // Explore all directions
+                const directions = [
+                    {dr: -1, dc: 0, dir: 'U'},
+                    {dr: 0, dc: 1, dir: 'R'},
+                    {dr: 1, dc: 0, dir: 'D'},
+                    {dr: 0, dc: -1, dir: 'L'}
+                ];
+                
+                for (let {dr, dc, dir} of directions) {
+                    const newPath = path + `${dir}(${sr},${sc}) → `;
+                    floodFill(sr + dr, sc + dc, newPath);
+                }
+                
+                // Backtrack
+                visited[sr][sc] = false;
+                animationSteps.push({
+                    type: 'backtrack',
+                    row: sr,
+                    col: sc,
+                    message: `🔙 Backtracking from (${sr}, ${sc})`,
+                    path: path
+                });
+            }
+            
+            floodFill(0, 0, "");
+        }
+        
+        function updateStepInfo(step) {
+            const stepInfo = document.getElementById('step-info');
+            stepInfo.textContent = step.message;
+            
+            if (foundPaths.length > 0) {
+                const pathsDiv = document.getElementById('paths-found');
+                const pathList = document.getElementById('path-list');
+                pathsDiv.style.display = 'block';
+                pathList.innerHTML = foundPaths.map(path => 
+                    `<div class="path-item">${path}</div>`
+                ).join('');
+            }
+        }
+        
+        function animateStep(stepIndex) {
+            if (stepIndex >= animationSteps.length) {
+                isAnimating = false;
+                document.getElementById('step-info').textContent = 
+                    `🏁 Animation complete! Found ${foundPaths.length} path(s) to the destination.`;
+                return;
+            }
+            
+            const step = animationSteps[stepIndex];
+            const cell = document.getElementById(`cell-${step.row}-${step.col}`);
+            
+            if (!cell) {
+                setTimeout(() => animateStep(stepIndex + 1), 100);
+                return;
+            }
+            
+            // Clear previous state classes
+            cell.classList.remove('current', 'exploring', 'visited');
+            
+            switch (step.type) {
+                case 'exploring':
+                    cell.classList.add('exploring');
+                    cell.classList.add('animate');
+                    setTimeout(() => cell.classList.remove('animate'), 500);
+                    break;
+                case 'visit':
+                    cell.classList.add('current');
+                    break;
+                case 'backtrack':
+                    if (!cell.classList.contains('start') && !cell.classList.contains('end')) {
+                        cell.classList.add('visited');
+                    }
+                    break;
+                case 'found':
+                    cell.classList.add('current');
+                    break;
+            }
+            
+            updateStepInfo(step);
+            
+            setTimeout(() => animateStep(stepIndex + 1), 800);
+        }
+        
+        function startAnimation() {
+            if (isAnimating) return;
+            
+            isAnimating = true;
+            resetGrid();
+            generateAnimationSteps();
+            currentStep = 0;
+            
+            document.getElementById('paths-found').style.display = 'none';
+            animateStep(0);
+        }
+        
+        function resetGrid() {
+            const cells = document.querySelectorAll('.cell');
+            cells.forEach(cell => {
+                cell.classList.remove('current', 'exploring', 'visited');
+            });
+            
+            document.getElementById('step-info').textContent = 
+                'Click "Start Animation" to see the flood fill algorithm in action!';
+            document.getElementById('paths-found').style.display = 'none';
+            
+            foundPaths = [];
+            isAnimating = false;
+        }
+        
+        function generateNewGrid() {
+            if (isAnimating) return;
+            
+            // Generate a new random grid
+            const rows = 5;
+            const cols = 5;
+            grid = [];
+            
+            for (let i = 0; i < rows; i++) {
+                grid[i] = [];
+                for (let j = 0; j < cols; j++) {
+                    // 70% chance of being a path, 30% chance of being a wall
+                    grid[i][j] = Math.random() > 0.3 ? 1 : 0;
+                }
+            }
+            
+            // Ensure start and end are always paths
+            grid[0][0] = 1;
+            grid[rows - 1][cols - 1] = 1;
+            
+            // Ensure there's at least one path from start
+            if (grid[0][1] === 0 && grid[1][0] === 0) {
+                grid[0][1] = 1;
+            }
+            
+            initializeGrid();
+            resetGrid();
+        }
+        
+        // Initialize on load
+        initializeGrid();
+    </script>
+</body>
+</html>
