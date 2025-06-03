@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sort 0s and 1s Animation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            color: white;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .algorithm-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .array-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .array-element {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 10px;
+            transition: all 0.5s ease;
+            border: 3px solid transparent;
+            position: relative;
+        }
+
+        .element-0 {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            color: white;
+        }
+
+        .element-1 {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: white;
+        }
+
+        .pointer-i {
+            border-color: #ffd700 !important;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+        }
+
+        .pointer-j {
+            border-color: #ff4757 !important;
+            box-shadow: 0 0 15px rgba(255, 71, 87, 0.6);
+        }
+
+        .swapping {
+            transform: scale(1.1);
+            animation: pulse 0.5s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1.1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .pointer-labels {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .pointer-label {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .label-i {
+            background: #ffd700;
+            color: #333;
+        }
+
+        .label-j {
+            background: #ff4757;
+            color: white;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #f093fb, #f5576c);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 18px;
+            font-weight: bold;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .step-counter {
+            text-align: center;
+            font-size: 16px;
+            margin: 10px 0;
+            opacity: 0.8;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 5px;
+        }
+
+        .completed {
+            animation: celebration 1s ease-in-out;
+        }
+
+        @keyframes celebration {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.05) rotate(1deg); }
+            75% { transform: scale(1.05) rotate(-1deg); }
+        }
+
+        .input-section {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .input-section input {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 10px;
+            margin: 0 10px;
+            font-size: 16px;
+            width: 200px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+
+        .zones {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .zone {
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .zone-zeros {
+            background: rgba(255, 107, 107, 0.3);
+            border: 2px solid #ff6b6b;
+        }
+
+        .zone-ones {
+            background: rgba(78, 205, 196, 0.3);
+            border: 2px solid #4ecdc4;
+        }
+
+        .zone-unknown {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Sort 0s and 1s Algorithm</h1>
+        
+        <div class="algorithm-info">
+            <h3>Two Pointer Technique:</h3>
+            <p><strong>i pointer (yellow):</strong> Points to the next position where a 0 should be placed</p>
+            <p><strong>j pointer (red):</strong> Scans through the array from left to right</p>
+            <p><strong>Logic:</strong> When j finds a 0 (arr[j] < arr[i]), swap it with element at position i</p>
+        </div>
+
+        <div class="input-section">
+            <input type="text" id="arrayInput" placeholder="Enter array (e.g., 1,0,1,0,1)" value="1,0,1,0,1,0,1">
+            <button class="btn-secondary" onclick="setCustomArray()">Set Array</button>
+        </div>
+
+        <div class="zones">
+            <div class="zone zone-zeros">0 to i-1: All 0s</div>
+            <div class="zone zone-ones">i to j-1: All 1s</div>
+            <div class="zone zone-unknown">j to end: Unknown</div>
+        </div>
+
+        <div class="array-container" id="arrayContainer"></div>
+        
+        <div class="pointer-labels" id="pointerLabels"></div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(45deg, #ff6b6b, #ee5a52);"></div>
+                <span>Value 0</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(45deg, #4ecdc4, #44a08d);"></div>
+                <span>Value 1</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #ffd700; border: 2px solid #ffd700;"></div>
+                <span>Pointer i</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #ff4757; border: 2px solid #ff4757;"></div>
+                <span>Pointer j</span>
+            </div>
+        </div>
+
+        <div class="step-counter" id="stepCounter">Step: 0</div>
+        <div class="status" id="status">Click "Start" to begin the sorting animation</div>
+
+        <div class="controls">
+            <button class="btn-success" onclick="startAnimation()" id="startBtn">Start</button>
+            <button class="btn-primary" onclick="nextStep()" id="nextBtn" disabled>Next Step</button>
+            <button class="btn-secondary" onclick="resetAnimation()" id="resetBtn">Reset</button>
+            <button class="btn-primary" onclick="autoPlay()" id="autoBtn" disabled>Auto Play</button>
+        </div>
+    </div>
+
+    <script>
+        let originalArray = [1, 0, 1, 0, 1, 0, 1];
+        let arr = [...originalArray];
+        let i = 0;
+        let j = 0;
+        let step = 0;
+        let isAnimating = false;
+        let autoInterval = null;
+
+        function renderArray() {
+            const container = document.getElementById('arrayContainer');
+            const labelsContainer = document.getElementById('pointerLabels');
+            
+            container.innerHTML = '';
+            labelsContainer.innerHTML = '';
+
+            arr.forEach((value, index) => {
+                const element = document.createElement('div');
+                element.className = `array-element element-${value}`;
+                element.textContent = value;
+                element.id = `element-${index}`;
+
+                if (index === i && i < arr.length) {
+                    element.classList.add('pointer-i');
+                }
+                if (index === j && j < arr.length) {
+                    element.classList.add('pointer-j');
+                }
+
+                container.appendChild(element);
+            });
+
+            // Update pointer labels
+            if (i < arr.length) {
+                const labelI = document.createElement('div');
+                labelI.className = 'pointer-label label-i';
+                labelI.textContent = `i = ${i}`;
+                labelsContainer.appendChild(labelI);
+            }
+
+            if (j < arr.length) {
+                const labelJ = document.createElement('div');
+                labelJ.className = 'pointer-label label-j';
+                labelJ.textContent = `j = ${j}`;
+                labelsContainer.appendChild(labelJ);
+            }
+        }
+
+        function updateStatus(message) {
+            document.getElementById('status').textContent = message;
+            document.getElementById('stepCounter').textContent = `Step: ${step}`;
+        }
+
+        function startAnimation() {
+            isAnimating = true;
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('nextBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            updateStatus('Animation started! Use "Next Step" to proceed step by step.');
+            renderArray();
+        }
+
+        function nextStep() {
+            if (j >= arr.length) {
+                updateStatus('🎉 Sorting completed! Array is now sorted.');
+                document.getElementById('nextBtn').disabled = true;
+                document.getElementById('autoBtn').disabled = true;
+                document.querySelector('.array-container').classList.add('completed');
+                return;
+            }
+
+            step++;
+
+            if (arr[j] < arr[i]) {
+                // Highlight elements being swapped
+                document.getElementById(`element-${i}`).classList.add('swapping');
+                document.getElementById(`element-${j}`).classList.add('swapping');
+                
+                setTimeout(() => {
+                    // Perform swap
+                    let temp = arr[i];
+                    arr[i] = arr[j];
+                    arr[j] = temp;
+                    
+                    updateStatus(`Swapped arr[${j}] = ${arr[j]} with arr[${i}] = ${arr[i]}. Moving i to ${i + 1}.`);
+                    i++;
+                    j++;
+                    
+                    renderArray();
+                    
+                    // Remove swapping animation
+                    setTimeout(() => {
+                        document.querySelectorAll('.swapping').forEach(el => {
+                            el.classList.remove('swapping');
+                        });
+                    }, 500);
+                }, 300);
+            } else {
+                updateStatus(`arr[${j}] = ${arr[j]} is not less than arr[${i}] = ${arr[i]}. Moving j to ${j + 1}.`);
+                j++;
+                renderArray();
+            }
+        }
+
+        function resetAnimation() {
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+            }
+            
+            arr = [...originalArray];
+            i = 0;
+            j = 0;
+            step = 0;
+            isAnimating = false;
+            
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('nextBtn').disabled = true;
+            document.getElementById('autoBtn').disabled = true;
+            document.querySelector('.array-container').classList.remove('completed');
+            
+            updateStatus('Click "Start" to begin the sorting animation');
+            renderArray();
+        }
+
+        function autoPlay() {
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+                document.getElementById('autoBtn').textContent = 'Auto Play';
+                document.getElementById('nextBtn').disabled = false;
+            } else {
+                autoInterval = setInterval(() => {
+                    if (j >= arr.length) {
+                        clearInterval(autoInterval);
+                        autoInterval = null;
+                        document.getElementById('autoBtn').textContent = 'Auto Play';
+                        document.getElementById('nextBtn').disabled = false;
+                        return;
+                    }
+                    nextStep();
+                }, 1500);
+                document.getElementById('autoBtn').textContent = 'Pause';
+                document.getElementById('nextBtn').disabled = true;
+            }
+        }
+
+        function setCustomArray() {
+            const input = document.getElementById('arrayInput').value;
+            try {
+                const newArray = input.split(',').map(x => parseInt(x.trim()));
+                
+                // Validate array contains only 0s and 1s
+                if (newArray.every(x => x === 0 || x === 1)) {
+                    originalArray = newArray;
+                    resetAnimation();
+                } else {
+                    alert('Please enter only 0s and 1s separated by commas');
+                }
+            } catch (e) {
+                alert('Invalid input format. Please use format: 1,0,1,0,1');
+            }
+        }
+
+        // Initialize
+        renderArray();
+        updateStatus('Click "Start" to begin the sorting animation');
+    </script>
+</body>
+</html>
