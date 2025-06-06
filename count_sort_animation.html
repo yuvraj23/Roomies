@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Count Sort Animation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .title {
+            text-align: center;
+            color: #2d3748;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .step-title {
+            color: #4a5568;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-align: center;
+            min-height: 30px;
+        }
+
+        .array-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            min-height: 80px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .array-element {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.5s ease;
+            box-shadow: 0 4px 12px rgba(79, 172, 254, 0.3);
+        }
+
+        .array-element.highlight {
+            background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .freq-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            margin: 30px 0;
+            min-height: 120px;
+            gap: 4px;
+        }
+
+        .freq-bar {
+            width: 40px;
+            background: linear-gradient(180deg, #a8edea 0%, #fed6e3 100%);
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            transition: all 0.6s ease;
+            margin: 0 2px;
+        }
+
+        .freq-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.9rem;
+            color: #4a5568;
+            font-weight: 600;
+        }
+
+        .freq-value {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            color: #2d3748;
+            font-weight: 600;
+            background: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.3);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(240, 147, 251, 0.4);
+        }
+
+        .explanation {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            color: #2d3748;
+            line-height: 1.6;
+            box-shadow: 0 4px 15px rgba(252, 182, 159, 0.2);
+        }
+
+        .complexity {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .complexity-item {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(168, 237, 234, 0.3);
+        }
+
+        .complexity-label {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .complexity-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #4a5568;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Count Sort Algorithm</h1>
+        
+        <div class="step-title" id="stepTitle">Step 1: Original Array</div>
+        
+        <div class="array-container" id="originalArray"></div>
+        
+        <div class="freq-container" id="freqContainer" style="display: none;"></div>
+        
+        <div class="array-container" id="sortedArray" style="display: none;"></div>
+        
+        <div class="controls">
+            <button class="btn btn-primary" onclick="startAnimation()">Start Animation</button>
+            <button class="btn btn-secondary" onclick="resetAnimation()">Reset</button>
+        </div>
+        
+        <div class="explanation">
+            <strong>How Count Sort Works:</strong><br>
+            1. <strong>Find Range:</strong> Determine min and max values<br>
+            2. <strong>Count Frequencies:</strong> Count occurrences of each element<br>
+            3. <strong>Calculate Positions:</strong> Convert to prefix sums<br>
+            4. <strong>Place Elements:</strong> Build sorted array from right to left
+        </div>
+        
+        <div class="complexity">
+            <div class="complexity-item">
+                <div class="complexity-label">Time Complexity</div>
+                <div class="complexity-value">O(n + k)</div>
+            </div>
+            <div class="complexity-item">
+                <div class="complexity-label">Space Complexity</div>
+                <div class="complexity-value">O(k)</div>
+            </div>
+            <div class="complexity-item">
+                <div class="complexity-label">Stability</div>
+                <div class="complexity-value">Stable</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const originalData = [4, 2, 2, 8, 3, 3, 1, 7, 6, 5];
+        let currentStep = 0;
+        let isAnimating = false;
+
+        function createArrayElement(value, isHighlight = false) {
+            const element = document.createElement('div');
+            element.className = `array-element ${isHighlight ? 'highlight' : ''}`;
+            element.textContent = value;
+            return element;
+        }
+
+        function createFreqBar(value, label, height) {
+            const bar = document.createElement('div');
+            bar.className = 'freq-bar';
+            bar.style.height = `${height * 15 + 20}px`;
+            
+            const labelEl = document.createElement('div');
+            labelEl.className = 'freq-label';
+            labelEl.textContent = label;
+            
+            const valueEl = document.createElement('div');
+            valueEl.className = 'freq-value';
+            valueEl.textContent = value || '0';
+            
+            bar.appendChild(labelEl);
+            if (value > 0) bar.appendChild(valueEl);
+            
+            return bar;
+        }
+
+        function displayOriginalArray() {
+            const container = document.getElementById('originalArray');
+            container.innerHTML = '';
+            originalData.forEach(value => {
+                container.appendChild(createArrayElement(value));
+            });
+        }
+
+        function findMinMax() {
+            return {
+                min: Math.min(...originalData),
+                max: Math.max(...originalData)
+            };
+        }
+
+        function countFrequencies(min, max) {
+            const freq = new Array(max - min + 1).fill(0);
+            originalData.forEach(value => {
+                freq[value - min]++;
+            });
+            return freq;
+        }
+
+        function convertToPrefixSum(freq) {
+            const prefixSum = [...freq];
+            for (let i = 1; i < prefixSum.length; i++) {
+                prefixSum[i] = prefixSum[i - 1] + prefixSum[i];
+            }
+            return prefixSum;
+        }
+
+        function buildSortedArray(prefixSum, min) {
+            const sorted = new Array(originalData.length);
+            const workingPrefix = [...prefixSum];
+            
+            for (let i = originalData.length - 1; i >= 0; i--) {
+                const val = originalData[i];
+                const pos = workingPrefix[val - min];
+                sorted[pos - 1] = val;
+                workingPrefix[val - min]--;
+            }
+            return sorted;
+        }
+
+        async function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function startAnimation() {
+            if (isAnimating) return;
+            isAnimating = true;
+            
+            const stepTitle = document.getElementById('stepTitle');
+            const freqContainer = document.getElementById('freqContainer');
+            const sortedContainer = document.getElementById('sortedArray');
+            
+            // Step 1: Show original array
+            stepTitle.textContent = 'Step 1: Original Array';
+            displayOriginalArray();
+            await sleep(1500);
+            
+            // Step 2: Find min and max
+            stepTitle.textContent = 'Step 2: Finding Min (1) and Max (8)';
+            const { min, max } = findMinMax();
+            
+            // Highlight min and max elements
+            const elements = document.querySelectorAll('.array-element');
+            elements.forEach((el, index) => {
+                if (originalData[index] === min || originalData[index] === max) {
+                    el.classList.add('highlight');
+                }
+            });
+            await sleep(2000);
+            
+            // Remove highlights
+            elements.forEach(el => el.classList.remove('highlight'));
+            
+            // Step 3: Count frequencies
+            stepTitle.textContent = 'Step 3: Counting Frequencies';
+            freqContainer.style.display = 'flex';
+            freqContainer.innerHTML = '';
+            
+            const freq = countFrequencies(min, max);
+            for (let i = 0; i < freq.length; i++) {
+                const bar = createFreqBar(freq[i], min + i, freq[i]);
+                freqContainer.appendChild(bar);
+                await sleep(200);
+            }
+            await sleep(1500);
+            
+            // Step 4: Convert to prefix sums
+            stepTitle.textContent = 'Step 4: Converting to Prefix Sums';
+            const prefixSum = convertToPrefixSum(freq);
+            
+            for (let i = 0; i < prefixSum.length; i++) {
+                const bars = freqContainer.children;
+                const valueEl = bars[i].querySelector('.freq-value');
+                if (valueEl) {
+                    valueEl.textContent = prefixSum[i];
+                    valueEl.style.background = '#ff6b6b';
+                    valueEl.style.color = 'white';
+                }
+                bars[i].style.height = `${prefixSum[i] * 8 + 20}px`;
+                await sleep(300);
+            }
+            await sleep(1500);
+            
+            // Step 5: Build sorted array
+            stepTitle.textContent = 'Step 5: Building Sorted Array';
+            sortedContainer.style.display = 'flex';
+            sortedContainer.innerHTML = '';
+            
+            const sorted = buildSortedArray(prefixSum, min);
+            for (let i = 0; i < sorted.length; i++) {
+                const element = createArrayElement(sorted[i]);
+                element.style.opacity = '0';
+                sortedContainer.appendChild(element);
+                
+                setTimeout(() => {
+                    element.style.opacity = '1';
+                    element.classList.add('fade-in');
+                }, i * 150);
+            }
+            
+            await sleep(sorted.length * 150 + 500);
+            stepTitle.textContent = 'Count Sort Complete! ✨';
+            
+            isAnimating = false;
+        }
+
+        function resetAnimation() {
+            if (isAnimating) return;
+            
+            currentStep = 0;
+            document.getElementById('stepTitle').textContent = 'Step 1: Original Array';
+            document.getElementById('freqContainer').style.display = 'none';
+            document.getElementById('sortedArray').style.display = 'none';
+            displayOriginalArray();
+        }
+
+        // Initialize
+        displayOriginalArray();
+    </script>
+</body>
+</html>
