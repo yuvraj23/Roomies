@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Target Sum Triplets Algorithm Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #fafafa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .algorithm-info {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .algorithm-info h3 {
+            color: #495057;
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+        }
+
+        .algorithm-info p {
+            color: #6c757d;
+            margin-bottom: 12px;
+        }
+
+        .complexity-tag {
+            display: inline-block;
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            background: white;
+            color: #667eea;
+        }
+
+        .btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn.primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn.primary:hover {
+            background: #5a6fd8;
+        }
+
+        .visualization-area {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 20px;
+            background: #fdfdfd;
+        }
+
+        .array-container {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .array-element {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            color: #495057;
+        }
+
+        .array-element.current {
+            background: #ff6b6b;
+            border-color: #ff5252;
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+        }
+
+        .array-element.left {
+            background: #4ecdc4;
+            border-color: #26c6da;
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
+        }
+
+        .array-element.right {
+            background: #95e1d3;
+            border-color: #4db6ac;
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(149, 225, 211, 0.3);
+        }
+
+        .array-element.found {
+            background: #ffd93d;
+            border-color: #ffc107;
+            color: #333;
+            animation: celebrate 0.6s ease;
+        }
+
+        @keyframes celebrate {
+            0%, 100% { transform: scale(1.05); }
+            50% { transform: scale(1.15); }
+        }
+
+        .pointer-legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .legend-current { background: #ff6b6b; }
+        .legend-left { background: #4ecdc4; }
+        .legend-right { background: #95e1d3; }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .status-item {
+            text-align: center;
+            padding: 15px 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        .status-label {
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .explanation-box {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #e9ecef;
+        }
+
+        .step-text {
+            font-size: 15px;
+            color: #495057;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .results-section {
+            background: #e8f5e8;
+            border: 1px solid #c3e6c3;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .results-title {
+            font-size: 1.1rem;
+            color: #2e7d32;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .result-item {
+            background: white;
+            border: 1px solid #a5d6a7;
+            border-radius: 6px;
+            padding: 12px;
+            margin: 8px 0;
+            text-align: center;
+            font-weight: 500;
+            color: #2e7d32;
+            animation: slideIn 0.4s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .code-reference {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .code-title {
+            font-size: 1rem;
+            color: #495057;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .code-snippet {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 13px;
+            color: #6c757d;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 8px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .title {
+                font-size: 1.5rem;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .array-element {
+                width: 45px;
+                height: 45px;
+                font-size: 14px;
+            }
+            
+            .controls {
+                gap: 8px;
+            }
+            
+            .btn {
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">Target Sum Triplets Algorithm</h1>
+            <p class="subtitle">Visualizing the Two-Pointer Technique</p>
+        </div>
+
+        <div class="content">
+            <div class="algorithm-info">
+                <h3>How it works</h3>
+                <p>This algorithm efficiently finds all triplets in a sorted array that sum to a target value by combining a single loop with the two-pointer technique.</p>
+                <span class="complexity-tag">Time Complexity: O(n²)</span>
+            </div>
+
+            <div class="controls">
+                <button class="btn primary" onclick="startAnimation()">Start</button>
+                <button class="btn" onclick="nextStep()">Next Step</button>
+                <button class="btn" onclick="autoPlay()">Auto Play</button>
+                <button class="btn" onclick="resetAnimation()">Reset</button>
+            </div>
+
+            <div class="visualization-area">
+                <div class="array-container" id="arrayContainer"></div>
+                
+                <div class="pointer-legend">
+                    <div class="legend-item">
+                        <div class="legend-color legend-current"></div>
+                        <span>Current (i)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color legend-left"></div>
+                        <span>Left Pointer</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color legend-right"></div>
+                        <span>Right Pointer</span>
+                    </div>
+                </div>
+
+                <div class="status-grid">
+                    <div class="status-item">
+                        <div class="status-label">Target</div>
+                        <div class="status-value" id="targetValue">12</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-label">Current</div>
+                        <div class="status-value" id="currentElement">-</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-label">Needed</div>
+                        <div class="status-value" id="restTarget">-</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-label">Sum</div>
+                        <div class="status-value" id="currentSum">-</div>
+                    </div>
+                </div>
+
+                <div class="explanation-box">
+                    <div class="step-text" id="stepExplanation">
+                        Press "Start" to begin finding all triplets that sum to 12
+                    </div>
+                </div>
+            </div>
+
+            <div class="results-section" id="results" style="display: none;">
+                <div class="results-title">Found Triplets</div>
+                <div id="resultsList"></div>
+            </div>
+
+            <div class="code-reference">
+                <div class="code-title">Algorithm Logic</div>
+                <div class="code-snippet">
+                    1. Fix first element with outer loop (i)<br>
+                    2. Calculate remaining target = target - arr[i]<br>
+                    3. Use two pointers on subarray [i+1...n-1]<br>
+                    4. Move pointers based on sum comparison<br>
+                    &nbsp;&nbsp;• If sum < target → left++<br>
+                    &nbsp;&nbsp;• If sum > target → right--<br>
+                    &nbsp;&nbsp;• If sum = target → found triplet!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+        const target = 12;
+        let currentI = 0;
+        let left = 1;
+        let right = array.length - 1;
+        let autoPlayInterval = null;
+        let foundTriplets = [];
+        let animationState = 'idle';
+
+        function initializeArray() {
+            const container = document.getElementById('arrayContainer');
+            container.innerHTML = '';
+            
+            array.forEach((num, index) => {
+                const element = document.createElement('div');
+                element.className = 'array-element';
+                element.textContent = num;
+                element.id = `element-${index}`;
+                container.appendChild(element);
+            });
+        }
+
+        function updateVisualization() {
+            // Reset all elements
+            array.forEach((_, index) => {
+                const element = document.getElementById(`element-${index}`);
+                element.className = 'array-element';
+            });
+
+            // Apply current state
+            if (currentI < array.length) {
+                document.getElementById(`element-${currentI}`).classList.add('current');
+            }
+            if (left < array.length && left > currentI) {
+                document.getElementById(`element-${left}`).classList.add('left');
+            }
+            if (right < array.length && right > left) {
+                document.getElementById(`element-${right}`).classList.add('right');
+            }
+
+            // Update status display
+            document.getElementById('currentElement').textContent = 
+                currentI < array.length ? array[currentI] : '-';
+            document.getElementById('restTarget').textContent = 
+                currentI < array.length ? (target - array[currentI]) : '-';
+            
+            const currentSum = (left < array.length && right < array.length && left < right) ? 
+                array[currentI] + array[left] + array[right] : '-';
+            document.getElementById('currentSum').textContent = currentSum;
+        }
+
+        function updateExplanation(message) {
+            document.getElementById('stepExplanation').textContent = message;
+        }
+
+        function highlightTriplet() {
+            ['current', 'left', 'right'].forEach(className => {
+                const elements = document.querySelectorAll(`.${className}`);
+                elements.forEach(el => el.classList.add('found'));
+            });
+            
+            setTimeout(() => {
+                const foundElements = document.querySelectorAll('.found');
+                foundElements.forEach(el => el.classList.remove('found'));
+            }, 1200);
+        }
+
+        function addResult(triplet) {
+            foundTriplets.push(triplet);
+            const resultsDiv = document.getElementById('results');
+            const resultsList = document.getElementById('resultsList');
+            
+            resultsDiv.style.display = 'block';
+            
+            const resultItem = document.createElement('div');
+            resultItem.className = 'result-item';
+            resultItem.textContent = `${triplet[0]} + ${triplet[1]} + ${triplet[2]} = ${target}`;
+            resultsList.appendChild(resultItem);
+        }
+
+        function nextStep() {
+            if (animationState === 'completed') {
+                updateExplanation('All possible triplets have been found!');
+                return;
+            }
+
+            if (currentI >= array.length) {
+                animationState = 'completed';
+                updateExplanation('Algorithm completed. All triplets found.');
+                return;
+            }
+
+            const restOfTarget = target - array[currentI];
+            
+            if (left >= right) {
+                currentI++;
+                if (currentI < array.length) {
+                    left = currentI + 1;
+                    right = array.length - 1;
+                    updateExplanation(`Moving to element ${array[currentI]}. Looking for pairs that sum to ${target - array[currentI]}.`);
+                } else {
+                    animationState = 'completed';
+                    updateExplanation('Algorithm completed. All triplets found.');
+                }
+            } else {
+                const currentSum = array[left] + array[right];
+                
+                if (currentSum < restOfTarget) {
+                    updateExplanation(`${array[left]} + ${array[right]} = ${currentSum} < ${restOfTarget}. Moving left pointer →`);
+                    left++;
+                } else if (currentSum > restOfTarget) {
+                    updateExplanation(`${array[left]} + ${array[right]} = ${currentSum} > ${restOfTarget}. Moving right pointer ←`);
+                    right--;
+                } else {
+                    const triplet = [array[currentI], array[left], array[right]];
+                    addResult(triplet);
+                    highlightTriplet();
+                    updateExplanation(`✓ Found: ${array[currentI]} + ${array[left]} + ${array[right]} = ${target}`);
+                    left++;
+                    right--;
+                }
+            }
+            
+            updateVisualization();
+        }
+
+        function startAnimation() {
+            animationState = 'running';
+            currentI = 0;
+            left = 1;
+            right = array.length - 1;
+            foundTriplets = [];
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('resultsList').innerHTML = '';
+            
+            updateExplanation(`Starting with ${array[currentI]}. Need to find pairs that sum to ${target - array[currentI]}.`);
+            updateVisualization();
+        }
+
+        function resetAnimation() {
+            clearInterval(autoPlayInterval);
+            autoPlayInterval = null;
+            animationState = 'idle';
+            currentI = 0;
+            left = 1;
+            right = array.length - 1;
+            foundTriplets = [];
+            
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('resultsList').innerHTML = '';
+            
+            array.forEach((_, index) => {
+                const element = document.getElementById(`element-${index}`);
+                element.className = 'array-element';
+            });
+            
+            document.getElementById('currentElement').textContent = '-';
+            document.getElementById('restTarget').textContent = '-';
+            document.getElementById('currentSum').textContent = '-';
+            
+            updateExplanation('Press "Start" to begin finding all triplets that sum to 12');
+        }
+
+        function autoPlay() {
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = null;
+                return;
+            }
+            
+            if (animationState === 'idle') {
+                startAnimation();
+            }
+            
+            autoPlayInterval = setInterval(() => {
+                if (animationState === 'completed') {
+                    clearInterval(autoPlayInterval);
+                    autoPlayInterval = null;
+                    return;
+                }
+                nextStep();
+            }, 1800);
+        }
+
+        // Initialize
+        initializeArray();
+        updateVisualization();
+    </script>
+</body>
+</html>
