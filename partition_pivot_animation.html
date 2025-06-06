@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Partition via Pivot Animation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .title {
+            text-align: center;
+            color: #2d3748;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .pivot-info {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #4a5568;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .pivot-value {
+            color: #e53e3e;
+            font-weight: 700;
+            font-size: 1.4rem;
+        }
+
+        .step-title {
+            color: #4a5568;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-align: center;
+            min-height: 30px;
+        }
+
+        .array-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            min-height: 80px;
+            flex-wrap: wrap;
+            gap: 6px;
+            position: relative;
+        }
+
+        .array-element {
+            width: 55px;
+            height: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: relative;
+            color: white;
+        }
+
+        .element-less-equal {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+        }
+
+        .element-greater {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+            box-shadow: 0 4px 12px rgba(245, 101, 101, 0.3);
+        }
+
+        .element-unknown {
+            background: linear-gradient(135deg, #a0aec0 0%, #718096 100%);
+            box-shadow: 0 4px 12px rgba(160, 174, 192, 0.3);
+        }
+
+        .element-current {
+            background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
+            transform: scale(1.15);
+            box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4);
+            z-index: 10;
+        }
+
+        .pointer {
+            position: absolute;
+            bottom: -35px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #2d3748;
+            background: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .pointer-i {
+            color: #e53e3e;
+            border: 2px solid #e53e3e;
+        }
+
+        .pointer-j {
+            color: #38a169;
+            border: 2px solid #38a169;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #f7fafc;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.3);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(240, 147, 251, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .explanation {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            color: #2d3748;
+            line-height: 1.6;
+            box-shadow: 0 4px 15px rgba(252, 182, 159, 0.2);
+        }
+
+        .regions {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .region {
+            padding: 8px 12px;
+            border-radius: 8px;
+            color: white;
+        }
+
+        .region-left {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        }
+
+        .region-middle {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+        }
+
+        .region-right {
+            background: linear-gradient(135deg, #a0aec0 0%, #718096 100%);
+        }
+
+        .swap-animation {
+            position: absolute;
+            background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            animation: swapPulse 1s ease-in-out;
+        }
+
+        @keyframes swapPulse {
+            0%, 100% { opacity: 0; transform: translateX(-50%) translateY(0); }
+            50% { opacity: 1; transform: translateX(-50%) translateY(-10px); }
+        }
+
+        @keyframes slideElement {
+            0% { transform: translateX(0) scale(1); }
+            50% { transform: translateX(var(--slide-distance)) scale(1.1); }
+            100% { transform: translateX(0) scale(1); }
+        }
+
+        .sliding {
+            animation: slideElement 0.8s ease-in-out;
+        }
+
+        .complexity {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .complexity-item {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(168, 237, 234, 0.3);
+        }
+
+        .complexity-label {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .complexity-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #4a5568;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Partition via Pivot Algorithm</h1>
+        
+        <div class="pivot-info">
+            Pivot Value: <span class="pivot-value">10</span>
+        </div>
+        
+        <div class="step-title" id="stepTitle">Click Start to begin partitioning</div>
+        
+        <div class="array-container" id="arrayContainer"></div>
+        
+        <div class="regions">
+            <div class="region region-left">≤ Pivot (0 to j-1)</div>
+            <div class="region region-middle">> Pivot (j to i-1)</div>
+            <div class="region region-right">Unknown (i to end)</div>
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color element-less-equal"></div>
+                <span>≤ Pivot (10)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color element-greater"></div>
+                <span>> Pivot (10)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color element-unknown"></div>
+                <span>Unknown</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color element-current"></div>
+                <span>Current Element</span>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn btn-primary" id="startBtn" onclick="startAnimation()">Start Animation</button>
+            <button class="btn btn-secondary" onclick="resetAnimation()">Reset</button>
+        </div>
+        
+        <div class="explanation">
+            <strong>How Partition via Pivot Works:</strong><br>
+            1. <strong>Two Pointers:</strong> i (scanner) and j (next position for ≤ pivot)<br>
+            2. <strong>Three Regions:</strong> [0 to j-1] ≤ pivot, [j to i-1] > pivot, [i to end] unknown<br>
+            3. <strong>Process:</strong> If arr[i] ≤ pivot, swap with arr[j] and increment both; else just increment i<br>
+            4. <strong>Result:</strong> All elements ≤ pivot come before all elements > pivot
+        </div>
+        
+        <div class="complexity">
+            <div class="complexity-item">
+                <div class="complexity-label">Time Complexity</div>
+                <div class="complexity-value">O(n)</div>
+            </div>
+            <div class="complexity-item">
+                <div class="complexity-label">Space Complexity</div>
+                <div class="complexity-value">O(1)</div>
+            </div>
+            <div class="complexity-item">
+                <div class="complexity-label">In-Place</div>
+                <div class="complexity-value">Yes</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const originalData = [15, 2, 3, 7, 8, 2, 5, 10, 1, 12, 66, 3, 10, 2];
+        const pivot = 10;
+        let currentArray = [...originalData];
+        let i = 0, j = 0;
+        let isAnimating = false;
+
+        function createArrayElement(value, index) {
+            const element = document.createElement('div');
+            element.className = 'array-element';
+            element.textContent = value;
+            element.id = `element-${index}`;
+            
+            // Set initial class based on position and value
+            updateElementClass(element, value, index);
+            
+            return element;
+        }
+
+        function updateElementClass(element, value, index) {
+            element.className = 'array-element';
+            
+            if (index === i && isAnimating) {
+                element.classList.add('element-current');
+            } else if (index < j) {
+                element.classList.add('element-less-equal');
+            } else if (index < i) {
+                element.classList.add('element-greater');
+            } else {
+                element.classList.add('element-unknown');
+            }
+        }
+
+        function addPointers() {
+            const container = document.getElementById('arrayContainer');
+            const elements = container.children;
+            
+            // Remove existing pointers
+            const existingPointers = container.querySelectorAll('.pointer');
+            existingPointers.forEach(p => p.remove());
+            
+            // Add i pointer
+            if (i < elements.length) {
+                const iPointer = document.createElement('div');
+                iPointer.className = 'pointer pointer-i';
+                iPointer.textContent = 'i';
+                elements[i].appendChild(iPointer);
+            }
+            
+            // Add j pointer
+            if (j < elements.length) {
+                const jPointer = document.createElement('div');
+                jPointer.className = 'pointer pointer-j';
+                jPointer.textContent = 'j';
+                elements[j].appendChild(jPointer);
+            }
+        }
+
+        function displayArray() {
+            const container = document.getElementById('arrayContainer');
+            container.innerHTML = '';
+            
+            currentArray.forEach((value, index) => {
+                const element = createArrayElement(value, index);
+                container.appendChild(element);
+            });
+            
+            addPointers();
+        }
+
+        function updateAllElements() {
+            const container = document.getElementById('arrayContainer');
+            const elements = container.children;
+            
+            for (let index = 0; index < currentArray.length; index++) {
+                updateElementClass(elements[index], currentArray[index], index);
+            }
+            
+            addPointers();
+        }
+
+        async function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function animateSwap(index1, index2) {
+            const container = document.getElementById('arrayContainer');
+            const elem1 = container.children[index1];
+            const elem2 = container.children[index2];
+            
+            // Show swap animation
+            const swapIndicator = document.createElement('div');
+            swapIndicator.className = 'swap-animation';
+            swapIndicator.textContent = 'SWAP';
+            elem1.appendChild(swapIndicator);
+            
+            // Animate the swap
+            elem1.classList.add('sliding');
+            elem2.classList.add('sliding');
+            
+            await sleep(400);
+            
+            // Swap the values
+            const temp = currentArray[index1];
+            currentArray[index1] = currentArray[index2];
+            currentArray[index2] = temp;
+            
+            // Update display
+            elem1.textContent = currentArray[index1];
+            elem2.textContent = currentArray[index2];
+            
+            await sleep(400);
+            
+            // Remove animations
+            elem1.classList.remove('sliding');
+            elem2.classList.remove('sliding');
+            swapIndicator.remove();
+        }
+
+        async function startAnimation() {
+            if (isAnimating) return;
+            
+            isAnimating = true;
+            document.getElementById('startBtn').disabled = true;
+            
+            const stepTitle = document.getElementById('stepTitle');
+            i = 0;
+            j = 0;
+            currentArray = [...originalData];
+            
+            displayArray();
+            await sleep(1000);
+            
+            while (i < currentArray.length) {
+                stepTitle.textContent = `Comparing arr[${i}] = ${currentArray[i]} with pivot = ${pivot}`;
+                updateAllElements();
+                await sleep(1500);
+                
+                if (currentArray[i] > pivot) {
+                    stepTitle.textContent = `${currentArray[i]} > ${pivot}, move i forward (no swap needed)`;
+                    i++;
+                    await sleep(1000);
+                } else {
+                    stepTitle.textContent = `${currentArray[i]} ≤ ${pivot}, swap arr[${i}] with arr[${j}]`;
+                    
+                    if (i !== j) {
+                        await sleep(800);
+                        await animateSwap(i, j);
+                    }
+                    
+                    i++;
+                    j++;
+                    await sleep(1000);
+                }
+                
+                updateAllElements();
+                await sleep(500);
+            }
+            
+            stepTitle.textContent = 'Partitioning Complete! All elements ≤ 10 are on the left, > 10 on the right';
+            updateAllElements();
+            
+            isAnimating = false;
+            document.getElementById('startBtn').disabled = false;
+        }
+
+        function resetAnimation() {
+            if (isAnimating) return;
+            
+            i = 0;
+            j = 0;
+            currentArray = [...originalData];
+            isAnimating = false;
+            
+            document.getElementById('stepTitle').textContent = 'Click Start to begin partitioning';
+            document.getElementById('startBtn').disabled = false;
+            displayArray();
+        }
+
+        // Initialize
+        displayArray();
+    </script>
+</body>
+</html>
