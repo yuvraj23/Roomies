@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickSelect Algorithm Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #fff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .explanation {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .key-concept {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #4ade80;
+        }
+
+        .array-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .array-element {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.4s ease;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .array-element.pivot {
+            background: #ef4444;
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+        }
+
+        .array-element.left-partition {
+            background: #4ade80;
+            color: white;
+        }
+
+        .array-element.right-partition {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .array-element.target {
+            background: #8b5cf6;
+            color: white;
+            transform: scale(1.15);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.5);
+        }
+
+        .array-element.comparing {
+            animation: pulse 0.6s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .index-label {
+            position: absolute;
+            bottom: -25px;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .status {
+            text-align: center;
+            font-size: 1.1rem;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .sorted-demo {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">QuickSelect Algorithm</h1>
+            <p class="subtitle">Finding Kth Largest/Smallest Elements</p>
+        </div>
+
+        <div class="explanation">
+            <h3>Key Concept: Index Calculation</h3>
+            <div class="key-concept">
+                <strong>For Kth Largest:</strong> Use index = arr.length - k<br>
+                <em>Example: 2nd largest in array of 8 → index 6 (8-2=6)</em>
+            </div>
+            <div class="key-concept">
+                <strong>For Kth Smallest:</strong> Use index = k - 1<br>
+                <em>Example: 2nd smallest → index 1 (2-1=1)</em>
+            </div>
+        </div>
+
+        <div class="sorted-demo">
+            <h3 style="text-align: center; margin-bottom: 15px;" id="indexExplanation">Why arr.length - k?</h3>
+            <div style="text-align: center; font-size: 1.1rem;" id="indexDemo">
+                <p>Sorted: [1, 2, 4, 5, 7, 10, 15, 80]</p>
+                <p>Indices: 0, 1, 2, 3, 4, 5, <span style="color: #ef4444; font-weight: bold;">6</span>, 7</p>
+                <p style="margin-top: 10px;">2nd largest = index 6 = (8 - 2)</p>
+            </div>
+        </div>
+
+        <div class="status" id="status">Click "Start Animation" to begin QuickSelect demonstration</div>
+
+        <div class="array-container" id="arrayContainer"></div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: #ef4444;"></div>
+                <span>Pivot</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #4ade80;"></div>
+                <span>≤ Pivot</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #f59e0b;"></div>
+                <span>> Pivot</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #8b5cf6;"></div>
+                <span>Target Found</span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; justify-content: center;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <label for="kInput" style="font-weight: 600;">K:</label>
+                    <input type="number" id="kInput" value="2" min="1" max="8" 
+                           style="width: 60px; padding: 8px; border-radius: 8px; border: none; text-align: center; font-weight: 600;">
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <input type="radio" id="largest" name="findType" value="largest" checked>
+                    <label for="largest" style="font-weight: 600;">Kth Largest</label>
+                    <input type="radio" id="smallest" name="findType" value="smallest" style="margin-left: 15px;">
+                    <label for="smallest" style="font-weight: 600;">Kth Smallest</label>
+                </div>
+            </div>
+            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                <button class="btn" onclick="startAnimation()">Start Animation</button>
+                <button class="btn" onclick="resetAnimation()">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let arr = [1, 5, 2, 10, 15, 80, 4, 7];
+        let originalArr = [...arr];
+        let k = 2;
+        let findLargest = true;
+        let targetIndex = arr.length - k;
+        let isAnimating = false;
+
+        function updateIndexDemo() {
+            const kInput = document.getElementById('kInput');
+            const largest = document.getElementById('largest');
+            const explanation = document.getElementById('indexExplanation');
+            const demo = document.getElementById('indexDemo');
+            
+            k = parseInt(kInput.value) || 2;
+            findLargest = largest.checked;
+            
+            if (findLargest) {
+                targetIndex = arr.length - k;
+                explanation.textContent = "Why arr.length - k?";
+                demo.innerHTML = `
+                    <p>Sorted: [1, 2, 4, 5, 7, 10, 15, 80]</p>
+                    <p>Indices: 0, 1, 2, 3, 4, 5, <span style="color: #ef4444; font-weight: bold;">${targetIndex}</span>, 7</p>
+                    <p style="margin-top: 10px;">${k}${getOrdinal(k)} largest = index ${targetIndex} = (8 - ${k})</p>
+                `;
+            } else {
+                targetIndex = k - 1;
+                explanation.textContent = "Why k - 1?";
+                demo.innerHTML = `
+                    <p>Sorted: [1, 2, 4, 5, 7, 10, 15, 80]</p>
+                    <p>Indices: 0, <span style="color: #8b5cf6; font-weight: bold;">${targetIndex}</span>, 2, 3, 4, 5, 6, 7</p>
+                    <p style="margin-top: 10px;">${k}${getOrdinal(k)} smallest = index ${targetIndex} = (${k} - 1)</p>
+                `;
+            }
+        }
+
+        function getOrdinal(n) {
+            const s = ['th', 'st', 'nd', 'rd'];
+            const v = n % 100;
+            return s[(v - 20) % 10] || s[v] || s[0];
+        }
+
+
+
+        function renderArray() {
+            const container = document.getElementById('arrayContainer');
+            container.innerHTML = '';
+            
+            arr.forEach((val, idx) => {
+                const element = document.createElement('div');
+                element.className = 'array-element';
+                element.textContent = val;
+                element.id = `element-${idx}`;
+                
+                const indexLabel = document.createElement('div');
+                indexLabel.className = 'index-label';
+                indexLabel.textContent = idx;
+                element.appendChild(indexLabel);
+                
+                container.appendChild(element);
+            });
+        }
+
+        function updateStatus(message) {
+            document.getElementById('status').textContent = message;
+        }
+
+        async function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function partition(low, high, targetIdx) {
+            if (low > high) return -1;
+            
+            updateStatus(`Partitioning range [${low}, ${high}], looking for index ${targetIdx}`);
+            await sleep(1000);
+            
+            // Highlight pivot
+            const pivotIdx = high;
+            const pivot = arr[pivotIdx];
+            document.getElementById(`element-${pivotIdx}`).classList.add('pivot');
+            
+            updateStatus(`Pivot selected: ${pivot} at index ${pivotIdx}`);
+            await sleep(1000);
+            
+            let i = low;
+            
+            // Partition process
+            for (let j = low; j <= high; j++) {
+                const currentElement = document.getElementById(`element-${j}`);
+                currentElement.classList.add('comparing');
+                
+                if (arr[j] <= pivot) {
+                    updateStatus(`${arr[j]} ≤ ${pivot}, moving to left partition`);
+                    
+                    if (i !== j) {
+                        // Swap animation
+                        await sleep(500);
+                        [arr[i], arr[j]] = [arr[j], arr[i]];
+                        renderArray();
+                        document.getElementById(`element-${pivotIdx}`).classList.add('pivot');
+                    }
+                    
+                    document.getElementById(`element-${i}`).classList.add('left-partition');
+                    i++;
+                } else {
+                    updateStatus(`${arr[j]} > ${pivot}, stays in right partition`);
+                    if (j !== pivotIdx) {
+                        document.getElementById(`element-${j}`).classList.add('right-partition');
+                    }
+                }
+                
+                await sleep(800);
+                currentElement.classList.remove('comparing');
+            }
+            
+            const finalPivotIdx = i - 1;
+            
+            // Clear all classes and re-render
+            await sleep(500);
+            renderArray();
+            
+            // Show final partition state
+            for (let x = low; x < finalPivotIdx; x++) {
+                document.getElementById(`element-${x}`).classList.add('left-partition');
+            }
+            document.getElementById(`element-${finalPivotIdx}`).classList.add('pivot');
+            for (let x = finalPivotIdx + 1; x <= high; x++) {
+                document.getElementById(`element-${x}`).classList.add('right-partition');
+            }
+            
+            await sleep(1000);
+            
+            if (finalPivotIdx === targetIdx) {
+                document.getElementById(`element-${finalPivotIdx}`).classList.remove('pivot');
+                document.getElementById(`element-${finalPivotIdx}`).classList.add('target');
+                const type = findLargest ? "largest" : "smallest";
+                updateStatus(`🎉 Found! ${k}${getOrdinal(k)} ${type} element is ${arr[finalPivotIdx]} at index ${finalPivotIdx}`);
+                return finalPivotIdx;
+            } else if (finalPivotIdx < targetIdx) {
+                updateStatus(`Pivot index ${finalPivotIdx} < target ${targetIdx}. Searching right half.`);
+                await sleep(1500);
+                renderArray(); // Clear partition colors
+                return await partition(finalPivotIdx + 1, high, targetIdx);
+            } else {
+                updateStatus(`Pivot index ${finalPivotIdx} > target ${targetIdx}. Searching left half.`);
+                await sleep(1500);
+                renderArray(); // Clear partition colors
+                return await partition(low, finalPivotIdx - 1, targetIdx);
+            }
+        }
+
+        async function startAnimation() {
+            if (isAnimating) return;
+            isAnimating = true;
+            
+            updateIndexDemo(); // Update k and findType from inputs
+            
+            arr = [...originalArr];
+            renderArray();
+            
+            const type = findLargest ? "largest" : "smallest";
+            updateStatus(`Starting QuickSelect: Finding ${k}${getOrdinal(k)} ${type} (target index: ${targetIndex})`);
+            await sleep(1500);
+            
+            await partition(0, arr.length - 1, targetIndex);
+            isAnimating = false;
+        }
+
+        function resetAnimation() {
+            if (isAnimating) return;
+            updateIndexDemo();
+            arr = [...originalArr];
+            renderArray();
+            const type = findLargest ? "largest" : "smallest";
+            updateStatus(`Ready to find ${k}${getOrdinal(k)} ${type} element (target index: ${targetIndex})`);
+        }
+
+        // Add event listeners for inputs
+        document.addEventListener('DOMContentLoaded', function() {
+            const kInput = document.getElementById('kInput');
+            const radioButtons = document.querySelectorAll('input[name="findType"]');
+            
+            kInput.addEventListener('input', updateIndexDemo);
+            radioButtons.forEach(radio => {
+                radio.addEventListener('change', updateIndexDemo);
+            });
+            
+            updateIndexDemo();
+        });
+
+        // Initialize
+        renderArray();
+        updateIndexDemo();
+    </script>
+</body>
+</html>
