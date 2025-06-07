@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zero Moving Algorithm Animation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .algorithm-section {
+            margin: 30px 0;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            background: #f9f9f9;
+        }
+        
+        .algorithm-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #444;
+            margin-bottom: 15px;
+        }
+        
+        .array-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .array-element {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 2px;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.5s ease;
+            border-radius: 8px;
+        }
+        
+        .zero {
+            background-color: #ff6b6b;
+            color: white;
+        }
+        
+        .non-zero {
+            background-color: #4ecdc4;
+            color: white;
+        }
+        
+        .pointer {
+            background-color: #ffd93d;
+            border: 3px solid #ffb74d;
+        }
+        
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 5px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .step-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .pointer-info {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        
+        .pointer-label {
+            background: #fff3e0;
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 2px solid #ff9800;
+            font-weight: bold;
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .legend-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Zero Moving Algorithm Visualization</h1>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-box zero"></div>
+                <span>Zero</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box non-zero"></div>
+                <span>Non-Zero</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box pointer"></div>
+                <span>Active Pointer</span>
+            </div>
+        </div>
+        
+        <!-- Move Zeros to Start -->
+        <div class="algorithm-section">
+            <div class="algorithm-title">🔄 Move Zeros to Start (Right to Left scan)</div>
+            <div class="array-container" id="startArray"></div>
+            <div class="pointer-info">
+                <div class="pointer-label">i (scanner): <span id="startI">8</span></div>
+                <div class="pointer-label">j (placer): <span id="startJ">8</span></div>
+            </div>
+            <div class="step-info" id="startInfo">
+                Ready to start! We scan from right to left, moving non-zeros to the right side.
+            </div>
+            <div class="controls">
+                <button onclick="stepMoveToStart()" id="startStepBtn">Next Step</button>
+                <button onclick="resetMoveToStart()">Reset</button>
+                <button onclick="autoRunStart()" id="startAutoBtn">Auto Run</button>
+            </div>
+        </div>
+        
+        <!-- Move Zeros to End -->
+        <div class="algorithm-section">
+            <div class="algorithm-title">🔄 Move Zeros to End (Left to Right scan)</div>
+            <div class="array-container" id="endArray"></div>
+            <div class="pointer-info">
+                <div class="pointer-label">i (scanner): <span id="endI">0</span></div>
+                <div class="pointer-label">j (placer): <span id="endJ">0</span></div>
+            </div>
+            <div class="step-info" id="endInfo">
+                Ready to start! We scan from left to right, moving non-zeros to the left side.
+            </div>
+            <div class="controls">
+                <button onclick="stepMoveToEnd()" id="endStepBtn">Next Step</button>
+                <button onclick="resetMoveToEnd()">Reset</button>
+                <button onclick="autoRunEnd()" id="endAutoBtn">Auto Run</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initial array
+        const originalArray = [1, 0, 2, 3, 0, 4, 5, 0, 10];
+        
+        // State variables for "Move to Start"
+        let startArray = [...originalArray];
+        let startI = startArray.length - 1;
+        let startJ = startArray.length - 1;
+        let startComplete = false;
+        
+        // State variables for "Move to End"
+        let endArray = [...originalArray];
+        let endI = 0;
+        let endJ = 0;
+        let endComplete = false;
+        
+        function renderArray(containerId, array, iPos, jPos, completed = false) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            array.forEach((value, index) => {
+                const element = document.createElement('div');
+                element.className = 'array-element';
+                element.textContent = value;
+                
+                if (value === 0) {
+                    element.classList.add('zero');
+                } else {
+                    element.classList.add('non-zero');
+                }
+                
+                if (!completed && (index === iPos || index === jPos)) {
+                    element.classList.add('pointer');
+                }
+                
+                container.appendChild(element);
+            });
+        }
+        
+        function swap(arr, i, j) {
+            const temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
+        }
+        
+        // Move to Start functions
+        function stepMoveToStart() {
+            if (startComplete || startI < 0) {
+                startComplete = true;
+                document.getElementById('startInfo').textContent = '✅ Complete! All zeros moved to start.';
+                document.getElementById('startStepBtn').disabled = true;
+                return;
+            }
+            
+            if (startArray[startI] !== 0) {
+                // Found non-zero, swap with j position
+                swap(startArray, startI, startJ);
+                document.getElementById('startInfo').textContent = 
+                    `Found non-zero ${startArray[startJ]} at position ${startI}. Swapped with position ${startJ}. Moving both pointers.`;
+                startI--;
+                startJ--;
+            } else {
+                // Found zero, just move i
+                document.getElementById('startInfo').textContent = 
+                    `Found zero at position ${startI}. Leave it here and continue scanning.`;
+                startI--;
+            }
+            
+            document.getElementById('startI').textContent = startI;
+            document.getElementById('startJ').textContent = startJ;
+            renderArray('startArray', startArray, startI, startJ, startComplete);
+        }
+        
+        function resetMoveToStart() {
+            startArray = [...originalArray];
+            startI = startArray.length - 1;
+            startJ = startArray.length - 1;
+            startComplete = false;
+            document.getElementById('startI').textContent = startI;
+            document.getElementById('startJ').textContent = startJ;
+            document.getElementById('startInfo').textContent = 'Ready to start! We scan from right to left, moving non-zeros to the right side.';
+            document.getElementById('startStepBtn').disabled = false;
+            renderArray('startArray', startArray, startI, startJ);
+        }
+        
+        function autoRunStart() {
+            const btn = document.getElementById('startAutoBtn');
+            if (btn.textContent === 'Auto Run') {
+                btn.textContent = 'Running...';
+                btn.disabled = true;
+                const interval = setInterval(() => {
+                    stepMoveToStart();
+                    if (startComplete) {
+                        clearInterval(interval);
+                        btn.textContent = 'Auto Run';
+                        btn.disabled = false;
+                    }
+                }, 1000);
+            }
+        }
+        
+        // Move to End functions
+        function stepMoveToEnd() {
+            if (endComplete || endI >= endArray.length) {
+                endComplete = true;
+                document.getElementById('endInfo').textContent = '✅ Complete! All zeros moved to end.';
+                document.getElementById('endStepBtn').disabled = true;
+                return;
+            }
+            
+            if (endArray[endI] !== 0) {
+                // Found non-zero, swap with j position
+                swap(endArray, endI, endJ);
+                document.getElementById('endInfo').textContent = 
+                    `Found non-zero ${endArray[endJ]} at position ${endI}. Swapped with position ${endJ}. Moving both pointers.`;
+                endI++;
+                endJ++;
+            } else {
+                // Found zero, just move i
+                document.getElementById('endInfo').textContent = 
+                    `Found zero at position ${endI}. Leave it here and continue scanning.`;
+                endI++;
+            }
+            
+            document.getElementById('endI').textContent = endI;
+            document.getElementById('endJ').textContent = endJ;
+            renderArray('endArray', endArray, endI, endJ, endComplete);
+        }
+        
+        function resetMoveToEnd() {
+            endArray = [...originalArray];
+            endI = 0;
+            endJ = 0;
+            endComplete = false;
+            document.getElementById('endI').textContent = endI;
+            document.getElementById('endJ').textContent = endJ;
+            document.getElementById('endInfo').textContent = 'Ready to start! We scan from left to right, moving non-zeros to the left side.';
+            document.getElementById('endStepBtn').disabled = false;
+            renderArray('endArray', endArray, endI, endJ);
+        }
+        
+        function autoRunEnd() {
+            const btn = document.getElementById('endAutoBtn');
+            if (btn.textContent === 'Auto Run') {
+                btn.textContent = 'Running...';
+                btn.disabled = true;
+                const interval = setInterval(() => {
+                    stepMoveToEnd();
+                    if (endComplete) {
+                        clearInterval(interval);
+                        btn.textContent = 'Auto Run';
+                        btn.disabled = false;
+                    }
+                }, 1000);
+            }
+        }
+        
+        // Initialize
+        renderArray('startArray', startArray, startI, startJ);
+        renderArray('endArray', endArray, endI, endJ);
+    </script>
+</body>
+</html>
