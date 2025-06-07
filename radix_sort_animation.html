@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Radix Sort Complete Visualization</title>
+    <title>Radix Sort - Following Your Code</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Monaco', 'Courier New', monospace;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             margin: 0;
             padding: 20px;
-            min-height: 100vh;
             color: white;
+            min-height: 100vh;
         }
 
         .container {
@@ -21,30 +21,31 @@
         }
 
         h1 {
-            font-size: 2.5em;
-            margin-bottom: 30px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .control-panel {
-            margin-bottom: 30px;
+            font-size: 2.8em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .start-btn {
-            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
             border: none;
-            padding: 15px 30px;
-            font-size: 1.2em;
             color: white;
-            border-radius: 50px;
+            padding: 18px 40px;
+            font-size: 1.3em;
+            font-weight: bold;
+            border-radius: 30px;
             cursor: pointer;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
         }
 
         .start-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.4);
         }
 
         .start-btn:disabled {
@@ -53,563 +54,582 @@
             transform: none;
         }
 
-        .info-panel {
-            background: rgba(255,255,255,0.1);
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            backdrop-filter: blur(10px);
-        }
-
-        .current-step {
-            font-size: 1.3em;
-            margin-bottom: 10px;
-            font-weight: bold;
-        }
-
-        .digit-info {
+        .code-step {
+            background: rgba(0,0,0,0.4);
+            border-left: 4px solid #4ecdc4;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            font-family: 'Monaco', monospace;
+            text-align: left;
             font-size: 1.1em;
-            color: #ffd700;
-        }
-
-        .array-container {
-            background: rgba(255,255,255,0.1);
-            padding: 30px;
-            border-radius: 20px;
-            margin-bottom: 20px;
             backdrop-filter: blur(10px);
         }
 
-        .array-label {
-            font-size: 1.2em;
-            margin-bottom: 15px;
-            font-weight: bold;
-        }
-
-        .array-display {
+        .main-array {
             display: flex;
             justify-content: center;
-            gap: 10px;
-            margin-bottom: 10px;
+            gap: 12px;
+            margin: 25px 0;
             flex-wrap: wrap;
         }
 
-        .number-box {
-            background: linear-gradient(45deg, #4ecdc4, #26a69a);
+        .array-item {
+            background: linear-gradient(145deg, #667eea, #764ba2);
             color: white;
-            padding: 15px;
-            border-radius: 10px;
-            font-size: 1.1em;
+            padding: 15px 20px;
+            border-radius: 12px;
+            font-size: 1.4em;
             font-weight: bold;
-            min-width: 60px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
             transition: all 0.5s ease;
+            min-width: 70px;
             position: relative;
         }
 
-        .number-box.highlight {
-            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
-            transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(255,107,107,0.4);
+        .array-item.processing {
+            background: linear-gradient(145deg, #ffd700, #ff8c00);
+            transform: scale(1.15);
+            animation: glow 1s infinite alternate;
         }
 
-        .digit-highlight {
-            position: absolute;
-            bottom: -5px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #ffd700;
-            color: #333;
-            padding: 2px 6px;
-            border-radius: 5px;
-            font-size: 0.8em;
-            font-weight: bold;
+        @keyframes glow {
+            from { box-shadow: 0 6px 20px rgba(255,215,0,0.4); }
+            to { box-shadow: 0 8px 30px rgba(255,215,0,0.8); }
         }
 
-        .arrays-column {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .freq-container, .prefix-container {
-            background: rgba(255,255,255,0.1);
+        .digit-extraction {
+            background: rgba(255,215,0,0.2);
             padding: 20px;
             border-radius: 15px;
-            backdrop-filter: blur(10px);
+            margin: 25px 0;
+            border: 2px solid #ffd700;
         }
 
-        .array-grid {
-            display: grid;
-            grid-template-columns: repeat(10, 1fr);
+        .freq-array, .prefix-array {
+            display: flex;
+            justify-content: center;
             gap: 8px;
-            margin-top: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
         }
 
-        .array-cell {
-            background: rgba(255,255,255,0.2);
-            padding: 10px;
-            border-radius: 8px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
-
-        .array-cell.active {
-            background: linear-gradient(45deg, #ffd700, #ffed4e);
+        .freq-item, .prefix-item {
+            background: linear-gradient(145deg, #ff9a9e, #fecfef);
             color: #333;
-            transform: scale(1.1);
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-weight: bold;
+            text-align: center;
+            min-width: 50px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.5s ease;
         }
 
-        .array-index {
-            font-size: 0.8em;
-            color: #ccc;
+        .freq-item.updating, .prefix-item.updating {
+            background: linear-gradient(145deg, #4ecdc4, #44a08d);
+            color: white;
+            transform: scale(1.2);
+            animation: pulse 0.8s ease;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1.2); }
+            50% { transform: scale(1.3); }
+        }
+
+        .freq-label, .prefix-label {
+            font-size: 0.9em;
+            opacity: 0.8;
             margin-bottom: 5px;
         }
 
-        .sorting-container {
-            background: rgba(255,255,255,0.1);
-            padding: 30px;
-            border-radius: 20px;
-            margin-bottom: 20px;
-            backdrop-filter: blur(10px);
+        .result-building {
+            background: rgba(76, 175, 80, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 25px 0;
+            border: 2px solid #4caf50;
         }
 
-        .sorting-process {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            align-items: start;
-        }
-
-        .original-array, .sorted-array {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .array-item {
-            background: linear-gradient(45deg, #a8e6cf, #88d8c0);
-            color: #333;
-            padding: 10px 15px;
-            border-radius: 8px;
+        .step-title {
+            font-size: 1.6em;
             font-weight: bold;
-            transition: all 0.5s ease;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            margin: 25px 0 15px 0;
+            color: #4ecdc4;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
         }
 
-        .array-item.moving {
-            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
-            color: white;
-            transform: translateX(20px);
-        }
-
-        .item-digit {
-            background: rgba(255,255,255,0.3);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.9em;
-        }
-
-        .explanation {
+        .algorithm-info {
             background: rgba(255,255,255,0.1);
             padding: 20px;
             border-radius: 15px;
-            margin-top: 20px;
+            margin: 20px 0;
             backdrop-filter: blur(10px);
-            text-align: left;
-        }
-
-        .step-details {
             font-size: 1.1em;
             line-height: 1.6;
         }
 
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .divisor-info {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            padding: 15px 25px;
+            border-radius: 20px;
+            font-size: 1.3em;
+            font-weight: bold;
+            margin: 20px 0;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
         }
 
-        .animate-in {
-            animation: slideIn 0.5s ease;
+        .final-result {
+            background: linear-gradient(45deg, #4caf50, #45a049);
+            padding: 25px;
+            border-radius: 20px;
+            margin: 30px 0;
+            font-size: 1.4em;
+            font-weight: bold;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            animation: celebration 2s ease infinite;
         }
 
-        @keyframes pulse {
+        @keyframes celebration {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+            50% { transform: scale(1.02); }
         }
 
-        .pulse {
-            animation: pulse 1s ease infinite;
+        .index-labels {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
         }
 
-        .hidden {
-            display: none;
+        .index-label {
+            font-size: 0.9em;
+            opacity: 0.7;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .progress-indicator {
+            background: rgba(255,255,255,0.2);
+            height: 6px;
+            border-radius: 3px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ecdc4, #44a08d);
+            border-radius: 3px;
+            transition: width 0.8s ease;
+            width: 0%;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🔢 Complete Radix Sort Visualization</h1>
+        <h1>🔢 Radix Sort - Following Your Code Structure</h1>
         
-        <div class="control-panel">
-            <button id="startBtn" class="start-btn">Start Animation</button>
+        <button class="start-btn" onclick="startRadixSort()" id="startBtn">
+            🚀 Start Radix Sort Animation
+        </button>
+
+        <div class="progress-indicator">
+            <div class="progress-fill" id="progressFill"></div>
         </div>
 
-        <div class="info-panel">
-            <div id="currentStep" class="current-step">Click Start to begin the animation</div>
-            <div id="digitInfo" class="digit-info">This will show frequency array, prefix sum, and sorting steps</div>
+        <div class="algorithm-info" id="algorithmInfo">
+            <strong>Input Array:</strong> [999, 888, 777, 666, 555, 444, 333, 222, 111]<br>
+            <strong>Algorithm:</strong> Radix Sort using Counting Sort for each digit position<br>
+            <strong>Your Code Structure:</strong> radixSort() → countingSortByDigit() → frequency array → prefix sum → result building
         </div>
 
-        <div class="array-container">
-            <div class="array-label">Current Array State</div>
-            <div id="arrayDisplay" class="array-display"></div>
+        <div class="code-step" id="codeStep">
+            Ready to start - Click the button above!
         </div>
 
-        <div id="freqPrefixContainer" class="arrays-column hidden">
-            <div class="freq-container">
-                <div class="array-label">Frequency Array (Count of each digit 0-9)</div>
-                <div class="array-grid" id="freqArray"></div>
-            </div>
-            <div class="prefix-container">
-                <div class="array-label">Prefix Sum Array (Cumulative positions)</div>
-                <div class="array-grid" id="prefixArray"></div>
-            </div>
+        <div class="divisor-info" id="divisorInfo" style="display: none;"></div>
+
+        <div class="step-title" id="stepTitle"></div>
+
+        <div class="main-array" id="mainArray"></div>
+
+        <div class="digit-extraction" id="digitExtraction" style="display: none;"></div>
+
+        <div id="frequencySection" style="display: none;">
+            <div class="step-title">📊 Frequency Array (freq[10])</div>
+            <div class="index-labels" id="freqIndexLabels"></div>
+            <div class="freq-array" id="freqArray"></div>
         </div>
 
-        <div id="sortingContainer" class="sorting-container hidden">
-            <div class="array-label">Counting Sort Process (Right to Left)</div>
-            <div class="sorting-process">
-                <div>
-                    <h3>Original Order</h3>
-                    <div id="originalList" class="original-array"></div>
-                </div>
-                <div>
-                    <h3>Sorted Result</h3>
-                    <div id="sortedList" class="sorted-array"></div>
-                </div>
-            </div>
+        <div id="prefixSection" style="display: none;">
+            <div class="step-title">🔄 Converting to Prefix Sum Array</div>
+            <div class="index-labels" id="prefixIndexLabels"></div>
+            <div class="prefix-array" id="prefixArray"></div>
         </div>
 
-        <div class="explanation">
-            <div id="stepDetails" class="step-details">
-                <strong>Complete Radix Sort Process:</strong><br>
-                1. <strong>Frequency Array:</strong> Count occurrences of each digit (0-9)<br>
-                2. <strong>Prefix Sum:</strong> Convert frequencies to cumulative positions<br>
-                3. <strong>Stable Sorting:</strong> Place elements in correct positions (right-to-left)<br>
-                4. <strong>Repeat:</strong> Process next digit position
-            </div>
+        <div class="result-building" id="resultSection" style="display: none;">
+            <div class="step-title">🏗️ Building Sorted Array (Right to Left)</div>
+            <div id="resultArray"></div>
         </div>
     </div>
 
     <script>
-        class CompleteRadixSortVisualizer {
-            constructor() {
-                // Better array for demonstration
-                this.originalArray = [170, 45, 75, 90, 2, 802, 24, 66];
-                this.currentArray = [...this.originalArray];
-                this.currentStep = 0;
-                this.isAnimating = false;
-                this.digitPosition = 1;
-                
-                this.startBtn = document.getElementById('startBtn');
-                this.arrayDisplay = document.getElementById('arrayDisplay');
-                this.currentStepEl = document.getElementById('currentStep');
-                this.digitInfoEl = document.getElementById('digitInfo');
-                this.freqPrefixContainer = document.getElementById('freqPrefixContainer');
-                this.freqArray = document.getElementById('freqArray');
-                this.prefixArray = document.getElementById('prefixArray');
-                this.sortingContainer = document.getElementById('sortingContainer');
-                this.originalList = document.getElementById('originalList');
-                this.sortedList = document.getElementById('sortedList');
-                this.stepDetailsEl = document.getElementById('stepDetails');
-                
-                this.startBtn.addEventListener('click', () => this.startAnimation());
-                
-                this.displayArray();
-            }
+        let testArr = [999, 888, 777, 666, 555, 444, 333, 222, 111];
+        let currentArray = [...testArr];
+        let isAnimating = false;
+        let maxNumber = 0;
+        let currentDivisor = 1;
+        let animationSpeed = 2000;
 
-            displayArray(highlightDigit = false) {
-                this.arrayDisplay.innerHTML = '';
-                this.currentArray.forEach((num, index) => {
-                    const box = document.createElement('div');
-                    box.className = 'number-box animate-in';
-                    box.textContent = num;
-                    
-                    if (highlightDigit) {
-                        const digit = Math.floor(num / this.digitPosition) % 10;
-                        const digitEl = document.createElement('div');
-                        digitEl.className = 'digit-highlight';
-                        digitEl.textContent = digit;
-                        box.appendChild(digitEl);
-                        box.classList.add('highlight');
-                    }
-                    
-                    this.arrayDisplay.appendChild(box);
-                });
-            }
+        function updateCodeStep(code) {
+            document.getElementById('codeStep').innerHTML = `<strong>Current Code Step:</strong><br>${code}`;
+        }
 
-            displayFrequencyArray(frequencies) {
-                this.freqArray.innerHTML = '';
-                for (let i = 0; i < 10; i++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'array-cell';
-                    cell.innerHTML = `
-                        <div class="array-index">[${i}]</div>
-                        <div>${frequencies[i] || 0}</div>
-                    `;
-                    this.freqArray.appendChild(cell);
-                }
-            }
+        function updateProgress(percentage) {
+            document.getElementById('progressFill').style.width = percentage + '%';
+        }
 
-            displayPrefixArray(prefixSums) {
-                this.prefixArray.innerHTML = '';
-                for (let i = 0; i < 10; i++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'array-cell';
-                    cell.innerHTML = `
-                        <div class="array-index">[${i}]</div>
-                        <div>${prefixSums[i] || 0}</div>
-                    `;
-                    this.prefixArray.appendChild(cell);
-                }
-            }
-
-            highlightFreqCell(digit) {
-                const cells = this.freqArray.children;
-                // Remove previous highlights
-                for (let cell of cells) {
-                    cell.classList.remove('active');
-                }
-                if (digit >= 0 && digit < 10) {
-                    cells[digit].classList.add('active');
-                }
-            }
-
-            highlightPrefixCell(digit) {
-                const cells = this.prefixArray.children;
-                // Remove previous highlights
-                for (let cell of cells) {
-                    cell.classList.remove('active');
-                }
-                if (digit >= 0 && digit < 10) {
-                    cells[digit].classList.add('active');
-                }
-            }
-
-            setupSortingLists() {
-                this.originalList.innerHTML = '';
-                this.sortedList.innerHTML = '';
+        function displayMainArray(arr, highlightIndex = -1) {
+            const container = document.getElementById('mainArray');
+            container.innerHTML = '';
+            
+            arr.forEach((num, index) => {
+                const item = document.createElement('div');
+                item.className = 'array-item';
+                item.textContent = num;
                 
-                // Show original array
-                this.currentArray.forEach((num, index) => {
-                    const item = document.createElement('div');
-                    item.className = 'array-item';
-                    item.id = `original-${index}`;
-                    const digit = Math.floor(num / this.digitPosition) % 10;
-                    item.innerHTML = `
-                        <span>${num}</span>
-                        <span class="item-digit">digit: ${digit}</span>
-                    `;
-                    this.originalList.appendChild(item);
-                });
-            }
-
-            getDigitName(position) {
-                if (position === 1) return 'Units';
-                if (position === 10) return 'Tens';
-                if (position === 100) return 'Hundreds';
-                return `${position}s`;
-            }
-
-            async startAnimation() {
-                if (this.isAnimating) return;
-                
-                this.isAnimating = true;
-                this.startBtn.disabled = true;
-                this.currentArray = [...this.originalArray];
-                this.digitPosition = 1;
-                
-                // Hide containers initially
-                this.freqPrefixContainer.classList.add('hidden');
-                this.sortingContainer.classList.add('hidden');
-                
-                this.currentStepEl.textContent = "Starting Complete Radix Sort Animation...";
-                this.stepDetailsEl.innerHTML = "<strong>Starting:</strong> We'll sort [170, 45, 75, 90, 2, 802, 24, 66] using Radix Sort with complete internal steps.";
-                
-                await this.sleep(2000);
-                
-                // Find max number
-                const maxNumber = Math.max(...this.currentArray);
-                this.currentStepEl.textContent = `Maximum number: ${maxNumber} (${maxNumber.toString().length} digits)`;
-                this.stepDetailsEl.innerHTML = `<strong>Analysis:</strong> Maximum number is ${maxNumber}, which has ${maxNumber.toString().length} digits. We need ${maxNumber.toString().length} passes through the algorithm.`;
-                
-                await this.sleep(2000);
-                
-                // Process each digit position
-                let tempMax = maxNumber;
-                while (tempMax > 0) {
-                    await this.completeDigitSort();
-                    tempMax = Math.floor(tempMax / 10);
-                    this.digitPosition *= 10;
+                if (index === highlightIndex) {
+                    item.classList.add('processing');
                 }
                 
-                // Final result
-                this.freqPrefixContainer.classList.add('hidden');
-                this.sortingContainer.classList.add('hidden');
-                this.currentStepEl.textContent = "✅ Radix Sort Complete!";
-                this.digitInfoEl.textContent = "Array is now fully sorted: [" + this.currentArray.join(', ') + "]";
-                this.stepDetailsEl.innerHTML = "<strong>Completed!</strong> The array has been successfully sorted using Radix Sort. Each digit position was processed with frequency counting, prefix sums, and stable sorting.";
-                
-                this.displayArray();
-                
-                this.startBtn.disabled = false;
-                this.isAnimating = false;
+                container.appendChild(item);
+            });
+        }
+
+        function createFrequencyArray() {
+            // Create index labels
+            const indexContainer = document.getElementById('freqIndexLabels');
+            indexContainer.innerHTML = '';
+            for (let i = 0; i < 10; i++) {
+                const label = document.createElement('div');
+                label.className = 'index-label';
+                label.textContent = `[${i}]`;
+                indexContainer.appendChild(label);
             }
 
-            async completeDigitSort() {
-                const digitName = this.getDigitName(this.digitPosition);
-                
-                // Step 1: Show current digit being processed
-                this.currentStepEl.textContent = `Step 1: Processing ${digitName} Place`;
-                this.digitInfoEl.textContent = `Extracting ${digitName.toLowerCase()} digit from each number`;
-                this.stepDetailsEl.innerHTML = `<strong>Step 1 - Extract Digits:</strong> We're processing the ${digitName.toLowerCase()} place (divisor = ${this.digitPosition}). Each number's ${digitName.toLowerCase()} digit will be highlighted.`;
-                
-                this.displayArray(true);
-                await this.sleep(3000);
-                
-                // Step 2: Build frequency array
-                this.currentStepEl.textContent = `Step 2: Building Frequency Array`;
-                this.digitInfoEl.textContent = `Counting how many numbers have each digit (0-9)`;
-                this.stepDetailsEl.innerHTML = `<strong>Step 2 - Frequency Count:</strong> Count how many numbers have each digit (0-9) in the ${digitName.toLowerCase()} position.`;
-                
-                this.freqPrefixContainer.classList.remove('hidden');
-                
-                const frequencies = new Array(10).fill(0);
-                this.displayFrequencyArray(frequencies);
-                
-                // Count frequencies with animation
-                for (let i = 0; i < this.currentArray.length; i++) {
-                    const num = this.currentArray[i];
-                    const digit = Math.floor(num / this.digitPosition) % 10;
-                    frequencies[digit]++;
-                    
-                    this.highlightFreqCell(digit);
-                    this.displayFrequencyArray(frequencies);
-                    await this.sleep(800);
-                }
-                
-                await this.sleep(1500);
-                
-                // Step 3: Build prefix sum array
-                this.currentStepEl.textContent = `Step 3: Building Prefix Sum Array`;
-                this.digitInfoEl.textContent = `Converting frequencies to cumulative positions`;
-                this.stepDetailsEl.innerHTML = `<strong>Step 3 - Prefix Sums:</strong> Convert frequency counts to cumulative positions. Each value shows where elements with that digit should end up.`;
-                
-                const prefixSums = [...frequencies];
-                this.displayPrefixArray(prefixSums);
-                
-                // Build prefix sums with animation
-                for (let i = 1; i < 10; i++) {
-                    prefixSums[i] = prefixSums[i] + prefixSums[i - 1];
-                    this.highlightPrefixCell(i);
-                    this.displayPrefixArray(prefixSums);
-                    await this.sleep(800);
-                }
-                
-                await this.sleep(1500);
-                
-                // Step 4: Stable sorting process
-                this.currentStepEl.textContent = `Step 4: Stable Sorting (Right to Left)`;
-                this.digitInfoEl.textContent = `Placing elements in correct positions using prefix sums`;
-                this.stepDetailsEl.innerHTML = `<strong>Step 4 - Stable Sort:</strong> Process elements from right to left, using prefix sums to place each element in its correct position while maintaining stability.`;
-                
-                this.sortingContainer.classList.remove('hidden');
-                this.setupSortingLists();
-                
-                const sortedArray = new Array(this.currentArray.length);
-                const workingPrefixSums = [...prefixSums];
-                
-                // Process from right to left for stability
-                for (let i = this.currentArray.length - 1; i >= 0; i--) {
-                    const num = this.currentArray[i];
-                    const digit = Math.floor(num / this.digitPosition) % 10;
-                    const correctIndex = workingPrefixSums[digit] - 1;
-                    
-                    // Highlight current element
-                    const originalItem = document.getElementById(`original-${i}`);
-                    if (originalItem) {
-                        originalItem.classList.add('moving');
-                    }
-                    
-                    // Highlight prefix sum being used
-                    this.highlightPrefixCell(digit);
-                    
-                    await this.sleep(1000);
-                    
-                    // Add to sorted list
-                    const sortedItem = document.createElement('div');
-                    sortedItem.className = 'array-item animate-in';
-                    sortedItem.innerHTML = `
-                        <span>${num}</span>
-                        <span class="item-digit">pos: ${correctIndex}</span>
-                    `;
-                    
-                    // Insert at correct visual position
-                    const existingItems = this.sortedList.children;
-                    if (correctIndex < existingItems.length) {
-                        this.sortedList.insertBefore(sortedItem, existingItems[correctIndex]);
-                    } else {
-                        this.sortedList.appendChild(sortedItem);
-                    }
-                    
-                    sortedArray[correctIndex] = num;
-                    workingPrefixSums[digit]--;
-                    
-                    // Update prefix sum display
-                    this.displayPrefixArray(workingPrefixSums);
-                    
-                    await this.sleep(1500);
-                    
-                    if (originalItem) {
-                        originalItem.classList.remove('moving');
-                    }
-                }
-                
-                // Update current array
-                this.currentArray = sortedArray;
-                
-                await this.sleep(2000);
-                
-                // Show final state for this digit
-                this.currentStepEl.textContent = `${digitName} Place Complete`;
-                this.digitInfoEl.textContent = `Result: [${this.currentArray.join(', ')}]`;
-                this.displayArray();
-                
-                await this.sleep(2000);
-                
-                // Hide detail containers for next iteration
-                this.freqPrefixContainer.classList.add('hidden');
-                this.sortingContainer.classList.add('hidden');
-            }
-
-            sleep(ms) {
-                return new Promise(resolve => setTimeout(resolve, ms));
+            // Create frequency array
+            const container = document.getElementById('freqArray');
+            container.innerHTML = '';
+            for (let i = 0; i < 10; i++) {
+                const item = document.createElement('div');
+                item.className = 'freq-item';
+                item.id = `freq-${i}`;
+                item.innerHTML = `<div class="freq-label">digit ${i}</div><div>0</div>`;
+                container.appendChild(item);
             }
         }
 
-        // Initialize the visualizer when the page loads
-        document.addEventListener('DOMContentLoaded', () => {
-            new CompleteRadixSortVisualizer();
-        });
+        function createPrefixArray() {
+            // Create index labels
+            const indexContainer = document.getElementById('prefixIndexLabels');
+            indexContainer.innerHTML = '';
+            for (let i = 0; i < 10; i++) {
+                const label = document.createElement('div');
+                label.className = 'index-label';
+                label.textContent = `[${i}]`;
+                indexContainer.appendChild(label);
+            }
+
+            // Create prefix array
+            const container = document.getElementById('prefixArray');
+            container.innerHTML = '';
+            for (let i = 0; i < 10; i++) {
+                const item = document.createElement('div');
+                item.className = 'prefix-item';
+                item.id = `prefix-${i}`;
+                item.innerHTML = `<div class="freq-label">sum to ${i}</div><div>0</div>`;
+                container.appendChild(item);
+            }
+        }
+
+        async function updateFrequency(digit, newValue) {
+            const item = document.getElementById(`freq-${digit}`);
+            item.classList.add('updating');
+            item.innerHTML = `<div class="freq-label">digit ${digit}</div><div>${newValue}</div>`;
+            await sleep(800);
+            item.classList.remove('updating');
+        }
+
+        async function updatePrefix(index, newValue, isUpdating = false) {
+            const item = document.getElementById(`prefix-${index}`);
+            if (isUpdating) {
+                item.classList.add('updating');
+            }
+            item.innerHTML = `<div class="freq-label">sum to ${index}</div><div>${newValue}</div>`;
+            await sleep(600);
+            if (isUpdating) {
+                item.classList.remove('updating');
+            }
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function findMaxNumber() {
+            updateCodeStep(`
+                // Step 1: Find max number to know how many digits to process
+                int maxNumber = Integer.MIN_VALUE;
+                for (int i = 0; i < arr.length; i++) {
+                    if (arr[i] > maxNumber) {
+                        maxNumber = arr[i];
+                    }
+                }
+            `);
+
+            document.getElementById('stepTitle').textContent = '🔍 Step 1: Finding Maximum Number';
+            
+            let max = Number.MIN_SAFE_INTEGER;
+            for (let i = 0; i < currentArray.length; i++) {
+                displayMainArray(currentArray, i);
+                await sleep(animationSpeed / 3);
+                if (currentArray[i] > max) {
+                    max = currentArray[i];
+                }
+            }
+            
+            maxNumber = max;
+            document.getElementById('stepTitle').textContent = `🎯 Maximum Number Found: ${maxNumber}`;
+            displayMainArray(currentArray);
+            await sleep(animationSpeed);
+        }
+
+        async function countingSortByDigit(arr, divisor) {
+            const digitPlace = divisor === 1 ? 'units' : divisor === 10 ? 'tens' : divisor === 100 ? 'hundreds' : 'thousands';
+            
+            updateCodeStep(`
+                // countingSortByDigit(arr, ${divisor}) - Processing ${digitPlace} place
+                int[] freq = new int[10]; // For digits 0–9
+            `);
+
+            document.getElementById('divisorInfo').style.display = 'block';
+            document.getElementById('divisorInfo').textContent = `🎯 Processing ${digitPlace.toUpperCase()} place (divisor = ${divisor})`;
+
+            // Step 1: Create and show frequency array
+            document.getElementById('frequencySection').style.display = 'block';
+            createFrequencyArray();
+            await sleep(animationSpeed);
+
+            // Step 2: Count frequencies
+            updateCodeStep(`
+                // Count frequency of each digit at current place
+                for (int i = 0; i < arr.length; i++) {
+                    int currentDigit = (arr[i] / ${divisor}) % 10; // Get digit
+                    freq[currentDigit]++;
+                }
+            `);
+
+            document.getElementById('stepTitle').textContent = '📝 Counting Digit Frequencies';
+            
+            const freq = new Array(10).fill(0);
+            
+            for (let i = 0; i < arr.length; i++) {
+                displayMainArray(arr, i);
+                const currentDigit = Math.floor(arr[i] / divisor) % 10;
+                
+                document.getElementById('digitExtraction').style.display = 'block';
+                document.getElementById('digitExtraction').innerHTML = `
+                    <strong>Extracting digit from ${arr[i]}:</strong><br>
+                    (${arr[i]} ÷ ${divisor}) % 10 = ${currentDigit}<br>
+                    <strong>Incrementing freq[${currentDigit}]</strong>
+                `;
+                
+                freq[currentDigit]++;
+                await updateFrequency(currentDigit, freq[currentDigit]);
+                await sleep(animationSpeed / 2);
+            }
+
+            displayMainArray(arr);
+            document.getElementById('digitExtraction').style.display = 'none';
+            await sleep(animationSpeed);
+
+            // Step 3: Convert to prefix sums
+            updateCodeStep(`
+                // Convert frequencies to prefix sums for correct positions
+                for (int i = 1; i < freq.length; i++) {
+                    freq[i] = freq[i] + freq[i - 1];
+                }
+            `);
+
+            document.getElementById('stepTitle').textContent = '🔄 Converting to Prefix Sum Array';
+            document.getElementById('prefixSection').style.display = 'block';
+            createPrefixArray();
+            
+            // Copy initial frequencies to prefix array
+            for (let i = 0; i < 10; i++) {
+                await updatePrefix(i, freq[i]);
+            }
+            await sleep(animationSpeed);
+
+            // Calculate prefix sums
+            for (let i = 1; i < freq.length; i++) {
+                const oldValue = freq[i];
+                freq[i] = freq[i] + freq[i - 1];
+                await updatePrefix(i, freq[i], true);
+                await sleep(animationSpeed / 2);
+            }
+
+            await sleep(animationSpeed);
+
+            // Step 4: Build sorted array
+            updateCodeStep(`
+                // Build sorted array, process right-to-left for stability
+                int[] sortedArr = new int[arr.length];
+                for (int i = arr.length - 1; i >= 0; i--) {
+                    int currentDigit = (arr[i] / ${divisor}) % 10;
+                    int correctIndex = freq[currentDigit] - 1;
+                    sortedArr[correctIndex] = arr[i]; // Place element
+                    freq[currentDigit]--; // Update frequency
+                }
+            `);
+
+            document.getElementById('stepTitle').textContent = '🏗️ Building Final Sorted Array (Right to Left)';
+            document.getElementById('resultSection').style.display = 'block';
+            
+            const sortedArr = new Array(arr.length);
+            const resultContainer = document.getElementById('resultArray');
+            
+            // Initialize result display
+            resultContainer.innerHTML = '';
+            const resultDiv = document.createElement('div');
+            resultDiv.className = 'main-array';
+            for (let i = 0; i < arr.length; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'array-item';
+                slot.textContent = '?';
+                slot.style.opacity = '0.3';
+                resultDiv.appendChild(slot);
+            }
+            resultContainer.appendChild(resultDiv);
+
+            // Process from right to left
+            for (let i = arr.length - 1; i >= 0; i--) {
+                displayMainArray(arr, i);
+                
+                const currentDigit = Math.floor(arr[i] / divisor) % 10;
+                const correctIndex = freq[currentDigit] - 1;
+                sortedArr[correctIndex] = arr[i];
+                
+                // Update prefix array
+                await updatePrefix(currentDigit, freq[currentDigit] - 1, true);
+                freq[currentDigit]--;
+                
+                // Update result array
+                const slots = resultDiv.children;
+                slots[correctIndex].textContent = arr[i];
+                slots[correctIndex].style.opacity = '1';
+                slots[correctIndex].style.background = 'linear-gradient(145deg, #4caf50, #45a049)';
+                
+                await sleep(animationSpeed);
+            }
+
+            displayMainArray(sortedArr);
+            await sleep(animationSpeed);
+
+            // Hide sections for next iteration
+            document.getElementById('frequencySection').style.display = 'none';
+            document.getElementById('prefixSection').style.display = 'none';
+            document.getElementById('resultSection').style.display = 'none';
+
+            return sortedArr;
+        }
+
+        async function radixSort() {
+            updateCodeStep(`
+                // radixSort(testArr) - Main function
+                int[] testArr = {999, 888, 777, 666, 555, 444, 333, 222, 111};
+                System.out.println("Before sorting : " + Arrays.toString(testArr));
+            `);
+
+            document.getElementById('stepTitle').textContent = '🚀 Starting Radix Sort';
+            displayMainArray(currentArray);
+            await sleep(animationSpeed);
+
+            await findMaxNumber();
+
+            updateCodeStep(`
+                // Step 2: Process each digit place (units, tens, hundreds, ...)
+                int divisor = 1; // Start with units place
+                while (maxNumber > 0) {
+                    arr = countingSortByDigit(arr, divisor); // Sort by current digit
+                    maxNumber = maxNumber / 10; // Move to next digit
+                    divisor = divisor * 10; // Update divisor (1, 10, 100, ...)
+                }
+            `);
+
+            let tempMaxNumber = maxNumber;
+            currentDivisor = 1;
+            let step = 2;
+
+            while (tempMaxNumber > 0) {
+                updateProgress((step - 2) / 3 * 100);
+                currentArray = await countingSortByDigit(currentArray, currentDivisor);
+                tempMaxNumber = Math.floor(tempMaxNumber / 10);
+                currentDivisor *= 10;
+                step++;
+            }
+
+            updateProgress(100);
+            document.getElementById('divisorInfo').style.display = 'none';
+            document.getElementById('stepTitle').innerHTML = '🎉 Radix Sort Complete!';
+            
+            const finalResult = document.createElement('div');
+            finalResult.className = 'final-result';
+            finalResult.innerHTML = `
+                <strong>✅ SORTING COMPLETED!</strong><br>
+                Before: [${testArr.join(', ')}]<br>
+                After:  [${currentArray.join(', ')}]<br>
+                <em>Your code successfully sorted the array!</em>
+            `;
+            document.querySelector('.container').appendChild(finalResult);
+
+            updateCodeStep(`
+                // Final result
+                System.out.println("After sorting  : " + Arrays.toString(arr));
+                // Output: [111, 222, 333, 444, 555, 666, 777, 888, 999]
+            `);
+        }
+
+        async function startRadixSort() {
+            if (isAnimating) return;
+            
+            isAnimating = true;
+            const btn = document.getElementById('startBtn');
+            btn.disabled = true;
+            btn.textContent = '🔄 Animating...';
+            
+            // Reset everything
+            currentArray = [...testArr];
+            document.querySelector('.final-result')?.remove();
+            document.getElementById('frequencySection').style.display = 'none';
+            document.getElementById('prefixSection').style.display = 'none';
+            document.getElementById('resultSection').style.display = 'none';
+            document.getElementById('divisorInfo').style.display = 'none';
+            document.getElementById('digitExtraction').style.display = 'none';
+            updateProgress(0);
+            
+            await radixSort();
+            
+            isAnimating = false;
+            btn.disabled = false;
+            btn.textContent = '🔄 Restart Animation';
+        }
+
+        // Initialize
+        displayMainArray(currentArray);
     </script>
 </body>
 </html>
