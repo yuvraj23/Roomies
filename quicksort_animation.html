@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickSort Complete Algorithm Animation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .level-section {
+            margin: 25px 0;
+            padding: 20px;
+            border: 3px solid #e0e0e0;
+            border-radius: 12px;
+            background: #f8f9fa;
+        }
+        
+        .level-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 15px;
+            text-align: center;
+            padding: 10px;
+            background: #e9ecef;
+            border-radius: 8px;
+        }
+        
+        .active-level {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+        
+        .completed-level {
+            border-color: #007bff;
+            background: #cce5ff;
+        }
+        
+        .array-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 15px 0;
+            flex-wrap: wrap;
+            gap: 3px;
+        }
+        
+        .array-element {
+            width: 45px;
+            height: 45px;
+            border: 2px solid #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 14px;
+            border-radius: 6px;
+            transition: all 0.4s ease;
+        }
+        
+        .normal { background-color: #e9ecef; }
+        .pivot { 
+            background-color: #dc3545; 
+            color: white;
+            transform: scale(1.05);
+            border-color: #c82333;
+        }
+        .smaller { 
+            background-color: #28a745; 
+            color: white;
+        }
+        .larger { 
+            background-color: #fd7e14; 
+            color: white;
+        }
+        .pointer-i { 
+            border-color: #ffc107;
+            border-width: 3px;
+            box-shadow: 0 0 8px #ffc107;
+        }
+        .pointer-j { 
+            border-color: #6f42c1;
+            border-width: 3px;
+            box-shadow: 0 0 8px #6f42c1;
+        }
+        .sorted { 
+            background-color: #007bff; 
+            color: white;
+        }
+        .inactive { 
+            opacity: 0.4; 
+        }
+        
+        .partition-info {
+            text-align: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .pointers-display {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+        
+        .pointer-info {
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .i-pointer { background: #fff3cd; border: 2px solid #ffc107; }
+        .j-pointer { background: #e2e3ff; border: 2px solid #6f42c1; }
+        .pivot-info { background: #f8d7da; border: 2px solid #dc3545; }
+        
+        .controls {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            margin: 5px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .step-explanation {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #007bff;
+            font-size: 15px;
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border: 2px solid #dee2e6;
+            font-size: 12px;
+        }
+        
+        .legend-box {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            border: 2px solid #333;
+        }
+        
+        .recursion-tree {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 2px solid #ffc107;
+        }
+        
+        .tree-title {
+            font-weight: bold;
+            color: #856404;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .tree-level {
+            margin: 8px 0;
+            text-align: center;
+            font-family: monospace;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 QuickSort Algorithm - Complete Step-by-Step</h1>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-box pivot"></div>
+                <span>Pivot</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box smaller"></div>
+                <span>≤ Pivot</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box larger"></div>
+                <span>> Pivot</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box sorted"></div>
+                <span>Final Sorted</span>
+            </div>
+        </div>
+        
+        <div class="step-explanation" id="mainExplanation">
+            Welcome to QuickSort! We'll solve this step-by-step, showing each partition level separately. 
+            Original array: [100, 4, 200, 5, 6, 1, 0]
+        </div>
+        
+        <div class="recursion-tree" id="recursionTree">
+            <div class="tree-title">🌳 Recursion Tree</div>
+            <div id="treeContent">
+                <div class="tree-level">Level 0: [100, 4, 200, 5, 6, 1, 0] → pivot: ?</div>
+            </div>
+        </div>
+        
+        <div id="levelsContainer"></div>
+        
+        <div class="controls">
+            <button onclick="nextStep()" id="nextBtn">Next Step</button>
+            <button onclick="nextPartition()" id="partitionBtn" style="display:none;">Complete This Partition</button>
+            <button onclick="autoRun()" id="autoBtn">Auto Run All</button>
+            <button onclick="reset()">Reset</button>
+            <button onclick="showFinal()" id="finalBtn" style="display:none;">Show Final Result</button>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        let originalArray = [100, 4, 200, 5, 6, 1, 0];
+        let levels = [];
+        let currentLevel = 0;
+        let currentPartition = 0;
+        let step = 0;
+        let isComplete = false;
+        let autoRunning = false;
+        
+        // Initialize the algorithm
+        function initializeQuickSort() {
+            levels = [];
+            // Level 0: Initial partition
+            levels.push([{
+                array: [...originalArray],
+                low: 0,
+                high: originalArray.length - 1,
+                pivot: originalArray[originalArray.length - 1],
+                i: 0,
+                j: 0,
+                phase: 'start',
+                range: `[0...${originalArray.length - 1}]`
+            }]);
+            
+            currentLevel = 0;
+            currentPartition = 0;
+            step = 0;
+            renderAllLevels();
+            updateExplanation("Starting QuickSort! Level 0 shows the initial array. We'll partition it first.");
+            updateRecursionTree();
+        }
+        
+        function renderAllLevels() {
+            const container = document.getElementById('levelsContainer');
+            container.innerHTML = '';
+            
+            levels.forEach((levelPartitions, levelIndex) => {
+                levelPartitions.forEach((partition, partIndex) => {
+                    const section = document.createElement('div');
+                    section.className = 'level-section';
+                    section.id = `level-${levelIndex}-${partIndex}`;
+                    
+                    if (levelIndex === currentLevel && partIndex === currentPartition) {
+                        section.classList.add('active-level');
+                    } else if (levelIndex < currentLevel || (levelIndex === currentLevel && partIndex < currentPartition)) {
+                        section.classList.add('completed-level');
+                    }
+                    
+                    section.innerHTML = `
+                        <div class="level-title">
+                            Level ${levelIndex} - Partition ${partIndex + 1}: Range ${partition.range}
+                        </div>
+                        <div class="array-container" id="array-${levelIndex}-${partIndex}"></div>
+                        <div class="pointers-display" id="pointers-${levelIndex}-${partIndex}"></div>
+                        <div class="partition-info" id="info-${levelIndex}-${partIndex}"></div>
+                    `;
+                    
+                    container.appendChild(section);
+                    renderPartition(partition, levelIndex, partIndex);
+                });
+            });
+        }
+        
+        function renderPartition(partition, levelIndex, partIndex) {
+            const arrayContainer = document.getElementById(`array-${levelIndex}-${partIndex}`);
+            const pointersContainer = document.getElementById(`pointers-${levelIndex}-${partIndex}`);
+            const infoContainer = document.getElementById(`info-${levelIndex}-${partIndex}`);
+            
+            // Render array
+            arrayContainer.innerHTML = '';
+            partition.array.forEach((value, index) => {
+                const element = document.createElement('div');
+                element.className = 'array-element';
+                element.textContent = value;
+                
+                if (index < partition.low || index > partition.high) {
+                    element.classList.add('inactive');
+                } else {
+                    element.classList.add('normal');
+                    
+                    if (partition.phase === 'partitioning' || partition.phase === 'complete') {
+                        if (index === partition.high) {
+                            element.classList.add('pivot');
+                        } else if (index >= partition.low && index < partition.i) {
+                            element.classList.add('smaller');
+                        } else if (index > partition.i && index < partition.j) {
+                            element.classList.add('larger');
+                        }
+                        
+                        if (index === partition.i && partition.phase === 'partitioning') {
+                            element.classList.add('pointer-i');
+                        }
+                        if (index === partition.j && partition.j < partition.high && partition.phase === 'partitioning') {
+                            element.classList.add('pointer-j');
+                        }
+                    }
+                    
+                    if (partition.phase === 'sorted') {
+                        element.classList.add('sorted');
+                    }
+                }
+                
+                arrayContainer.appendChild(element);
+            });
+            
+            // Render pointers info
+            if (partition.phase === 'partitioning' && levelIndex === currentLevel && partIndex === currentPartition) {
+                pointersContainer.innerHTML = `
+                    <div class="pointer-info i-pointer">i: ${partition.i}</div>
+                    <div class="pointer-info j-pointer">j: ${partition.j}</div>
+                    <div class="pointer-info pivot-info">Pivot: ${partition.pivot}</div>
+                `;
+            } else {
+                pointersContainer.innerHTML = '';
+            }
+            
+            // Render info
+            let info = '';
+            if (partition.phase === 'start') {
+                info = `Ready to partition range ${partition.range} with pivot ${partition.pivot}`;
+            } else if (partition.phase === 'partitioning') {
+                info = `Partitioning... comparing ${partition.array[partition.j]} with pivot ${partition.pivot}`;
+            } else if (partition.phase === 'complete') {
+                info = `Partition complete! Pivot ${partition.pivot} is in correct position.`;
+            } else if (partition.phase === 'sorted') {
+                info = `✅ This range is fully sorted!`;
+            }
+            infoContainer.textContent = info;
+        }
+        
+        function updateExplanation(text) {
+            document.getElementById('mainExplanation').textContent = text;
+        }
+        
+        function updateRecursionTree() {
+            const content = document.getElementById('treeContent');
+            content.innerHTML = '';
+            
+            levels.forEach((levelPartitions, levelIndex) => {
+                levelPartitions.forEach((partition, partIndex) => {
+                    const div = document.createElement('div');
+                    div.className = 'tree-level';
+                    let status = '';
+                    if (partition.phase === 'sorted') status = '✅';
+                    else if (partition.phase === 'complete') status = '🔄';
+                    else if (levelIndex === currentLevel && partIndex === currentPartition) status = '👉';
+                    
+                    div.textContent = `Level ${levelIndex}: ${partition.range} → pivot: ${partition.pivot} ${status}`;
+                    content.appendChild(div);
+                });
+            });
+        }
+        
+        function swap(arr, i, j) {
+            const temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
+        }
+        
+        function nextStep() {
+            if (isComplete) return;
+            
+            const partition = levels[currentLevel][currentPartition];
+            
+            if (partition.phase === 'start') {
+                partition.phase = 'partitioning';
+                partition.i = partition.low;
+                partition.j = partition.low;
+                updateExplanation(`Starting partition of ${partition.range}. Scanning with j, placing ≤${partition.pivot} elements at position i.`);
+                document.getElementById('partitionBtn').style.display = 'inline-block';
+            }
+            else if (partition.phase === 'partitioning') {
+                if (partition.j < partition.high) {
+                    if (partition.array[partition.j] <= partition.pivot) {
+                        updateExplanation(`${partition.array[partition.j]} ≤ ${partition.pivot}, so swap positions ${partition.i} and ${partition.j}, then advance both pointers.`);
+                        swap(partition.array, partition.i, partition.j);
+                        partition.i++;
+                    } else {
+                        updateExplanation(`${partition.array[partition.j]} > ${partition.pivot}, so just advance scanner j.`);
+                    }
+                    partition.j++;
+                } else {
+                    // Place pivot and complete partition
+                    swap(partition.array, partition.i, partition.high);
+                    partition.phase = 'complete';
+                    updateExplanation(`Partition complete! Pivot ${partition.pivot} placed at position ${partition.i}. Creating sub-problems...`);
+                    document.getElementById('partitionBtn').style.display = 'none';
+                    
+                    // Create next level partitions
+                    const nextLevel = [];
+                    if (partition.low < partition.i - 1) {
+                        nextLevel.push({
+                            array: [...partition.array],
+                            low: partition.low,
+                            high: partition.i - 1,
+                            pivot: partition.array[partition.i - 1],
+                            i: partition.low,
+                            j: partition.low,
+                            phase: 'start',
+                            range: `[${partition.low}...${partition.i - 1}]`
+                        });
+                    }
+                    if (partition.i + 1 < partition.high) {
+                        nextLevel.push({
+                            array: [...partition.array],
+                            low: partition.i + 1,
+                            high: partition.high,
+                            pivot: partition.array[partition.high],
+                            i: partition.i + 1,
+                            j: partition.i + 1,
+                            phase: 'start',
+                            range: `[${partition.i + 1}...${partition.high}]`
+                        });
+                    }
+                    
+                    if (nextLevel.length > 0) {
+                        levels.push(nextLevel);
+                    }
+                    
+                    moveToNextPartition();
+                }
+            }
+            
+            renderAllLevels();
+            updateRecursionTree();
+        }
+        
+        function nextPartition() {
+            const partition = levels[currentLevel][currentPartition];
+            
+            while (partition.phase === 'partitioning' && partition.j < partition.high) {
+                if (partition.array[partition.j] <= partition.pivot) {
+                    swap(partition.array, partition.i, partition.j);
+                    partition.i++;
+                }
+                partition.j++;
+            }
+            
+            if (partition.j >= partition.high) {
+                swap(partition.array, partition.i, partition.high);
+                partition.phase = 'complete';
+                document.getElementById('partitionBtn').style.display = 'none';
+                
+                // Create sub-problems
+                const nextLevel = [];
+                if (partition.low < partition.i - 1) {
+                    nextLevel.push({
+                        array: [...partition.array],
+                        low: partition.low,
+                        high: partition.i - 1,
+                        pivot: partition.array[partition.i - 1],
+                        i: partition.low,
+                        j: partition.low,
+                        phase: 'start',
+                        range: `[${partition.low}...${partition.i - 1}]`
+                    });
+                }
+                if (partition.i + 1 < partition.high) {
+                    nextLevel.push({
+                        array: [...partition.array],
+                        low: partition.i + 1,
+                        high: partition.high,
+                        pivot: partition.array[partition.high],
+                        i: partition.i + 1,
+                        j: partition.i + 1,
+                        phase: 'start',
+                        range: `[${partition.i + 1}...${partition.high}]`
+                    });
+                }
+                
+                if (nextLevel.length > 0) {
+                    levels.push(nextLevel);
+                }
+                
+                moveToNextPartition();
+            }
+            
+            renderAllLevels();
+            updateRecursionTree();
+        }
+        
+        function moveToNextPartition() {
+            currentPartition++;
+            
+            if (currentPartition >= levels[currentLevel].length) {
+                currentLevel++;
+                currentPartition = 0;
+                
+                if (currentLevel >= levels.length) {
+                    // Mark all as sorted
+                    levels.forEach(level => {
+                        level.forEach(partition => {
+                            partition.phase = 'sorted';
+                        });
+                    });
+                    
+                    isComplete = true;
+                    updateExplanation('🎉 QuickSort Complete! All elements are now in their correct sorted positions.');
+                    document.getElementById('nextBtn').disabled = true;
+                    document.getElementById('finalBtn').style.display = 'inline-block';
+                    return;
+                }
+            }
+            
+            updateExplanation(`Moving to next partition: Level ${currentLevel}, Partition ${currentPartition + 1}`);
+        }
+        
+        function autoRun() {
+            if (autoRunning || isComplete) return;
+            
+            autoRunning = true;
+            document.getElementById('autoBtn').textContent = 'Running...';
+            document.getElementById('autoBtn').disabled = true;
+            
+            const interval = setInterval(() => {
+                nextStep();
+                if (isComplete) {
+                    clearInterval(interval);
+                    document.getElementById('autoBtn').textContent = 'Auto Run All';
+                    document.getElementById('autoBtn').disabled = false;
+                    autoRunning = false;
+                }
+            }, 1500);
+        }
+        
+        function showFinal() {
+            const finalArray = levels[0][0].array;
+            updateExplanation(`🎯 Final Sorted Array: [${finalArray.join(', ')}] - QuickSort Successfully Completed!`);
+        }
+        
+        function reset() {
+            levels = [];
+            currentLevel = 0;
+            currentPartition = 0;
+            step = 0;
+            isComplete = false;
+            autoRunning = false;
+            
+            document.getElementById('nextBtn').disabled = false;
+            document.getElementById('autoBtn').textContent = 'Auto Run All';
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('partitionBtn').style.display = 'none';
+            document.getElementById('finalBtn').style.display = 'none';
+            
+            initializeQuickSort();
+        }
+        
+        // Initialize
+        initializeQuickSort();
+    </script>
+</body>
+</html>
