@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NotePro - Unlimited Notes</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap');
+    
+    * { 
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f7f7f7;
+      --text-primary: #37352f;
+      --text-secondary: #787774;
+      --border: #e9e9e7;
+      --hover: #f1f1ef;
+      --accent: #2383e2;
+      --sidebar: #fbfbfa;
+    }
+    
+    .dark {
+      --bg-primary: #191919;
+      --bg-secondary: #252525;
+      --text-primary: #e3e2e0;
+      --text-secondary: #9b9a97;
+      --border: #373737;
+      --hover: #2f2f2f;
+      --accent: #529cca;
+      --sidebar: #1f1f1f;
+    }
+    
+    body {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      margin: 0;
+      overflow: hidden;
+    }
+    
+    .notion-btn {
+      background: transparent;
+      transition: background 0.15s ease;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+    }
+    
+    .notion-btn:hover {
+      background: var(--hover);
+    }
+    
+    .block-content {
+      background: var(--bg-primary);
+      border: 1px solid transparent;
+      transition: all 0.1s;
+    }
+    
+    .block-content:hover {
+      background: var(--hover);
+    }
+    
+    .block-content:focus {
+      background: var(--bg-primary);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+    
+    input, textarea, select {
+      background: transparent;
+      color: var(--text-primary);
+    }
+    
+    input::placeholder, textarea::placeholder {
+      color: var(--text-secondary);
+      opacity: 0.5;
+    }
+    
+    .sidebar {
+      background: var(--sidebar);
+      border-right: 1px solid var(--border);
+    }
+    
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+    
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    
+    /* Reading Mode Styles */
+    .reading-mode {
+      font-family: 'Merriweather', Georgia, serif;
+      line-height: 1.8;
+      font-size: 18px;
+    }
+    
+    .reading-mode h1 {
+      font-size: 42px;
+      line-height: 1.3;
+      margin-bottom: 24px;
+      font-weight: 700;
+    }
+    
+    .reading-mode h2 {
+      font-size: 32px;
+      line-height: 1.4;
+      margin-top: 48px;
+      margin-bottom: 16px;
+      font-weight: 700;
+    }
+    
+    .reading-mode h3 {
+      font-size: 24px;
+      line-height: 1.5;
+      margin-top: 32px;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+    
+    .reading-mode p {
+      margin-bottom: 24px;
+    }
+    
+    .reading-mode blockquote {
+      border-left: 4px solid var(--accent);
+      padding-left: 24px;
+      margin: 32px 0;
+      font-style: italic;
+      font-size: 20px;
+      color: var(--text-secondary);
+    }
+    
+    .reading-mode pre {
+      background: var(--bg-secondary);
+      padding: 20px;
+      border-radius: 8px;
+      margin: 24px 0;
+      overflow-x: auto;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    
+    .reading-mode ul, .reading-mode ol {
+      margin: 24px 0;
+      padding-left: 32px;
+    }
+    
+    .reading-mode li {
+      margin-bottom: 12px;
+    }
+    
+    .reading-mode img {
+      max-width: 100%;
+      height: auto;
+      margin: 32px 0;
+      border-radius: 8px;
+    }
+    
+    .reading-mode .callout {
+      background: var(--hover);
+      border: 1px solid var(--border);
+      padding: 20px;
+      border-radius: 8px;
+      margin: 24px 0;
+      display: flex;
+      gap: 16px;
+    }
+    
+    .reading-toolbar {
+      position: fixed;
+      bottom: 40px;
+      right: 40px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      padding: 12px 20px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      z-index: 100;
+    }
+    
+    .reading-toolbar button {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 8px;
+      transition: background 0.2s;
+      color: var(--text-primary);
+      font-size: 14px;
+    }
+    
+    .reading-toolbar button:hover {
+      background: var(--hover);
+    }
+    
+    @media (max-width: 768px) {
+      .reading-mode {
+        font-size: 16px;
+      }
+      
+      .reading-mode h1 {
+        font-size: 32px;
+      }
+      
+      .reading-toolbar {
+        bottom: 20px;
+        right: 20px;
+        left: 20px;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const MAX_FILE_SIZE = 95 * 1024 * 1024;
+
+    function NoteApp() {
+      const [notes, setNotes] = useState([]);
+      const [currentNote, setCurrentNote] = useState(null);
+      const [view, setView] = useState('home');
+      const [githubToken, setGithubToken] = useState('');
+      const [gistId, setGistId] = useState('');
+      const [showSettings, setShowSettings] = useState(false);
+      const [loading, setLoading] = useState(false);
+      const [tokenInput, setTokenInput] = useState('');
+      const [searchQuery, setSearchQuery] = useState('');
+      const [selectedTag, setSelectedTag] = useState('all');
+      const [darkMode, setDarkMode] = useState(false);
+      const [sidebarOpen, setSidebarOpen] = useState(true);
+      const [favorites, setFavorites] = useState([]);
+      const canvasRefs = useRef({});
+      const [drawingStates, setDrawingStates] = useState({});
+      const [folders, setFolders] = useState([]);
+      const [currentFolder, setCurrentFolder] = useState('all');
+      const [showFolderModal, setShowFolderModal] = useState(false);
+      const [newFolderName, setNewFolderName] = useState('');
+      const [customTagInput, setCustomTagInput] = useState('');
+      const [readingFontSize, setReadingFontSize] = useState(18);
+
+      useEffect(() => {
+        const saved = {
+          token: localStorage.getItem('github_token'),
+          gistId: localStorage.getItem('gist_id'),
+          darkMode: localStorage.getItem('dark_mode') === 'true',
+          favorites: JSON.parse(localStorage.getItem('favorites') || '[]'),
+          folders: JSON.parse(localStorage.getItem('folders') || '["DSA", "Java", "Python", "AWS"]'),
+          readingFontSize: parseInt(localStorage.getItem('reading_font_size') || '18')
+        };
+        
+        setDarkMode(saved.darkMode);
+        setFavorites(saved.favorites);
+        setFolders(saved.folders);
+        setReadingFontSize(saved.readingFontSize);
+        if (saved.darkMode) document.documentElement.classList.add('dark');
+        
+        if (saved.token) {
+          setGithubToken(saved.token);
+          setTokenInput(saved.token);
+          if (saved.gistId) setGistId(saved.gistId);
+          loadNotes(saved.token, saved.gistId);
+        }
+      }, []);
+
+      const toggleDarkMode = () => {
+        const newMode = !darkMode;
+        setDarkMode(newMode);
+        localStorage.setItem('dark_mode', newMode);
+        document.documentElement.classList[newMode ? 'add' : 'remove']('dark');
+      };
+
+      const toggleFavorite = (noteId) => {
+        const newFavs = favorites.includes(noteId) ? favorites.filter(id => id !== noteId) : [...favorites, noteId];
+        setFavorites(newFavs);
+        localStorage.setItem('favorites', JSON.stringify(newFavs));
+      };
+
+      const loadNotes = async (token, gid) => {
+        if (!token) return setShowSettings(true);
+        setLoading(true);
+        try {
+          let gistIdToUse = gid;
+          if (!gistIdToUse) {
+            const res = await fetch('https://api.github.com/gists', {
+              headers: { 'Authorization': `token ${token}` }
+            });
+            if (res.ok) {
+              const gists = await res.json();
+              const found = gists.find(g => g.description === 'NotePro Storage');
+              if (found) {
+                gistIdToUse = found.id;
+                setGistId(found.id);
+                localStorage.setItem('gist_id', found.id);
+              }
+            }
+          }
+
+          if (gistIdToUse) {
+            const res = await fetch(`https://api.github.com/gists/${gistIdToUse}`, {
+              headers: { 'Authorization': `token ${token}` }
+            });
+            if (res.ok) {
+              const data = await res.json();
+              const index = data.files['index.json'];
+              let allNotes = [];
+              if (index) {
+                const idx = JSON.parse(index.content);
+                for (const fn of idx.files) {
+                  if (data.files[fn]) {
+                    allNotes = [...allNotes, ...JSON.parse(data.files[fn].content)];
+                  }
+                }
+              }
+              setNotes(allNotes.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)));
+            }
+          }
+        } catch (err) {
+          console.error(err);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      const saveNotes = async (updatedNotes) => {
+        if (!githubToken) return setShowSettings(true);
+        setLoading(true);
+        try {
+          const files = {};
+          const fileList = [];
+          let idx = 1, current = [], size = 0;
+
+          for (const note of updatedNotes) {
+            const noteSize = new Blob([JSON.stringify(note)]).size;
+            if (size + noteSize > MAX_FILE_SIZE && current.length > 0) {
+              const fn = `notes${idx}.json`;
+              files[fn] = { content: JSON.stringify(current, null, 2) };
+              fileList.push(fn);
+              idx++;
+              current = [];
+              size = 0;
+            }
+            current.push(note);
+            size += noteSize;
+          }
+
+          if (current.length > 0) {
+            const fn = `notes${idx}.json`;
+            files[fn] = { content: JSON.stringify(current, null, 2) };
+            fileList.push(fn);
+          }
+
+          files['index.json'] = {
+            content: JSON.stringify({
+              files: fileList,
+              totalNotes: updatedNotes.length,
+              lastUpdated: new Date().toISOString()
+            }, null, 2)
+          };
+
+          const url = gistId ? `https://api.github.com/gists/${gistId}` : 'https://api.github.com/gists';
+          const method = gistId ? 'PATCH' : 'POST';
+          const body = gistId ? { files } : { description: 'NotePro Storage', public: false, files };
+
+          const res = await fetch(url, {
+            method,
+            headers: {
+              'Authorization': `token ${githubToken}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body)
+          });
+
+          if (res.ok) {
+            if (!gistId) {
+              const data = await res.json();
+              setGistId(data.id);
+              localStorage.setItem('gist_id', data.id);
+            }
+            setNotes(updatedNotes);
+          }
+        } catch (err) {
+          console.error(err);
+          alert('Failed to save');
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      const createNote = () => {
+        const note = {
+          id: Date.now().toString(),
+          title: '',
+          icon: '📝',
+          content: [],
+          tags: [],
+          folder: currentFolder === 'all' || currentFolder === 'favorites' ? '' : currentFolder,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        setCurrentNote(note);
+        setView('edit');
+      };
+
+      const saveCurrentNote = async () => {
+        if (!currentNote?.title.trim()) return alert('Add a title');
+        const idx = notes.findIndex(n => n.id === currentNote.id);
+        const updated = idx >= 0 ? [...notes] : [currentNote, ...notes];
+        if (idx >= 0) updated[idx] = currentNote;
+        await saveNotes(updated);
+      };
+
+      const deleteNote = async (id) => {
+        if (!confirm('Delete this note?')) return;
+        await saveNotes(notes.filter(n => n.id !== id));
+        if (currentNote?.id === id) {
+          setCurrentNote(null);
+          setView('home');
+        }
+      };
+
+      const addBlock = (type) => {
+        if (!currentNote) return;
+        setCurrentNote({
+          ...currentNote,
+          content: [...currentNote.content, { id: Date.now().toString(), type, content: '', data: null }],
+          updatedAt: new Date().toISOString()
+        });
+      };
+
+      const updateBlock = (id, content, data = null) => {
+        if (!currentNote) return;
+        setCurrentNote({
+          ...currentNote,
+          content: currentNote.content.map(b => b.id === id ? { ...b, content, ...(data !== null && { data }) } : b),
+          updatedAt: new Date().toISOString()
+        });
+      };
+
+      const deleteBlock = (id) => {
+        if (!currentNote) return;
+        setCurrentNote({ ...currentNote, content: currentNote.content.filter(b => b.id !== id) });
+      };
+
+      const moveBlock = (id, dir) => {
+        if (!currentNote) return;
+        const idx = currentNote.content.findIndex(b => b.id === id);
+        const newIdx = dir === 'up' ? idx - 1 : idx + 1;
+        if (newIdx < 0 || newIdx >= currentNote.content.length) return;
+        const arr = [...currentNote.content];
+        [arr[idx], arr[newIdx]] = [arr[newIdx], arr[idx]];
+        setCurrentNote({ ...currentNote, content: arr });
+      };
+
+      const toggleTag = (tag) => {
+        if (!currentNote) return;
+        const tags = currentNote.tags || [];
+        const newTags = tags.includes(tag) ? tags.filter(t => t !== tag) : [...tags, tag];
+        setCurrentNote({ ...currentNote, tags: newTags });
+      };
+
+      const addCustomTag = () => {
+        if (!customTagInput.trim() || !currentNote) return;
+        const tag = customTagInput.trim();
+        const tags = currentNote.tags || [];
+        if (!tags.includes(tag)) {
+          setCurrentNote({ ...currentNote, tags: [...tags, tag] });
+        }
+        setCustomTagInput('');
+      };
+
+      const removeTag = (tag) => {
+        if (!currentNote) return;
+        setCurrentNote({ ...currentNote, tags: currentNote.tags.filter(t => t !== tag) });
+      };
+
+      const addFolder = () => {
+        if (!newFolderName.trim() || folders.includes(newFolderName.trim())) return;
+        const updated = [...folders, newFolderName.trim()];
+        setFolders(updated);
+        localStorage.setItem('folders', JSON.stringify(updated));
+        setNewFolderName('');
+        setShowFolderModal(false);
+      };
+
+      const deleteFolder = (folder) => {
+        if (!confirm(`Delete folder "${folder}"? Notes will be moved to root.`)) return;
+        const updated = folders.filter(f => f !== folder);
+        setFolders(updated);
+        localStorage.setItem('folders', JSON.stringify(updated));
+        const updatedNotes = notes.map(n => n.folder === folder ? {...n, folder: ''} : n);
+        saveNotes(updatedNotes);
+        if (currentFolder === folder) setCurrentFolder('all');
+      };
+
+      const adjustFontSize = (change) => {
+        const newSize = Math.max(14, Math.min(24, readingFontSize + change));
+        setReadingFontSize(newSize);
+        localStorage.setItem('reading_font_size', newSize.toString());
+      };
+
+      const initCanvas = (id) => {
+        const canvas = canvasRefs.current[id];
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        ctx.strokeStyle = darkMode ? '#fff' : '#000';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        setDrawingStates(prev => ({ ...prev, [id]: { drawing: false, ctx } }));
+      };
+
+      const startDraw = (e, id) => {
+        const canvas = canvasRefs.current[id];
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX || e.touches?.[0]?.clientX) - rect.left;
+        const y = (e.clientY || e.touches?.[0]?.clientY) - rect.top;
+        const ctx = canvas.getContext('2d');
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        setDrawingStates(prev => ({ ...prev, [id]: { ...prev[id], drawing: true } }));
+      };
+
+      const draw = (e, id) => {
+        const state = drawingStates[id];
+        if (!state?.drawing) return;
+        const canvas = canvasRefs.current[id];
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX || e.touches?.[0]?.clientX) - rect.left;
+        const y = (e.clientY || e.touches?.[0]?.clientY) - rect.top;
+        state.ctx.lineTo(x, y);
+        state.ctx.stroke();
+      };
+
+      const stopDraw = (id) => {
+        setDrawingStates(prev => ({ ...prev, [id]: { ...prev[id], drawing: false } }));
+      };
+
+      const saveDraw = (id) => {
+        const canvas = canvasRefs.current[id];
+        if (canvas) updateBlock(id, 'Drawing', canvas.toDataURL());
+      };
+
+      const clearDraw = (id) => {
+        const canvas = canvasRefs.current[id];
+        if (canvas) canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+      };
+
+      const renderEdit = (block, idx) => {
+        const base = "w-full p-2 block-content rounded outline-none";
+        const actions = (
+          <div className="absolute -left-10 top-0 opacity-0 group-hover:opacity-100 transition flex flex-col">
+            <button onClick={() => moveBlock(block.id, 'up')} disabled={idx === 0} className="w-6 h-6 notion-btn rounded disabled:opacity-20 text-sm">↑</button>
+            <button onClick={() => moveBlock(block.id, 'down')} disabled={idx === currentNote.content.length - 1} className="w-6 h-6 notion-btn rounded disabled:opacity-20 text-sm">↓</button>
+            <button onClick={() => deleteBlock(block.id)} className="w-6 h-6 notion-btn rounded text-red-500">×</button>
+          </div>
+        );
+
+        switch (block.type) {
+          case 'text':
+            return <div className="relative">{actions}<textarea value={block.content} onChange={e => updateBlock(block.id, e.target.value)} className={base + " resize-none"} placeholder="Type..." rows={2} /></div>;
+          case 'h1':
+            return <div className="relative">{actions}<input value={block.content} onChange={e => updateBlock(block.id, e.target.value)} className={base + " text-3xl font-bold"} placeholder="Heading 1" /></div>;
+          case 'h2':
+            return <div className="relative">{actions}<input value={block.content} onChange={e => updateBlock(block.id, e.target.value)} className={base + " text-2xl font-bold"} placeholder="Heading 2" /></div>;
+          case 'h3':
+            return <div className="relative">{actions}<input value={block.content} onChange={e => updateBlock(block.id, e.target.value)} className={base + " text-xl font-semibold"} placeholder="Heading 3" /></div>;
+          case 'code':
+            return <div className="relative">{actions}<textarea value={block.content} onChange={e => updateBlock(block.id, e.target.value)} className="w-full p-3 font-mono text-sm rounded resize-none" style={{background: darkMode ? '#1e1e1e' : '#f5f5f5'}} placeholder="code..." rows={5} /></div>;
+          case 'quote':
+            return <div className="relative">{actions}<div className="border-l-4 pl-3" style={{borderColor: 'var(--accent)'}}><textarea value={block.content} onChange={e => updateBlock(block.id, e.target.value)} className="w-full bg-transparent italic outline-none resize-none" placeholder="Quote" rows={2} /></div></div>;
+          case 'list':
+            return <div className="relative">{actions}<textarea value={block.content} onChange={e => updateBlock(block.id, e.target.value)} className={base + " resize-none"} placeholder="• Item" rows={3} /></div>;
+          case 'todo':
+            return <div className="relative">{actions}<div className="flex gap-2 p-2"><input type="checkbox" className="mt-1" /><input value={block.content} onChange={e => updateBlock(block.id, e.target.value)} className="flex-1 bg-transparent outline-none" placeholder="To-do" /></div></div>;
+          case 'image':
+            return <div className="relative">{actions}<div className="border rounded p-2" style={{borderColor: 'var(--border)'}}><input value={block.content} onChange={e => updateBlock(block.id, e.target.value)} className="w-full p-2 text-sm bg-transparent outline-none" placeholder="Image URL" />{block.content && <img src={block.content} className="mt-2 w-full rounded" alt="" />}</div></div>;
+          case 'callout':
+            return <div className="relative">{actions}<div className="border rounded p-3 flex gap-2" style={{borderColor: 'var(--border)', background: 'var(--hover)'}}><span>💡</span><input value={block.content} onChange={e => updateBlock(block.id, e.target.value)} className="flex-1 bg-transparent outline-none" placeholder="Callout" /></div></div>;
+          case 'divider':
+            return <div className="relative">{actions}<hr className="my-3" style={{borderColor: 'var(--border)'}} /></div>;
+          case 'draw':
+            return (
+              <div className="relative">{actions}<div className="border rounded p-2" style={{borderColor: 'var(--border)'}}>
+                {block.data ? (
+                  <div className="relative group">
+                    <img src={block.data} className="w-full rounded" alt="Drawing" />
+                    <button onClick={() => { updateBlock(block.id, '', null); setTimeout(() => initCanvas(block.id), 50); }} className="absolute top-2 right-2 px-2 py-1 bg-white text-black rounded text-sm opacity-0 group-hover:opacity-100">Edit</button>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <span className="text-sm">🎨 Draw</span>
+                      <div className="flex gap-2">
+                        <button onClick={() => clearDraw(block.id)} className="px-2 py-1 notion-btn border rounded text-xs" style={{borderColor: 'var(--border)'}}>Clear</button>
+                        <button onClick={() => saveDraw(block.id)} className="px-2 py-1 rounded text-xs text-white" style={{background: 'var(--accent)'}}>Save</button>
+                      </div>
+                    </div>
+                    <canvas ref={el => { canvasRefs.current[block.id] = el; if (el && !drawingStates[block.id]) initCanvas(block.id); }} width={800} height={400} className="w-full border rounded cursor-crosshair" style={{borderColor: 'var(--border)', background: darkMode ? '#2a2a2a' : '#fff'}} onMouseDown={e => startDraw(e, block.id)} onMouseMove={e => draw(e, block.id)} onMouseUp={() => stopDraw(block.id)} onMouseLeave={() => stopDraw(block.id)} onTouchStart={e => { e.preventDefault(); startDraw(e, block.id); }} onTouchMove={e => { e.preventDefault(); draw(e, block.id); }} onTouchEnd={() => stopDraw(block.id)} />
+                  </div>
+                )}
+              </div></div>
+            );
+          default:
+            return null;
+        }
+      };
+
+      const renderReadingBlock = (block) => {
+        switch (block.type) {
+          case 'text':
+            return <p>{block.content}</p>;
+          case 'h1':
+            return <h1>{block.content}</h1>;
+          case 'h2':
+            return <h2>{block.content}</h2>;
+          case 'h3':
+            return <h3>{block.content}</h3>;
+          case 'code':
+            return <pre><code>{block.content}</code></pre>;
+          case 'quote':
+            return <blockquote>{block.content}</blockquote>;
+          case 'list':
+            return (
+              <ul>
+                {block.content.split('\n').filter(Boolean).map((line, i) => (
+                  <li key={i}>{line.replace(/^[•\-*]\s*/, '')}</li>
+                ))}
+              </ul>
+            );
+          case 'todo':
+            return <div style={{display: 'flex', gap: '12px', marginBottom: '12px'}}><input type="checkbox" /><span>{block.content}</span></div>;
+          case 'image':
+            return block.content ? <img src={block.content} alt="" /> : null;
+          case 'callout':
+            return <div className="callout"><span style={{fontSize: '24px'}}>💡</span><div>{block.content}</div></div>;
+          case 'divider':
+            return <hr style={{border: 'none', borderTop: '1px solid var(--border)', margin: '32px 0'}} />;
+          case 'draw':
+            return block.data ? <img src={block.data} alt="Drawing" /> : null;
+          default:
+            return null;
+        }
+      };
+
+      const allTags = [...new Set(notes.flatMap(n => n.tags || []))];
+      const filtered = notes.filter(n => {
+        const search = n.title.toLowerCase().includes(searchQuery.toLowerCase());
+        const tag = selectedTag === 'all' || n.tags?.includes(selectedTag);
+        const folder = currentFolder === 'all' || n.folder === currentFolder || (currentFolder === 'favorites' && favorites.includes(n.id));
+        return search && tag && folder;
+      });
+
+      if (showSettings || !githubToken) {
+        return (
+          <div className="h-screen flex items-center justify-center p-6" style={{background: 'var(--bg-secondary)'}}>
+            <div className="max-w-lg w-full p-8 rounded-lg" style={{background: 'var(--bg-primary)'}}>
+              <h2 className="text-2xl font-bold mb-6">Setup GitHub Storage</h2>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">GitHub Token</label>
+                <input type="password" value={tokenInput} onChange={e => setTokenInput(e.target.value)} className="w-full p-3 border rounded" style={{borderColor: 'var(--border)', background: 'var(--bg-secondary)'}} placeholder="ghp_..." />
+              </div>
+              <div className="p-4 rounded mb-4" style={{background: 'var(--hover)'}}>
+                <p className="text-sm mb-2"><strong>Setup Guide:</strong></p>
+                <ol className="text-sm space-y-1 list-decimal list-inside" style={{color: 'var(--text-secondary)'}}>
+                  <li>Go to GitHub → Settings → Developer settings</li>
+                  <li>Personal access tokens → Generate new token</li>
+                  <li>Select <strong>gist</strong> scope only</li>
+                  <li>Paste token above</li>
+                </ol>
+                <p className="text-xs mt-3 p-2 rounded" style={{background: 'var(--bg-primary)', color: 'var(--accent)'}}>✨ Files auto-split at 95MB. Truly unlimited storage!</p>
+              </div>
+              <button onClick={() => { if (tokenInput.trim()) { localStorage.setItem('github_token', tokenInput); setGithubToken(tokenInput); loadNotes(tokenInput, ''); setShowSettings(false); }}} className="w-full py-3 rounded font-semibold text-white" style={{background: 'var(--accent)'}}>Connect GitHub</button>
+            </div>
+          </div>
+        );
+      }
+
+      if (view === 'home') {
+        return (
+          <div className="h-screen flex" style={{background: 'var(--bg-secondary)'}}>
+            {sidebarOpen && (
+              <div className="sidebar w-64 flex flex-col">
+                <div className="p-4 border-b" style={{borderColor: 'var(--border)'}}>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="font-bold text-lg">NotePro</span>
+                    <button onClick={toggleDarkMode} className="notion-btn p-2 rounded text-xl">{darkMode ? '☀️' : '🌙'}</button>
+                  </div>
+                  <button onClick={createNote} className="w-full py-2 rounded font-medium text-white" style={{background: 'var(--accent)'}}>+ New Note</button>
+                </div>
+                
+                <div className="flex-1 overflow-y-auto p-2">
+                  <button onClick={() => { setCurrentFolder('all'); setSelectedTag('all'); }} className="w-full text-left px-3 py-2 rounded mb-1 flex items-center gap-2" style={{background: currentFolder === 'all' ? 'var(--hover)' : 'transparent'}}>
+                    <span>📄</span>
+                    <span className="flex-1">All Notes</span>
+                    <span className="text-xs" style={{color: 'var(--text-secondary)'}}>{notes.length}</span>
+                  </button>
+                  
+                  <button onClick={() => { setCurrentFolder('favorites'); setSelectedTag('all'); }} className="w-full text-left px-3 py-2 rounded mb-1 flex items-center gap-2" style={{background: currentFolder === 'favorites' ? 'var(--hover)' : 'transparent'}}>
+                    <span>⭐</span>
+                    <span className="flex-1">Favorites</span>
+                    <span className="text-xs" style={{color: 'var(--text-secondary)'}}>{favorites.length}</span>
+                  </button>
+                  
+                  <div className="mt-4 mb-2">
+                    <div className="px-3 py-1 text-xs font-semibold flex items-center justify-between" style={{color: 'var(--text-secondary)'}}>
+                      <span>FOLDERS</span>
+                      <button onClick={() => setShowFolderModal(true)} className="notion-btn px-1 rounded">+</button>
+                    </div>
+                  </div>
+                  
+                  {folders.map(folder => (
+                    <div key={folder} className="group flex items-center">
+                      <button onClick={() => { setCurrentFolder(folder); setSelectedTag('all'); }} className="flex-1 text-left px-3 py-2 rounded mb-1 flex items-center gap-2" style={{background: currentFolder === folder ? 'var(--hover)' : 'transparent'}}>
+                        <span>📁</span>
+                        <span className="flex-1 text-sm">{folder}</span>
+                        <span className="text-xs" style={{color: 'var(--text-secondary)'}}>{notes.filter(n => n.folder === folder).length}</span>
+                      </button>
+                      <button onClick={() => deleteFolder(folder)} className="opacity-0 group-hover:opacity-100 notion-btn px-2 text-red-500 text-xs">×</button>
+                    </div>
+                  ))}
+                  
+                  {allTags.length > 0 && (
+                    <div className="mt-4">
+                      <div className="px-3 py-1 text-xs font-semibold" style={{color: 'var(--text-secondary)'}}>TAGS</div>
+                      {allTags.map(tag => (
+                        <button key={tag} onClick={() => setSelectedTag(tag)} className="w-full text-left px-3 py-2 rounded mb-1 text-sm flex items-center gap-2" style={{background: selectedTag === tag ? 'var(--hover)' : 'transparent'}}>
+                          <span>#</span>
+                          <span className="flex-1">{tag}</span>
+                          <span className="text-xs" style={{color: 'var(--text-secondary)'}}>{notes.filter(n => n.tags?.includes(tag)).length}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                
+                <div className="p-3 border-t" style={{borderColor: 'var(--border)'}}>
+                  <button onClick={() => setShowSettings(true)} className="w-full px-3 py-2 notion-btn rounded text-sm text-left">⚙️ Settings</button>
+                </div>
+              </div>
+            )}
+            
+            <div className="flex-1 flex flex-col">
+              <div className="p-4 border-b flex items-center gap-3" style={{borderColor: 'var(--border)', background: 'var(--bg-primary)'}}>
+                <button onClick={() => setSidebarOpen(!sidebarOpen)} className="notion-btn p-2 rounded">☰</button>
+                <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="flex-1 px-4 py-2 rounded" style={{background: 'var(--bg-secondary)', border: '1px solid var(--border)'}} placeholder="Search notes..." />
+                <button onClick={() => loadNotes(githubToken, gistId)} className="notion-btn px-4 py-2 rounded" disabled={loading}>{loading ? '⏳' : '🔄'}</button>
+              </div>
+              
+              <div className="flex-1 overflow-y-auto p-6">
+                <div className="max-w-6xl mx-auto">
+                  <div className="mb-6">
+                    <h1 className="text-3xl font-bold mb-2">
+                      {currentFolder === 'all' ? 'All Notes' : currentFolder === 'favorites' ? 'Favorites' : currentFolder}
+                    </h1>
+                    <p className="text-sm" style={{color: 'var(--text-secondary)'}}>{filtered.length} notes</p>
+                  </div>
+                  
+                  <div className="grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {filtered.map(note => (
+                      <div key={note.id} className="p-4 rounded-lg border cursor-pointer transition hover:shadow-lg group" style={{background: 'var(--bg-primary)', borderColor: 'var(--border)'}}>
+                        <div className="flex items-start justify-between mb-3">
+                          <span className="text-3xl">{note.icon}</span>
+                          <button onClick={e => { e.stopPropagation(); toggleFavorite(note.id); }} className="notion-btn p-1 rounded text-lg opacity-0 group-hover:opacity-100 transition">{favorites.includes(note.id) ? '⭐' : '☆'}</button>
+                        </div>
+                        
+                        <h3 className="font-semibold mb-2 line-clamp-2 min-h-[3rem]" onClick={() => { setCurrentNote(note); setView('read'); }}>{note.title || 'Untitled'}</h3>
+                        
+                        <div className="text-xs mb-3" style={{color: 'var(--text-secondary)'}}>
+                          {new Date(note.updatedAt).toLocaleDateString()}
+                        </div>
+                        
+                        {note.folder && (
+                          <div className="text-xs px-2 py-1 rounded inline-block mb-2" style={{background: 'var(--hover)', color: 'var(--accent)'}}>
+                            📁 {note.folder}
+                          </div>
+                        )}
+                        
+                        {note.tags?.length > 0 && (
+                          <div className="flex gap-1 flex-wrap mb-3">
+                            {note.tags.slice(0, 2).map(t => (
+                              <span key={t} className="text-xs px-2 py-0.5 rounded" style={{background: 'var(--hover)', color: 'var(--text-secondary)'}}>#{t}</span>
+                            ))}
+                            {note.tags.length > 2 && (
+                              <span className="text-xs" style={{color: 'var(--text-secondary)'}}>
+                                +{note.tags.length - 2}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        
+                        <div className="flex gap-2 mt-3">
+                          <button onClick={(e) => { e.stopPropagation(); setCurrentNote(note); setView('read'); }} className="flex-1 px-3 py-1.5 rounded text-sm font-medium" style={{background: 'var(--accent)', color: '#fff'}}>Read</button>
+                          <button onClick={(e) => { e.stopPropagation(); setCurrentNote(note); setView('edit'); }} className="flex-1 px-3 py-1.5 rounded text-sm border" style={{borderColor: 'var(--border)'}}>Edit</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {filtered.length === 0 && (
+                    <div className="text-center py-20">
+                      <div className="text-6xl mb-4">📝</div>
+                      <p className="text-xl mb-6" style={{color: 'var(--text-secondary)'}}>{searchQuery ? 'No notes found' : 'No notes yet'}</p>
+                      {!searchQuery && <button onClick={createNote} className="px-6 py-3 rounded font-semibold text-white" style={{background: 'var(--accent)'}}>Create First Note</button>}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            
+            {showFolderModal && (
+              <div className="fixed inset-0 flex items-center justify-center z-50" style={{background: 'rgba(0,0,0,0.5)'}} onClick={() => setShowFolderModal(false)}>
+                <div className="p-6 rounded-lg max-w-md w-full mx-4" style={{background: 'var(--bg-primary)'}} onClick={e => e.stopPropagation()}>
+                  <h3 className="text-xl font-bold mb-4">New Folder</h3>
+                  <input value={newFolderName} onChange={e => setNewFolderName(e.target.value)} onKeyPress={e => e.key === 'Enter' && addFolder()} className="w-full p-3 border rounded mb-4" style={{borderColor: 'var(--border)', background: 'var(--bg-secondary)'}} placeholder="Folder name..." autoFocus />
+                  <div className="flex gap-2">
+                    <button onClick={addFolder} className="flex-1 py-2 rounded font-medium text-white" style={{background: 'var(--accent)'}}>Create</button>
+                    <button onClick={() => { setShowFolderModal(false); setNewFolderName(''); }} className="flex-1 py-2 notion-btn border rounded" style={{borderColor: 'var(--border)'}}>Cancel</button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      if (view === 'read' && currentNote) {
+        return (
+          <div className="h-screen flex flex-col" style={{background: 'var(--bg-secondary)'}}>
+            <div className="flex-1 overflow-y-auto">
+              <div className="max-w-3xl mx-auto px-8 py-12 reading-mode" style={{fontSize: `${readingFontSize}px`}}>
+                <div className="text-center mb-12">
+                  <div className="text-6xl mb-6">{currentNote.icon}</div>
+                  <h1 className="mb-4">{currentNote.title || 'Untitled'}</h1>
+                  <div className="flex items-center justify-center gap-4 text-sm" style={{color: 'var(--text-secondary)'}}>
+                    <span>{new Date(currentNote.updatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                    {currentNote.content.length > 0 && (
+                      <>
+                        <span>•</span>
+                        <span>{currentNote.content.length} blocks</span>
+                      </>
+                    )}
+                  </div>
+                  {currentNote.tags?.length > 0 && (
+                    <div className="flex gap-2 flex-wrap justify-center mt-4">
+                      {currentNote.tags.map(tag => (
+                        <span key={tag} className="px-3 py-1 rounded text-sm" style={{background: 'var(--hover)', color: 'var(--text-secondary)'}}>#{tag}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                
+                <div className="prose prose-lg">
+                  {currentNote.content.length === 0 ? (
+                    <div className="text-center py-12" style={{color: 'var(--text-secondary)'}}>
+                      <p>This note is empty.</p>
+                    </div>
+                  ) : (
+                    currentNote.content.map(block => (
+                      <div key={block.id}>
+                        {renderReadingBlock(block)}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+            
+            <div className="reading-toolbar">
+              <button onClick={() => setView('home')} title="Back to notes">
+                ← Back
+              </button>
+              <button onClick={() => setView('edit')} title="Edit note">
+                ✏️ Edit
+              </button>
+              <div style={{width: '1px', height: '24px', background: 'var(--border)'}}></div>
+              <button onClick={() => adjustFontSize(-2)} title="Decrease font size">
+                A-
+              </button>
+              <button onClick={() => adjustFontSize(2)} title="Increase font size">
+                A+
+              </button>
+              <button onClick={toggleDarkMode} title="Toggle theme">
+                {darkMode ? '☀️' : '🌙'}
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      if (view === 'edit' && currentNote) {
+        const predefinedTags = ['Important', 'Urgent', 'Review', 'Draft', 'Complete'];
+        
+        return (
+          <div className="h-screen flex flex-col" style={{background: 'var(--bg-secondary)'}}>
+            <div className="p-3 border-b flex items-center justify-between" style={{borderColor: 'var(--border)', background: 'var(--bg-primary)'}}>
+              <button onClick={() => setView('home')} className="px-3 py-2 notion-btn rounded">← Back</button>
+              <div className="flex gap-2">
+                <button onClick={() => setView('read')} className="px-4 py-2 notion-btn rounded">📖 Read</button>
+                <span className="text-xs px-3 py-2" style={{color: 'var(--text-secondary)'}}>{loading ? '💾 Saving...' : '✓ Saved'}</span>
+                <button onClick={saveCurrentNote} className="px-4 py-2 rounded font-medium text-white" style={{background: 'var(--accent)'}}>Save</button>
+                <button onClick={() => deleteNote(currentNote.id)} className="px-4 py-2 notion-btn rounded text-red-500">Delete</button>
+              </div>
+            </div>
+            
+            <div className="p-2 border-b flex gap-1 overflow-x-auto" style={{borderColor: 'var(--border)', background: 'var(--bg-primary)'}}>
+              <button onClick={() => addBlock('text')} className="px-3 py-1.5 notion-btn rounded text-sm whitespace-nowrap">Text</button>
+              <button onClick={() => addBlock('h1')} className="px-3 py-1.5 notion-btn rounded text-sm whitespace-nowrap">H1</button>
+              <button onClick={() => addBlock('h2')} className="px-3 py-1.5 notion-btn rounded text-sm whitespace-nowrap">H2</button>
+              <button onClick={() => addBlock('h3')} className="px-3 py-1.5 notion-btn rounded text-sm whitespace-nowrap">H3</button>
+              <button onClick={() => addBlock('list')} className="px-3 py-1.5 notion-btn rounded text-sm whitespace-nowrap">List</button>
+              <button onClick={() => addBlock('todo')} className="px-3 py-1.5 notion-btn rounded text-sm whitespace-nowrap">Todo</button>
+              <button onClick={() => addBlock('quote')} className="px-3 py-1.5 notion-btn rounded text-sm whitespace-nowrap">Quote</button>
+              <button onClick={() => addBlock('code')} className="px-3 py-1.5 notion-btn rounded text-sm whitespace-nowrap">Code</button>
+              <button onClick={() => addBlock('image')} className="px-3 py-1.5 notion-btn rounded text-sm whitespace-nowrap">Image</button>
+              <button onClick={() => addBlock('callout')} className="px-3 py-1.5 notion-btn rounded text-sm whitespace-nowrap">Callout</button>
+              <button onClick={() => addBlock('draw')} className="px-3 py-1.5 notion-btn rounded text-sm whitespace-nowrap">🎨 Draw</button>
+              <button onClick={() => addBlock('divider')} className="px-3 py-1.5 notion-btn rounded text-sm whitespace-nowrap">Divider</button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto">
+              <div className="max-w-3xl mx-auto p-8">
+                <div className="mb-8">
+                  <select value={currentNote.icon} onChange={e => setCurrentNote({...currentNote, icon: e.target.value})} className="text-5xl mb-4 bg-transparent outline-none cursor-pointer">
+                    {['📝', '📄', '📋', '📌', '💡', '🎯', '📚', '✅', '🔖', '💼', '🏠', '🎨', '🚀', '⭐', '🔥', '💻', '📊', '🎓'].map(icon => (
+                      <option key={icon} value={icon}>{icon}</option>
+                    ))}
+                  </select>
+                  
+                  <input 
+                    value={currentNote.title} 
+                    onChange={e => setCurrentNote({...currentNote, title: e.target.value})} 
+                    className="w-full text-4xl font-bold outline-none mb-4" 
+                    placeholder="Untitled" 
+                    style={{color: 'var(--text-primary)'}}
+                  />
+                  
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium mb-2">Folder</label>
+                    <select value={currentNote.folder || ''} onChange={e => setCurrentNote({...currentNote, folder: e.target.value})} className="px-3 py-2 border rounded" style={{borderColor: 'var(--border)', background: 'var(--bg-secondary)'}}>
+                      <option value="">No Folder</option>
+                      {folders.map(f => <option key={f} value={f}>{f}</option>)}
+                    </select>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium mb-2">Tags</label>
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {(currentNote.tags || []).map(tag => (
+                        <span key={tag} className="px-3 py-1 rounded text-sm flex items-center gap-2" style={{background: 'var(--accent)', color: '#fff'}}>
+                          #{tag}
+                          <button onClick={() => removeTag(tag)} className="hover:opacity-70">×</button>
+                        </span>
+                      ))}
+                    </div>
+                    
+                    <div className="flex gap-2 mb-2 flex-wrap">
+                      {predefinedTags.filter(t => !currentNote.tags?.includes(t)).map(tag => (
+                        <button key={tag} onClick={() => toggleTag(tag)} className="px-3 py-1 rounded text-sm border" style={{borderColor: 'var(--border)', background: 'var(--hover)'}}>+ {tag}</button>
+                      ))}
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <input value={customTagInput} onChange={e => setCustomTagInput(e.target.value)} onKeyPress={e => e.key === 'Enter' && addCustomTag()} className="flex-1 px-3 py-2 border rounded text-sm" style={{borderColor: 'var(--border)', background: 'var(--bg-secondary)'}} placeholder="Add custom tag..." />
+                      <button onClick={addCustomTag} className="px-4 py-2 rounded text-sm text-white" style={{background: 'var(--accent)'}}>Add</button>
+                    </div>
+                  </div>
+                  
+                  <div className="text-xs pt-4 border-t" style={{color: 'var(--text-secondary)', borderColor: 'var(--border)'}}>
+                    Created {new Date(currentNote.createdAt).toLocaleDateString()} • Last edited {new Date(currentNote.updatedAt).toLocaleString()}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  {currentNote.content.length === 0 && (
+                    <div className="text-center py-12 border-2 border-dashed rounded-lg" style={{borderColor: 'var(--border)'}}>
+                      <p className="text-lg mb-4" style={{color: 'var(--text-secondary)'}}>Start writing...</p>
+                      <button onClick={() => addBlock('text')} className="px-4 py-2 rounded text-white" style={{background: 'var(--accent)'}}>+ Add Block</button>
+                    </div>
+                  )}
+                  
+                  {currentNote.content.map((block, idx) => (
+                    <div key={block.id} className="group py-1">
+                      {renderEdit(block, idx)}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      return null;
+    }
+
+    ReactDOM.render(<NoteApp />, document.getElementById('root'));
+  </script>
+</body>
+</html>
