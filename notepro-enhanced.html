@@ -8,6 +8,14 @@
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
     
@@ -155,12 +163,21 @@
     .editor-code {
       font-family: 'JetBrains Mono', 'Monaco', monospace;
       font-size: 0.875rem;
-      background: var(--code-bg);
+      background: #282c34;
       border: 1px solid var(--code-border);
       border-radius: 6px;
       padding: 16px;
       line-height: 1.6;
-      color: var(--text-primary);
+      color: #abb2bf;
+    }
+    
+    .dark .editor-code {
+      background: #1e1e1e;
+      color: #d4d4d4;
+    }
+    
+    .editor-code:focus {
+      box-shadow: 0 0 0 2px var(--accent);
     }
     
     .editor-quote {
@@ -276,17 +293,89 @@
     .reading-mode pre {
       background: var(--code-bg);
       border: 1px solid var(--code-border);
-      padding: 28px;
+      padding: 0;
       border-radius: 12px;
       margin: 40px 0;
-      overflow-x: auto;
+      overflow: hidden;
       font-family: 'JetBrains Mono', 'Monaco', monospace;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    
+    .dark .reading-mode pre {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+    
+    .reading-mode .code-header {
+      background: linear-gradient(180deg, var(--hover) 0%, var(--bg-secondary) 100%);
+      border-bottom: 1px solid var(--code-border);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .reading-mode .code-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    
+    .reading-mode .code-dot.red { background: #ff5f56; }
+    .reading-mode .code-dot.yellow { background: #ffbd2e; }
+    .reading-mode .code-dot.green { background: #27c93f; }
+    
+    .reading-mode .code-lang {
+      margin-left: auto;
+      color: var(--text-secondary);
+      font-weight: 500;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .reading-mode pre code {
+      display: block;
+      padding: 28px;
+      overflow-x: auto;
       font-size: 15px;
       line-height: 1.7;
+      color: var(--text-primary);
+      font-family: 'JetBrains Mono', 'Monaco', monospace;
+      background: transparent !important;
+    }
+    
+    .reading-mode pre {
+      background: #282c34 !important;
+    }
+    
+    .dark .reading-mode pre {
+      background: #1e1e1e !important;
+    }
+    
+    .reading-mode pre .hljs {
+      background: transparent;
+      padding: 0;
     }
     
     .reading-mode code {
       font-family: 'JetBrains Mono', 'Monaco', monospace;
+    }
+    
+    .reading-mode :not(pre) > code {
+      background: var(--code-bg);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.9em;
+      border: 1px solid var(--code-border);
+      color: #e83e8c;
+      font-weight: 500;
+    }
+    
+    .dark .reading-mode :not(pre) > code {
+      color: #ff79c6;
     }
     
     .reading-mode ul, .reading-mode ol {
@@ -1139,6 +1228,19 @@
       const renderReadingBlock = (block) => {
         const textStyles = applyTextStyle(block);
         
+        // Detect language from code content
+        const detectLanguage = (code) => {
+          const trimmed = code.trim().toLowerCase();
+          if (trimmed.includes('def ') || trimmed.includes('import ') || trimmed.includes('print(')) return 'python';
+          if (trimmed.includes('function ') || trimmed.includes('const ') || trimmed.includes('let ') || trimmed.includes('=>')) return 'javascript';
+          if (trimmed.includes('public class') || trimmed.includes('public static void')) return 'java';
+          if (trimmed.includes('#include') || trimmed.includes('int main')) return 'cpp';
+          if (trimmed.includes('SELECT') || trimmed.includes('FROM') || trimmed.includes('WHERE')) return 'sql';
+          if (trimmed.includes('<html') || trimmed.includes('<!doctype')) return 'html';
+          if (trimmed.startsWith('{') || trimmed.startsWith('[')) return 'json';
+          return 'plaintext';
+        };
+        
         switch (block.type) {
           case 'text':
             return <p style={textStyles}>{block.content}</p>;
@@ -1149,7 +1251,19 @@
           case 'h3':
             return <h3>{block.content}</h3>;
           case 'code':
-            return <pre><code>{block.content}</code></pre>;
+            const language = detectLanguage(block.content);
+            const highlightedCode = hljs.highlight(block.content, { language: language === 'plaintext' ? 'text' : language }).value;
+            return (
+              <pre>
+                <div className="code-header">
+                  <span className="code-dot red"></span>
+                  <span className="code-dot yellow"></span>
+                  <span className="code-dot green"></span>
+                  <span className="code-lang">{language}</span>
+                </div>
+                <code className="hljs" dangerouslySetInnerHTML={{ __html: highlightedCode }}></code>
+              </pre>
+            );
           case 'quote':
             return <blockquote>{block.content}</blockquote>;
           case 'list':
@@ -1759,7 +1873,7 @@
                     onChange={e => setCurrentNote({...currentNote, icon: e.target.value})} 
                     className="text-6xl mb-6 bg-transparent outline-none cursor-pointer"
                   >
-                    {['📝', '📄', '📋', '📌', '💡', '🎯', '📚', '✅', '🔖', '💼', '🏠', '🎨', '🚀', '⭐', '🔥', '💻', '📊', '🎓'].map(icon => (
+                    {['📝', '📄', '📋', '📌', '💡', '🎯', '📚', '✅', '📖', '💼', '🏠', '🎨', '🚀', '⭐', '🔥', '💻', '📊', '🎓'].map(icon => (
                       <option key={icon} value={icon}>{icon}</option>
                     ))}
                   </select>
@@ -1842,7 +1956,7 @@
                 <div className="space-y-1">
                   {currentNote.content.length === 0 && (
                     <div className="text-center py-16 border-2 border-dashed rounded-xl" style={{borderColor: 'var(--border)'}}>
-                      <div className="text-5xl mb-4">✍️</div>
+                      <div className="text-5xl mb-4">✏️</div>
                       <p className="text-lg mb-6 font-medium" style={{color: 'var(--text-secondary)'}}>Start writing your note...</p>
                       <p className="text-sm mb-8" style={{color: 'var(--text-secondary)'}}>Use the toolbar above to add different content blocks</p>
                       <button 
