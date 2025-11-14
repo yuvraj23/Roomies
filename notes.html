@@ -775,6 +775,16 @@
 
       const addBlock = (type) => {
         if (!currentNote) return;
+        
+        // Check if drawing block already exists
+        if (type === 'draw') {
+          const hasDrawing = currentNote.content.some(block => block.type === 'draw');
+          if (hasDrawing) {
+            alert('⚠️ Only one drawing canvas allowed per note. Please use the existing canvas or delete it first.');
+            return;
+          }
+        }
+        
         setCurrentNote({
           ...currentNote,
           content: [...currentNote.content, { id: Date.now().toString(), type, content: '', data: null, styles: {} }],
@@ -1705,6 +1715,81 @@
                     ))
                   )}
                 </div>
+                
+                {/* Related Notes Section */}
+                {(() => {
+                  const currentFolder = currentNote.folder || '';
+                  const sameFolderNotes = notes.filter(n => {
+                    if (currentFolder) {
+                      return n.folder === currentFolder && n.id !== currentNote.id;
+                    } else {
+                      return (!n.folder || n.folder === '') && n.id !== currentNote.id;
+                    }
+                  }).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)).slice(0, 3);
+                  
+                  if (sameFolderNotes.length === 0) return null;
+                  
+                  return (
+                    <div style={{marginTop: '80px', paddingTop: '60px', borderTop: '1px solid var(--border)'}}>
+                      <h3 style={{
+                        fontFamily: 'Inter, sans-serif',
+                        fontSize: '24px',
+                        fontWeight: '600',
+                        marginBottom: '32px',
+                        color: 'var(--text-primary)'
+                      }}>
+                        {currentFolder ? `More from ${currentFolder}` : 'Related Notes'}
+                      </h3>
+                      <div style={{display: 'grid', gap: '24px'}}>
+                        {sameFolderNotes.map(note => (
+                          <div 
+                            key={note.id}
+                            onClick={() => setCurrentNote(note)}
+                            style={{
+                              padding: '24px',
+                              background: 'var(--hover)',
+                              border: '1px solid var(--border)',
+                              borderRadius: '12px',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s',
+                              fontFamily: 'Inter, sans-serif'
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+                            onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+                          >
+                            <div style={{display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '12px'}}>
+                              <span style={{fontSize: '32px'}}>{note.icon}</span>
+                              <div style={{flex: 1}}>
+                                <h4 style={{
+                                  fontSize: '18px',
+                                  fontWeight: '600',
+                                  margin: 0,
+                                  marginBottom: '6px',
+                                  color: 'var(--text-primary)'
+                                }}>
+                                  {note.title || 'Untitled'}
+                                </h4>
+                                <div style={{fontSize: '13px', color: 'var(--text-secondary)'}}>
+                                  {new Date(note.updatedAt).toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric'
+                                  })}
+                                  {note.tags?.length > 0 && (
+                                    <span style={{marginLeft: '12px'}}>
+                                      {note.tags.slice(0, 2).map(t => `#${t}`).join(' ')}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              <span style={{fontSize: '24px', color: 'var(--accent)'}}>→</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             </div>
             
@@ -1716,6 +1801,48 @@
                 ✏️ Edit
               </button>
               <div className="toolbar-divider"></div>
+              
+              {/* Previous/Next Blog Navigation */}
+              {(() => {
+                const currentFolder = currentNote.folder || '';
+                const sameFolderNotes = notes.filter(n => {
+                  if (currentFolder) {
+                    return n.folder === currentFolder;
+                  } else {
+                    return !n.folder || n.folder === '';
+                  }
+                }).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+                
+                const currentIndex = sameFolderNotes.findIndex(n => n.id === currentNote.id);
+                const prevNote = currentIndex > 0 ? sameFolderNotes[currentIndex - 1] : null;
+                const nextNote = currentIndex < sameFolderNotes.length - 1 ? sameFolderNotes[currentIndex + 1] : null;
+                
+                return (
+                  <>
+                    <button 
+                      onClick={() => prevNote && setCurrentNote(prevNote)} 
+                      disabled={!prevNote}
+                      title={prevNote ? `Previous: ${prevNote.title}` : 'No previous note'}
+                      style={{opacity: prevNote ? 1 : 0.3, cursor: prevNote ? 'pointer' : 'not-allowed'}}
+                    >
+                      ◀ Prev
+                    </button>
+                    <span style={{fontSize: '12px', color: 'var(--text-secondary)', padding: '0 8px'}}>
+                      {currentIndex + 1}/{sameFolderNotes.length}
+                    </span>
+                    <button 
+                      onClick={() => nextNote && setCurrentNote(nextNote)} 
+                      disabled={!nextNote}
+                      title={nextNote ? `Next: ${nextNote.title}` : 'No next note'}
+                      style={{opacity: nextNote ? 1 : 0.3, cursor: nextNote ? 'pointer' : 'not-allowed'}}
+                    >
+                      Next ▶
+                    </button>
+                    <div className="toolbar-divider"></div>
+                  </>
+                );
+              })()}
+              
               <button onClick={() => adjustFontSize(-2)} title="Decrease font size">
                 A−
               </button>
