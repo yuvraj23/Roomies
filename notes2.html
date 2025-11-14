@@ -1,0 +1,2117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NotePro - Enhanced Editor</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+    
+    * { 
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f7f7f7;
+      --text-primary: #37352f;
+      --text-secondary: #787774;
+      --border: #e9e9e7;
+      --hover: #f1f1ef;
+      --accent: #2383e2;
+      --sidebar: #fbfbfa;
+      --code-bg: #f6f8fa;
+      --code-border: #d0d7de;
+    }
+    
+    .dark {
+      --bg-primary: #191919;
+      --bg-secondary: #252525;
+      --text-primary: #e3e2e0;
+      --text-secondary: #9b9a97;
+      --border: #373737;
+      --hover: #2f2f2f;
+      --accent: #529cca;
+      --sidebar: #1f1f1f;
+      --code-bg: #161b22;
+      --code-border: #30363d;
+    }
+    
+    body {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      margin: 0;
+      overflow: hidden;
+    }
+    
+    .notion-btn {
+      background: transparent;
+      transition: all 0.15s ease;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+    }
+    
+    .notion-btn:hover {
+      background: var(--hover);
+    }
+
+    .toolbar-button {
+      padding: 8px 12px;
+      border-radius: 6px;
+      background: transparent;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .toolbar-button:hover {
+      background: var(--hover);
+      border-color: var(--accent);
+    }
+
+    .toolbar-button.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+    
+    .editor-block {
+      position: relative;
+      margin: 4px 0;
+      padding: 3px 0;
+      transition: all 0.15s ease;
+    }
+    
+    .editor-block:hover {
+      background: rgba(0, 0, 0, 0.02);
+    }
+    
+    .dark .editor-block:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+    
+    .editor-input, .editor-textarea {
+      width: 100%;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: var(--text-primary);
+      padding: 8px 12px;
+      border-radius: 4px;
+      transition: all 0.15s ease;
+      line-height: 1.6;
+      resize: none;
+    }
+    
+    .editor-input:focus, .editor-textarea:focus {
+      background: var(--bg-primary);
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+    
+    .editor-input::placeholder, .editor-textarea::placeholder {
+      color: var(--text-secondary);
+      opacity: 0.4;
+    }
+    
+    .editor-h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      line-height: 1.2;
+      margin: 16px 0 8px 0;
+    }
+    
+    .editor-h2 {
+      font-size: 1.875rem;
+      font-weight: 700;
+      line-height: 1.3;
+      margin: 12px 0 6px 0;
+    }
+    
+    .editor-h3 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      line-height: 1.4;
+      margin: 8px 0 4px 0;
+    }
+    
+    .editor-text {
+      font-size: 1rem;
+      line-height: 1.7;
+    }
+    
+    .editor-code {
+      font-family: 'JetBrains Mono', 'Monaco', monospace;
+      font-size: 0.875rem;
+      background: #282c34;
+      border: 1px solid var(--code-border);
+      border-radius: 6px;
+      padding: 16px;
+      line-height: 1.6;
+      color: #abb2bf;
+    }
+    
+    .dark .editor-code {
+      background: #1e1e1e;
+      color: #d4d4d4;
+    }
+    
+    .editor-code:focus {
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+    
+    .editor-quote {
+      border-left: 3px solid var(--accent);
+      padding-left: 20px;
+      margin: 12px 0;
+      font-style: italic;
+      color: var(--text-secondary);
+    }
+    
+    .editor-callout {
+      background: var(--hover);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    
+    .editor-actions {
+      position: absolute;
+      left: -40px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+    
+    .editor-block:hover .editor-actions {
+      opacity: 1;
+    }
+    
+    .action-btn {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-size: 14px;
+    }
+    
+    .action-btn:hover {
+      background: var(--hover);
+      border-color: var(--accent);
+    }
+    
+    .action-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+    
+    /* Enhanced Reading Mode */
+    .reading-mode {
+      font-family: 'Merriweather', Georgia, serif;
+      line-height: 1.85;
+      font-size: 19px;
+      color: var(--text-primary);
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    
+    .reading-mode h1 {
+      font-size: 52px;
+      line-height: 1.15;
+      margin: 0 0 40px 0;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .reading-mode h2 {
+      font-size: 38px;
+      line-height: 1.25;
+      margin: 64px 0 28px 0;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .reading-mode h3 {
+      font-size: 30px;
+      line-height: 1.35;
+      margin: 48px 0 24px 0;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .reading-mode p {
+      margin: 0 0 32px 0;
+      line-height: 1.85;
+      color: var(--text-primary);
+    }
+    
+    .reading-mode blockquote {
+      border-left: 4px solid var(--accent);
+      padding-left: 32px;
+      margin: 48px 0;
+      font-style: italic;
+      font-size: 22px;
+      line-height: 1.75;
+      color: var(--text-secondary);
+    }
+    
+    .reading-mode pre {
+      background: var(--code-bg);
+      border: 1px solid var(--code-border);
+      padding: 0;
+      border-radius: 12px;
+      margin: 40px 0;
+      overflow: hidden;
+      font-family: 'JetBrains Mono', 'Monaco', monospace;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    
+    .dark .reading-mode pre {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+    
+    .reading-mode .code-header {
+      background: linear-gradient(180deg, var(--hover) 0%, var(--bg-secondary) 100%);
+      border-bottom: 1px solid var(--code-border);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .reading-mode .code-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    
+    .reading-mode .code-dot.red { background: #ff5f56; }
+    .reading-mode .code-dot.yellow { background: #ffbd2e; }
+    .reading-mode .code-dot.green { background: #27c93f; }
+    
+    .reading-mode .code-lang {
+      margin-left: auto;
+      color: var(--text-secondary);
+      font-weight: 500;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .reading-mode pre code {
+      display: block;
+      padding: 28px;
+      overflow-x: auto;
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text-primary);
+      font-family: 'JetBrains Mono', 'Monaco', monospace;
+      background: transparent !important;
+    }
+    
+    .reading-mode pre {
+      background: #282c34 !important;
+    }
+    
+    .dark .reading-mode pre {
+      background: #1e1e1e !important;
+    }
+    
+    .reading-mode pre .hljs {
+      background: transparent;
+      padding: 0;
+    }
+    
+    .reading-mode code {
+      font-family: 'JetBrains Mono', 'Monaco', monospace;
+    }
+    
+    .reading-mode :not(pre) > code {
+      background: var(--code-bg);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.9em;
+      border: 1px solid var(--code-border);
+      color: #e83e8c;
+      font-weight: 500;
+    }
+    
+    .dark .reading-mode :not(pre) > code {
+      color: #ff79c6;
+    }
+    
+    .reading-mode ul, .reading-mode ol {
+      margin: 32px 0;
+      padding-left: 40px;
+    }
+    
+    .reading-mode li {
+      margin-bottom: 20px;
+      line-height: 1.85;
+    }
+    
+    .reading-mode img {
+      max-width: 100%;
+      height: auto;
+      margin: 56px 0;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    }
+    
+    .dark .reading-mode img {
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+    
+    .reading-mode .callout {
+      background: var(--hover);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      padding: 28px;
+      border-radius: 12px;
+      margin: 40px 0;
+      display: flex;
+      gap: 20px;
+      line-height: 1.85;
+    }
+    
+    .reading-header {
+      text-align: center;
+      margin-bottom: 80px;
+      padding-bottom: 60px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .reading-header h1 {
+      margin-bottom: 32px;
+    }
+    
+    .reading-meta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      font-size: 15px;
+      color: var(--text-secondary);
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .reading-tags {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 28px;
+    }
+    
+    .reading-tag {
+      padding: 8px 20px;
+      border-radius: 24px;
+      background: var(--hover);
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      border: 1px solid var(--border);
+    }
+    
+    .reading-toolbar {
+      position: fixed;
+      bottom: 48px;
+      right: 48px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 60px;
+      padding: 14px 24px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+    }
+    
+    .reading-toolbar button {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 10px 16px;
+      border-radius: 10px;
+      transition: all 0.2s;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .reading-toolbar button:hover {
+      background: var(--hover);
+    }
+    
+    .toolbar-divider {
+      width: 1px;
+      height: 28px;
+      background: var(--border);
+    }
+    
+    .sidebar {
+      background: var(--sidebar);
+      border-right: 1px solid var(--border);
+    }
+    
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-secondary);
+    }
+    
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .toolbar-section {
+      display: flex;
+      gap: 6px;
+      padding: 0 6px;
+      border-right: 1px solid var(--border);
+    }
+
+    .toolbar-section:last-child {
+      border-right: none;
+    }
+    
+    @media (max-width: 768px) {
+      .reading-mode {
+        font-size: 17px;
+        padding: 0 20px;
+      }
+      
+      .reading-mode h1 {
+        font-size: 36px;
+      }
+      
+      .reading-mode h2 {
+        font-size: 28px;
+      }
+      
+      .reading-mode h3 {
+        font-size: 22px;
+      }
+      
+      .reading-toolbar {
+        bottom: 20px;
+        right: 20px;
+        left: 20px;
+        justify-content: space-between;
+      }
+      
+      .editor-actions {
+        left: 4px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const MAX_FILE_SIZE = 95 * 1024 * 1024;
+
+    function NoteApp() {
+      const [notes, setNotes] = useState([]);
+      const [currentNote, setCurrentNote] = useState(null);
+      const [view, setView] = useState('home');
+      const [githubToken, setGithubToken] = useState('');
+      const [gistId, setGistId] = useState('');
+      const [showSettings, setShowSettings] = useState(false);
+      const [loading, setLoading] = useState(false);
+      const [tokenInput, setTokenInput] = useState('');
+      const [searchQuery, setSearchQuery] = useState('');
+      const [selectedTag, setSelectedTag] = useState('all');
+      const [darkMode, setDarkMode] = useState(false);
+      const [sidebarOpen, setSidebarOpen] = useState(true);
+      const [favorites, setFavorites] = useState([]);
+      const canvasRefs = useRef({});
+      const [drawingStates, setDrawingStates] = useState({});
+      const [folders, setFolders] = useState([]);
+      const [currentFolder, setCurrentFolder] = useState('all');
+      const [showFolderModal, setShowFolderModal] = useState(false);
+      const [newFolderName, setNewFolderName] = useState('');
+      const [customTagInput, setCustomTagInput] = useState('');
+      const [readingFontSize, setReadingFontSize] = useState(19);
+
+      useEffect(() => {
+        const saved = {
+          token: localStorage.getItem('github_token'),
+          gistId: localStorage.getItem('gist_id'),
+          darkMode: localStorage.getItem('dark_mode') === 'true',
+          favorites: JSON.parse(localStorage.getItem('favorites') || '[]'),
+          folders: JSON.parse(localStorage.getItem('folders') || '["DSA", "Java", "Python", "AWS"]'),
+          readingFontSize: parseInt(localStorage.getItem('reading_font_size') || '19')
+        };
+        
+        setDarkMode(saved.darkMode);
+        setFavorites(saved.favorites);
+        setFolders(saved.folders);
+        setReadingFontSize(saved.readingFontSize);
+        if (saved.darkMode) document.documentElement.classList.add('dark');
+        
+        if (saved.token) {
+          setGithubToken(saved.token);
+          setTokenInput(saved.token);
+          if (saved.gistId) setGistId(saved.gistId);
+          loadNotes(saved.token, saved.gistId);
+        }
+      }, []);
+
+      const toggleDarkMode = () => {
+        const newMode = !darkMode;
+        setDarkMode(newMode);
+        localStorage.setItem('dark_mode', newMode);
+        document.documentElement.classList[newMode ? 'add' : 'remove']('dark');
+      };
+
+      const toggleFavorite = (noteId) => {
+        const newFavs = favorites.includes(noteId) ? favorites.filter(id => id !== noteId) : [...favorites, noteId];
+        setFavorites(newFavs);
+        localStorage.setItem('favorites', JSON.stringify(newFavs));
+      };
+
+      const loadNotes = async (token, gid) => {
+        if (!token) return setShowSettings(true);
+        setLoading(true);
+        try {
+          let gistIdToUse = gid;
+          if (!gistIdToUse) {
+            const res = await fetch('https://api.github.com/gists', {
+              headers: { 'Authorization': `token ${token}` }
+            });
+            if (res.ok) {
+              const gists = await res.json();
+              const found = gists.find(g => g.description === 'NotePro Storage');
+              if (found) {
+                gistIdToUse = found.id;
+                setGistId(found.id);
+                localStorage.setItem('gist_id', found.id);
+              }
+            }
+          }
+
+          if (gistIdToUse) {
+            const res = await fetch(`https://api.github.com/gists/${gistIdToUse}`, {
+              headers: { 'Authorization': `token ${token}` }
+            });
+            if (res.ok) {
+              const data = await res.json();
+              const index = data.files['index.json'];
+              let allNotes = [];
+              if (index) {
+                const idx = JSON.parse(index.content);
+                for (const fn of idx.files) {
+                  if (data.files[fn]) {
+                    allNotes = [...allNotes, ...JSON.parse(data.files[fn].content)];
+                  }
+                }
+              }
+              setNotes(allNotes.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)));
+            }
+          }
+        } catch (err) {
+          console.error(err);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      const saveNotes = async (updatedNotes) => {
+        if (!githubToken) return setShowSettings(true);
+        setLoading(true);
+        try {
+          const files = {};
+          const fileList = [];
+          let idx = 1, current = [], size = 0;
+
+          for (const note of updatedNotes) {
+            const noteSize = new Blob([JSON.stringify(note)]).size;
+            if (size + noteSize > MAX_FILE_SIZE && current.length > 0) {
+              const fn = `notes${idx}.json`;
+              files[fn] = { content: JSON.stringify(current, null, 2) };
+              fileList.push(fn);
+              idx++;
+              current = [];
+              size = 0;
+            }
+            current.push(note);
+            size += noteSize;
+          }
+
+          if (current.length > 0) {
+            const fn = `notes${idx}.json`;
+            files[fn] = { content: JSON.stringify(current, null, 2) };
+            fileList.push(fn);
+          }
+
+          files['index.json'] = {
+            content: JSON.stringify({
+              files: fileList,
+              totalNotes: updatedNotes.length,
+              lastUpdated: new Date().toISOString()
+            }, null, 2)
+          };
+
+          const url = gistId ? `https://api.github.com/gists/${gistId}` : 'https://api.github.com/gists';
+          const method = gistId ? 'PATCH' : 'POST';
+          const body = gistId ? { files } : { description: 'NotePro Storage', public: false, files };
+
+          const res = await fetch(url, {
+            method,
+            headers: {
+              'Authorization': `token ${githubToken}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body)
+          });
+
+          if (res.ok) {
+            if (!gistId) {
+              const data = await res.json();
+              setGistId(data.id);
+              localStorage.setItem('gist_id', data.id);
+            }
+            setNotes(updatedNotes);
+          }
+        } catch (err) {
+          console.error(err);
+          alert('Failed to save');
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      const createNote = () => {
+        const note = {
+          id: Date.now().toString(),
+          title: '',
+          icon: '📝',
+          content: [],
+          tags: [],
+          folder: currentFolder === 'all' || currentFolder === 'favorites' ? '' : currentFolder,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        setCurrentNote(note);
+        setView('edit');
+      };
+
+      const saveCurrentNote = async () => {
+        if (!currentNote?.title.trim()) return alert('Add a title');
+        const idx = notes.findIndex(n => n.id === currentNote.id);
+        const updated = idx >= 0 ? [...notes] : [currentNote, ...notes];
+        if (idx >= 0) updated[idx] = currentNote;
+        await saveNotes(updated);
+      };
+
+      const deleteNote = async (id) => {
+        if (!confirm('Delete this note?')) return;
+        await saveNotes(notes.filter(n => n.id !== id));
+        if (currentNote?.id === id) {
+          setCurrentNote(null);
+          setView('home');
+        }
+      };
+
+      const addBlock = (type) => {
+        if (!currentNote) return;
+        
+        // Check if drawing block already exists
+        if (type === 'draw') {
+          const hasDrawing = currentNote.content.some(block => block.type === 'draw');
+          if (hasDrawing) {
+            alert('⚠️ Only one drawing canvas allowed per note. Please use the existing canvas or delete it first.');
+            return;
+          }
+        }
+        
+        setCurrentNote({
+          ...currentNote,
+          content: [...currentNote.content, { id: Date.now().toString(), type, content: '', data: null, styles: {} }],
+          updatedAt: new Date().toISOString()
+        });
+      };
+
+      const updateBlock = (id, content, data = null, styles = null) => {
+        if (!currentNote) return;
+        setCurrentNote({
+          ...currentNote,
+          content: currentNote.content.map(b => b.id === id ? { 
+            ...b, 
+            content, 
+            ...(data !== null && { data }),
+            ...(styles !== null && { styles: { ...b.styles, ...styles } })
+          } : b),
+          updatedAt: new Date().toISOString()
+        });
+      };
+
+      const deleteBlock = (id) => {
+        if (!currentNote) return;
+        setCurrentNote({ ...currentNote, content: currentNote.content.filter(b => b.id !== id) });
+      };
+
+      const moveBlock = (id, dir) => {
+        if (!currentNote) return;
+        const idx = currentNote.content.findIndex(b => b.id === id);
+        const newIdx = dir === 'up' ? idx - 1 : idx + 1;
+        if (newIdx < 0 || newIdx >= currentNote.content.length) return;
+        const arr = [...currentNote.content];
+        [arr[idx], arr[newIdx]] = [arr[newIdx], arr[idx]];
+        setCurrentNote({ ...currentNote, content: arr });
+      };
+
+      const toggleTag = (tag) => {
+        if (!currentNote) return;
+        const tags = currentNote.tags || [];
+        const newTags = tags.includes(tag) ? tags.filter(t => t !== tag) : [...tags, tag];
+        setCurrentNote({ ...currentNote, tags: newTags });
+      };
+
+      const addCustomTag = () => {
+        if (!customTagInput.trim() || !currentNote) return;
+        const tag = customTagInput.trim();
+        const tags = currentNote.tags || [];
+        if (!tags.includes(tag)) {
+          setCurrentNote({ ...currentNote, tags: [...tags, tag] });
+        }
+        setCustomTagInput('');
+      };
+
+      const removeTag = (tag) => {
+        if (!currentNote) return;
+        setCurrentNote({ ...currentNote, tags: currentNote.tags.filter(t => t !== tag) });
+      };
+
+      const addFolder = () => {
+        if (!newFolderName.trim() || folders.includes(newFolderName.trim())) return;
+        const updated = [...folders, newFolderName.trim()];
+        setFolders(updated);
+        localStorage.setItem('folders', JSON.stringify(updated));
+        setNewFolderName('');
+        setShowFolderModal(false);
+      };
+
+      const deleteFolder = (folder) => {
+        if (!confirm(`Delete folder "${folder}"? Notes will be moved to root.`)) return;
+        const updated = folders.filter(f => f !== folder);
+        setFolders(updated);
+        localStorage.setItem('folders', JSON.stringify(updated));
+        const updatedNotes = notes.map(n => n.folder === folder ? {...n, folder: ''} : n);
+        saveNotes(updatedNotes);
+        if (currentFolder === folder) setCurrentFolder('all');
+      };
+
+      const adjustFontSize = (change) => {
+        const newSize = Math.max(14, Math.min(26, readingFontSize + change));
+        setReadingFontSize(newSize);
+        localStorage.setItem('reading_font_size', newSize.toString());
+      };
+
+      const toggleBlockStyle = (blockId, style) => {
+        const block = currentNote.content.find(b => b.id === blockId);
+        if (!block || !['text', 'list'].includes(block.type)) return;
+        
+        const currentStyles = block.styles || {};
+        updateBlock(blockId, block.content, null, { [style]: !currentStyles[style] });
+      };
+
+      const initCanvas = (id) => {
+        const canvas = canvasRefs.current[id];
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        ctx.strokeStyle = darkMode ? '#fff' : '#000';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        setDrawingStates(prev => ({ ...prev, [id]: { drawing: false, ctx } }));
+      };
+
+      const startDraw = (e, id) => {
+        const canvas = canvasRefs.current[id];
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX || e.touches?.[0]?.clientX) - rect.left;
+        const y = (e.clientY || e.touches?.[0]?.clientY) - rect.top;
+        const ctx = canvas.getContext('2d');
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        setDrawingStates(prev => ({ ...prev, [id]: { ...prev[id], drawing: true } }));
+      };
+
+      const draw = (e, id) => {
+        const state = drawingStates[id];
+        if (!state?.drawing) return;
+        const canvas = canvasRefs.current[id];
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX || e.touches?.[0]?.clientX) - rect.left;
+        const y = (e.clientY || e.touches?.[0]?.clientY) - rect.top;
+        state.ctx.lineTo(x, y);
+        state.ctx.stroke();
+      };
+
+      const stopDraw = (id) => {
+        setDrawingStates(prev => ({ ...prev, [id]: { ...prev[id], drawing: false } }));
+      };
+
+      const saveDraw = (id) => {
+        const canvas = canvasRefs.current[id];
+        if (canvas) updateBlock(id, 'Drawing', canvas.toDataURL());
+      };
+
+      const clearDraw = (id) => {
+        const canvas = canvasRefs.current[id];
+        if (canvas) canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+      };
+
+      const applyTextStyle = (block) => {
+        const styles = block.styles || {};
+        const styleObj = {};
+        
+        if (styles.bold) styleObj.fontWeight = 'bold';
+        if (styles.italic) styleObj.fontStyle = 'italic';
+        if (styles.underline) styleObj.textDecoration = 'underline';
+        if (styles.strikethrough) styleObj.textDecoration = 'line-through';
+        if (styles.code) {
+          styleObj.fontFamily = "'JetBrains Mono', monospace";
+          styleObj.background = 'var(--code-bg)';
+          styleObj.padding = '2px 6px';
+          styleObj.borderRadius = '4px';
+          styleObj.fontSize = '0.9em';
+        }
+        if (styles.highlight) {
+          styleObj.background = 'rgba(255, 212, 0, 0.3)';
+          styleObj.padding = '2px 6px';
+          styleObj.borderRadius = '4px';
+        }
+        
+        return styleObj;
+      };
+
+      const renderEdit = (block, idx) => {
+        const actions = (
+          <div className="editor-actions">
+            <button onClick={() => moveBlock(block.id, 'up')} disabled={idx === 0} className="action-btn" title="Move up">↑</button>
+            <button onClick={() => moveBlock(block.id, 'down')} disabled={idx === currentNote.content.length - 1} className="action-btn" title="Move down">↓</button>
+            <button onClick={() => deleteBlock(block.id)} className="action-btn" style={{color: '#ef4444'}} title="Delete">×</button>
+          </div>
+        );
+
+        const textStyles = applyTextStyle(block);
+
+        switch (block.type) {
+          case 'text':
+            return (
+              <div className="editor-block">
+                {actions}
+                <textarea 
+                  value={block.content} 
+                  onChange={e => updateBlock(block.id, e.target.value)} 
+                  className="editor-textarea editor-text" 
+                  placeholder="Type something..." 
+                  rows={3}
+                  style={{minHeight: '60px', ...textStyles}}
+                />
+              </div>
+            );
+          case 'h1':
+            return (
+              <div className="editor-block">
+                {actions}
+                <input 
+                  value={block.content} 
+                  onChange={e => updateBlock(block.id, e.target.value)} 
+                  className="editor-input editor-h1" 
+                  placeholder="Heading 1" 
+                />
+              </div>
+            );
+          case 'h2':
+            return (
+              <div className="editor-block">
+                {actions}
+                <input 
+                  value={block.content} 
+                  onChange={e => updateBlock(block.id, e.target.value)} 
+                  className="editor-input editor-h2" 
+                  placeholder="Heading 2" 
+                />
+              </div>
+            );
+          case 'h3':
+            return (
+              <div className="editor-block">
+                {actions}
+                <input 
+                  value={block.content} 
+                  onChange={e => updateBlock(block.id, e.target.value)} 
+                  className="editor-input editor-h3" 
+                  placeholder="Heading 3" 
+                />
+              </div>
+            );
+          case 'code':
+            return (
+              <div className="editor-block">
+                {actions}
+                <textarea 
+                  value={block.content} 
+                  onChange={e => updateBlock(block.id, e.target.value)} 
+                  className="editor-textarea editor-code" 
+                  placeholder="// Your code here..." 
+                  rows={8}
+                />
+              </div>
+            );
+          case 'quote':
+            return (
+              <div className="editor-block">
+                {actions}
+                <div className="editor-quote">
+                  <textarea 
+                    value={block.content} 
+                    onChange={e => updateBlock(block.id, e.target.value)} 
+                    className="editor-textarea" 
+                    style={{background: 'transparent', border: 'none', width: '100%'}}
+                    placeholder="Quote..." 
+                    rows={2}
+                  />
+                </div>
+              </div>
+            );
+          case 'list':
+            return (
+              <div className="editor-block">
+                {actions}
+                <textarea 
+                  value={block.content} 
+                  onChange={e => updateBlock(block.id, e.target.value)} 
+                  className="editor-textarea editor-text" 
+                  placeholder="• List item" 
+                  rows={3}
+                  style={textStyles}
+                />
+              </div>
+            );
+          case 'numbered':
+            return (
+              <div className="editor-block">
+                {actions}
+                <textarea 
+                  value={block.content} 
+                  onChange={e => updateBlock(block.id, e.target.value)} 
+                  className="editor-textarea editor-text" 
+                  placeholder="1. Numbered item" 
+                  rows={3}
+                />
+              </div>
+            );
+          case 'todo':
+            return (
+              <div className="editor-block">
+                {actions}
+                <div style={{display: 'flex', gap: '12px', padding: '8px 12px', alignItems: 'flex-start'}}>
+                  <input type="checkbox" style={{marginTop: '4px'}} />
+                  <input 
+                    value={block.content} 
+                    onChange={e => updateBlock(block.id, e.target.value)} 
+                    className="editor-input" 
+                    style={{flex: 1, padding: '0'}}
+                    placeholder="To-do item" 
+                  />
+                </div>
+              </div>
+            );
+          case 'image':
+            return (
+              <div className="editor-block">
+                {actions}
+                <div style={{border: '1px solid var(--border)', borderRadius: '8px', padding: '16px'}}>
+                  <input 
+                    value={block.content} 
+                    onChange={e => updateBlock(block.id, e.target.value)} 
+                    className="editor-input" 
+                    placeholder="Paste image URL..." 
+                  />
+                  {block.content && (
+                    <img 
+                      src={block.content} 
+                      style={{marginTop: '12px', width: '100%', borderRadius: '6px'}} 
+                      alt="Preview" 
+                    />
+                  )}
+                </div>
+              </div>
+            );
+          case 'callout':
+            return (
+              <div className="editor-block">
+                {actions}
+                <div className="editor-callout">
+                  <span style={{fontSize: '24px'}}>💡</span>
+                  <input 
+                    value={block.content} 
+                    onChange={e => updateBlock(block.id, e.target.value)} 
+                    className="editor-input" 
+                    style={{flex: 1, padding: '0'}}
+                    placeholder="Callout text..." 
+                  />
+                </div>
+              </div>
+            );
+          case 'divider':
+            return (
+              <div className="editor-block">
+                {actions}
+                <hr style={{border: 'none', borderTop: '2px solid var(--border)', margin: '24px 0'}} />
+              </div>
+            );
+          case 'table':
+            return (
+              <div className="editor-block">
+                {actions}
+                <div style={{border: '1px solid var(--border)', borderRadius: '8px', padding: '16px'}}>
+                  <textarea 
+                    value={block.content} 
+                    onChange={e => updateBlock(block.id, e.target.value)} 
+                    className="editor-textarea" 
+                    placeholder="Column1 | Column2 | Column3&#10;Data1 | Data2 | Data3" 
+                    rows={4}
+                    style={{fontFamily: 'monospace', fontSize: '14px'}}
+                  />
+                </div>
+              </div>
+            );
+          case 'draw':
+            return (
+              <div className="editor-block">
+                {actions}
+                <div style={{border: '1px solid var(--border)', borderRadius: '8px', padding: '16px'}}>
+                  {block.data ? (
+                    <div style={{position: 'relative'}}>
+                      <img src={block.data} style={{width: '100%', borderRadius: '6px'}} alt="Drawing" />
+                      <button 
+                        onClick={() => { updateBlock(block.id, '', null); setTimeout(() => initCanvas(block.id), 50); }} 
+                        style={{
+                          position: 'absolute',
+                          top: '12px',
+                          right: '12px',
+                          padding: '8px 16px',
+                          background: '#fff',
+                          color: '#000',
+                          border: 'none',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          fontSize: '14px',
+                          fontWeight: '500'
+                        }}
+                      >
+                        Edit Drawing
+                      </button>
+                    </div>
+                  ) : (
+                    <div>
+                      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px'}}>
+                        <span style={{fontSize: '14px', fontWeight: '500'}}>🎨 Drawing Canvas</span>
+                        <div style={{display: 'flex', gap: '8px'}}>
+                          <button 
+                            onClick={() => clearDraw(block.id)} 
+                            style={{
+                              padding: '6px 12px',
+                              border: '1px solid var(--border)',
+                              borderRadius: '6px',
+                              background: 'transparent',
+                              cursor: 'pointer',
+                              fontSize: '13px'
+                            }}
+                          >
+                            Clear
+                          </button>
+                          <button 
+                            onClick={() => saveDraw(block.id)} 
+                            style={{
+                              padding: '6px 12px',
+                              background: 'var(--accent)',
+                              color: '#fff',
+                              border: 'none',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              fontSize: '13px',
+                              fontWeight: '500'
+                            }}
+                          >
+                            Save Drawing
+                          </button>
+                        </div>
+                      </div>
+                      <canvas 
+                        ref={el => { 
+                          canvasRefs.current[block.id] = el; 
+                          if (el && !drawingStates[block.id]) initCanvas(block.id); 
+                        }} 
+                        width={800} 
+                        height={400} 
+                        style={{
+                          width: '100%',
+                          border: '1px solid var(--border)',
+                          borderRadius: '6px',
+                          cursor: 'crosshair',
+                          background: darkMode ? '#2a2a2a' : '#fff'
+                        }}
+                        onMouseDown={e => startDraw(e, block.id)} 
+                        onMouseMove={e => draw(e, block.id)} 
+                        onMouseUp={() => stopDraw(block.id)} 
+                        onMouseLeave={() => stopDraw(block.id)} 
+                        onTouchStart={e => { e.preventDefault(); startDraw(e, block.id); }} 
+                        onTouchMove={e => { e.preventDefault(); draw(e, block.id); }} 
+                        onTouchEnd={() => stopDraw(block.id)} 
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          default:
+            return null;
+        }
+      };
+
+      const renderReadingBlock = (block) => {
+        const textStyles = applyTextStyle(block);
+        
+        // Detect language from code content
+        const detectLanguage = (code) => {
+          const trimmed = code.trim().toLowerCase();
+          if (trimmed.includes('def ') || trimmed.includes('import ') || trimmed.includes('print(')) return 'python';
+          if (trimmed.includes('function ') || trimmed.includes('const ') || trimmed.includes('let ') || trimmed.includes('=>')) return 'javascript';
+          if (trimmed.includes('public class') || trimmed.includes('public static void')) return 'java';
+          if (trimmed.includes('#include') || trimmed.includes('int main')) return 'cpp';
+          if (trimmed.includes('SELECT') || trimmed.includes('FROM') || trimmed.includes('WHERE')) return 'sql';
+          if (trimmed.includes('<html') || trimmed.includes('<!doctype')) return 'html';
+          if (trimmed.startsWith('{') || trimmed.startsWith('[')) return 'json';
+          return 'plaintext';
+        };
+        
+        switch (block.type) {
+          case 'text':
+            return <p style={textStyles}>{block.content}</p>;
+          case 'h1':
+            return <h1>{block.content}</h1>;
+          case 'h2':
+            return <h2>{block.content}</h2>;
+          case 'h3':
+            return <h3>{block.content}</h3>;
+          case 'code':
+            const language = detectLanguage(block.content);
+            const highlightedCode = hljs.highlight(block.content, { language: language === 'plaintext' ? 'text' : language }).value;
+            return (
+              <pre>
+                <div className="code-header">
+                  <span className="code-dot red"></span>
+                  <span className="code-dot yellow"></span>
+                  <span className="code-dot green"></span>
+                  <span className="code-lang">{language}</span>
+                </div>
+                <code className="hljs" dangerouslySetInnerHTML={{ __html: highlightedCode }}></code>
+              </pre>
+            );
+          case 'quote':
+            return <blockquote>{block.content}</blockquote>;
+          case 'list':
+            return (
+              <ul>
+                {block.content.split('\n').filter(Boolean).map((line, i) => (
+                  <li key={i} style={textStyles}>{line.replace(/^[•\-*]\s*/, '')}</li>
+                ))}
+              </ul>
+            );
+          case 'numbered':
+            return (
+              <ol>
+                {block.content.split('\n').filter(Boolean).map((line, i) => (
+                  <li key={i}>{line.replace(/^\d+\.\s*/, '')}</li>
+                ))}
+              </ol>
+            );
+          case 'todo':
+            return (
+              <div style={{display: 'flex', gap: '12px', marginBottom: '12px', alignItems: 'center'}}>
+                <input type="checkbox" />
+                <span>{block.content}</span>
+              </div>
+            );
+          case 'image':
+            return block.content ? <img src={block.content} alt="" /> : null;
+          case 'callout':
+            return (
+              <div className="callout">
+                <span style={{fontSize: '28px'}}>💡</span>
+                <div>{block.content}</div>
+              </div>
+            );
+          case 'divider':
+            return <hr style={{border: 'none', borderTop: '2px solid var(--border)', margin: '48px 0'}} />;
+          case 'table':
+            const rows = block.content.split('\n').filter(Boolean);
+            if (rows.length === 0) return null;
+            return (
+              <table style={{width: '100%', borderCollapse: 'collapse', margin: '32px 0'}}>
+                <thead>
+                  <tr>
+                    {rows[0].split('|').map((cell, i) => (
+                      <th key={i} style={{border: '1px solid var(--border)', padding: '12px', background: 'var(--hover)', textAlign: 'left', fontWeight: '600'}}>{cell.trim()}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.slice(1).map((row, i) => (
+                    <tr key={i}>
+                      {row.split('|').map((cell, j) => (
+                        <td key={j} style={{border: '1px solid var(--border)', padding: '12px'}}>{cell.trim()}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            );
+          case 'draw':
+            return block.data ? <img src={block.data} alt="Drawing" /> : null;
+          default:
+            return null;
+        }
+      };
+
+      const allTags = [...new Set(notes.flatMap(n => n.tags || []))];
+      const filtered = notes.filter(n => {
+        const search = n.title.toLowerCase().includes(searchQuery.toLowerCase());
+        const tag = selectedTag === 'all' || n.tags?.includes(selectedTag);
+        const folder = currentFolder === 'all' || n.folder === currentFolder || (currentFolder === 'favorites' && favorites.includes(n.id));
+        return search && tag && folder;
+      });
+
+      if (showSettings || !githubToken) {
+        return (
+          <div className="h-screen flex items-center justify-center p-6" style={{background: 'var(--bg-secondary)'}}>
+            <div className="max-w-lg w-full p-8 rounded-lg" style={{background: 'var(--bg-primary)', border: '1px solid var(--border)'}}>
+              <h2 className="text-2xl font-bold mb-6">Setup GitHub Storage</h2>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">GitHub Token</label>
+                <input 
+                  type="password" 
+                  value={tokenInput} 
+                  onChange={e => setTokenInput(e.target.value)} 
+                  className="w-full p-3 border rounded" 
+                  style={{borderColor: 'var(--border)', background: 'var(--bg-secondary)'}} 
+                  placeholder="ghp_..." 
+                />
+              </div>
+              <div className="p-4 rounded mb-4" style={{background: 'var(--hover)'}}>
+                <p className="text-sm mb-2"><strong>Setup Guide:</strong></p>
+                <ol className="text-sm space-y-1 list-decimal list-inside" style={{color: 'var(--text-secondary)'}}>
+                  <li>Go to GitHub → Settings → Developer settings</li>
+                  <li>Personal access tokens → Generate new token</li>
+                  <li>Select <strong>gist</strong> scope only</li>
+                  <li>Paste token above</li>
+                </ol>
+                <p className="text-xs mt-3 p-2 rounded" style={{background: 'var(--bg-primary)', color: 'var(--accent)'}}>
+                  ✨ Files auto-split at 95MB. Truly unlimited storage!
+                </p>
+              </div>
+              <button 
+                onClick={() => { 
+                  if (tokenInput.trim()) { 
+                    localStorage.setItem('github_token', tokenInput); 
+                    setGithubToken(tokenInput); 
+                    loadNotes(tokenInput, ''); 
+                    setShowSettings(false); 
+                  }
+                }} 
+                className="w-full py-3 rounded font-semibold text-white" 
+                style={{background: 'var(--accent)'}}
+              >
+                Connect GitHub
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      if (view === 'home') {
+        return (
+          <div className="h-screen flex" style={{background: 'var(--bg-secondary)'}}>
+            {sidebarOpen && (
+              <div className="sidebar w-64 flex flex-col">
+                <div className="p-4 border-b" style={{borderColor: 'var(--border)'}}>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="font-bold text-lg">NotePro</span>
+                    <button onClick={toggleDarkMode} className="notion-btn p-2 rounded text-xl">
+                      {darkMode ? '☀️' : '🌙'}
+                    </button>
+                  </div>
+                  <button 
+                    onClick={createNote} 
+                    className="w-full py-2 rounded font-medium text-white" 
+                    style={{background: 'var(--accent)'}}
+                  >
+                    + New Note
+                  </button>
+                </div>
+                
+                <div className="flex-1 overflow-y-auto p-2">
+                  <button 
+                    onClick={() => { setCurrentFolder('all'); setSelectedTag('all'); }} 
+                    className="w-full text-left px-3 py-2 rounded mb-1 flex items-center gap-2" 
+                    style={{background: currentFolder === 'all' ? 'var(--hover)' : 'transparent'}}
+                  >
+                    <span>📄</span>
+                    <span className="flex-1">All Notes</span>
+                    <span className="text-xs" style={{color: 'var(--text-secondary)'}}>{notes.length}</span>
+                  </button>
+                  
+                  <button 
+                    onClick={() => { setCurrentFolder('favorites'); setSelectedTag('all'); }} 
+                    className="w-full text-left px-3 py-2 rounded mb-1 flex items-center gap-2" 
+                    style={{background: currentFolder === 'favorites' ? 'var(--hover)' : 'transparent'}}
+                  >
+                    <span>⭐</span>
+                    <span className="flex-1">Favorites</span>
+                    <span className="text-xs" style={{color: 'var(--text-secondary)'}}>{favorites.length}</span>
+                  </button>
+                  
+                  <div className="mt-4 mb-2">
+                    <div className="px-3 py-1 text-xs font-semibold flex items-center justify-between" style={{color: 'var(--text-secondary)'}}>
+                      <span>FOLDERS</span>
+                      <button onClick={() => setShowFolderModal(true)} className="notion-btn px-1 rounded">+</button>
+                    </div>
+                  </div>
+                  
+                  {folders.map(folder => (
+                    <div key={folder} className="group flex items-center">
+                      <button 
+                        onClick={() => { setCurrentFolder(folder); setSelectedTag('all'); }} 
+                        className="flex-1 text-left px-3 py-2 rounded mb-1 flex items-center gap-2" 
+                        style={{background: currentFolder === folder ? 'var(--hover)' : 'transparent'}}
+                      >
+                        <span>📁</span>
+                        <span className="flex-1 text-sm">{folder}</span>
+                        <span className="text-xs" style={{color: 'var(--text-secondary)'}}>
+                          {notes.filter(n => n.folder === folder).length}
+                        </span>
+                      </button>
+                      <button 
+                        onClick={() => deleteFolder(folder)} 
+                        className="opacity-0 group-hover:opacity-100 notion-btn px-2 text-red-500 text-xs"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                  
+                  {allTags.length > 0 && (
+                    <div className="mt-4">
+                      <div className="px-3 py-1 text-xs font-semibold" style={{color: 'var(--text-secondary)'}}>TAGS</div>
+                      {allTags.map(tag => (
+                        <button 
+                          key={tag} 
+                          onClick={() => setSelectedTag(tag)} 
+                          className="w-full text-left px-3 py-2 rounded mb-1 text-sm flex items-center gap-2" 
+                          style={{background: selectedTag === tag ? 'var(--hover)' : 'transparent'}}
+                        >
+                          <span>#</span>
+                          <span className="flex-1">{tag}</span>
+                          <span className="text-xs" style={{color: 'var(--text-secondary)'}}>
+                            {notes.filter(n => n.tags?.includes(tag)).length}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                
+                <div className="p-3 border-t" style={{borderColor: 'var(--border)'}}>
+                  <button 
+                    onClick={() => setShowSettings(true)} 
+                    className="w-full px-3 py-2 notion-btn rounded text-sm text-left"
+                  >
+                    ⚙️ Settings
+                  </button>
+                </div>
+              </div>
+            )}
+            
+            <div className="flex-1 flex flex-col">
+              <div className="p-4 border-b flex items-center gap-3" style={{borderColor: 'var(--border)', background: 'var(--bg-primary)'}}>
+                <button onClick={() => setSidebarOpen(!sidebarOpen)} className="notion-btn p-2 rounded">☰</button>
+                <input 
+                  value={searchQuery} 
+                  onChange={e => setSearchQuery(e.target.value)} 
+                  className="flex-1 px-4 py-2 rounded" 
+                  style={{background: 'var(--bg-secondary)', border: '1px solid var(--border)'}} 
+                  placeholder="Search notes..." 
+                />
+                <button 
+                  onClick={() => loadNotes(githubToken, gistId)} 
+                  className="notion-btn px-4 py-2 rounded" 
+                  disabled={loading}
+                >
+                  {loading ? '⏳' : '🔄'}
+                </button>
+              </div>
+              
+              <div className="flex-1 overflow-y-auto p-6">
+                <div className="max-w-6xl mx-auto">
+                  <div className="mb-6">
+                    <h1 className="text-3xl font-bold mb-2">
+                      {currentFolder === 'all' ? 'All Notes' : currentFolder === 'favorites' ? 'Favorites' : currentFolder}
+                    </h1>
+                    <p className="text-sm" style={{color: 'var(--text-secondary)'}}>{filtered.length} notes</p>
+                  </div>
+                  
+                  <div className="grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {filtered.map(note => (
+                      <div 
+                        key={note.id} 
+                        className="p-4 rounded-lg border cursor-pointer transition hover:shadow-lg group" 
+                        style={{background: 'var(--bg-primary)', borderColor: 'var(--border)'}}
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <span className="text-3xl">{note.icon}</span>
+                          <button 
+                            onClick={e => { e.stopPropagation(); toggleFavorite(note.id); }} 
+                            className="notion-btn p-1 rounded text-lg opacity-0 group-hover:opacity-100 transition"
+                          >
+                            {favorites.includes(note.id) ? '⭐' : '☆'}
+                          </button>
+                        </div>
+                        
+                        <h3 
+                          className="font-semibold mb-2 line-clamp-2 min-h-[3rem]" 
+                          onClick={() => { setCurrentNote(note); setView('read'); }}
+                        >
+                          {note.title || 'Untitled'}
+                        </h3>
+                        
+                        <div className="text-xs mb-3" style={{color: 'var(--text-secondary)'}}>
+                          {new Date(note.updatedAt).toLocaleDateString()}
+                        </div>
+                        
+                        {note.folder && (
+                          <div className="text-xs px-2 py-1 rounded inline-block mb-2" style={{background: 'var(--hover)', color: 'var(--accent)'}}>
+                            📁 {note.folder}
+                          </div>
+                        )}
+                        
+                        {note.tags?.length > 0 && (
+                          <div className="flex gap-1 flex-wrap mb-3">
+                            {note.tags.slice(0, 2).map(t => (
+                              <span 
+                                key={t} 
+                                className="text-xs px-2 py-0.5 rounded" 
+                                style={{background: 'var(--hover)', color: 'var(--text-secondary)'}}
+                              >
+                                #{t}
+                              </span>
+                            ))}
+                            {note.tags.length > 2 && (
+                              <span className="text-xs" style={{color: 'var(--text-secondary)'}}>
+                                +{note.tags.length - 2}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        
+                        <div className="flex gap-2 mt-3">
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); setCurrentNote(note); setView('read'); }} 
+                            className="flex-1 px-3 py-1.5 rounded text-sm font-medium" 
+                            style={{background: 'var(--accent)', color: '#fff'}}
+                          >
+                            Read
+                          </button>
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); setCurrentNote(note); setView('edit'); }} 
+                            className="flex-1 px-3 py-1.5 rounded text-sm border" 
+                            style={{borderColor: 'var(--border)'}}
+                          >
+                            Edit
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {filtered.length === 0 && (
+                    <div className="text-center py-20">
+                      <div className="text-6xl mb-4">📝</div>
+                      <p className="text-xl mb-6" style={{color: 'var(--text-secondary)'}}>
+                        {searchQuery ? 'No notes found' : 'No notes yet'}
+                      </p>
+                      {!searchQuery && (
+                        <button 
+                          onClick={createNote} 
+                          className="px-6 py-3 rounded font-semibold text-white" 
+                          style={{background: 'var(--accent)'}}
+                        >
+                          Create First Note
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            
+            {showFolderModal && (
+              <div 
+                className="fixed inset-0 flex items-center justify-center z-50" 
+                style={{background: 'rgba(0,0,0,0.5)'}} 
+                onClick={() => setShowFolderModal(false)}
+              >
+                <div 
+                  className="p-6 rounded-lg max-w-md w-full mx-4" 
+                  style={{background: 'var(--bg-primary)'}} 
+                  onClick={e => e.stopPropagation()}
+                >
+                  <h3 className="text-xl font-bold mb-4">New Folder</h3>
+                  <input 
+                    value={newFolderName} 
+                    onChange={e => setNewFolderName(e.target.value)} 
+                    onKeyPress={e => e.key === 'Enter' && addFolder()} 
+                    className="w-full p-3 border rounded mb-4" 
+                    style={{borderColor: 'var(--border)', background: 'var(--bg-secondary)'}} 
+                    placeholder="Folder name..." 
+                    autoFocus 
+                  />
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={addFolder} 
+                      className="flex-1 py-2 rounded font-medium text-white" 
+                      style={{background: 'var(--accent)'}}
+                    >
+                      Create
+                    </button>
+                    <button 
+                      onClick={() => { setShowFolderModal(false); setNewFolderName(''); }} 
+                      className="flex-1 py-2 notion-btn border rounded" 
+                      style={{borderColor: 'var(--border)'}}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      if (view === 'read' && currentNote) {
+        return (
+          <div className="h-screen flex flex-col" style={{background: 'var(--bg-secondary)'}}>
+            <div className="flex-1 overflow-y-auto">
+              <div className="max-w-3xl mx-auto px-8 py-16 reading-mode" style={{fontSize: `${readingFontSize}px`}}>
+                <div className="reading-header">
+                  <div style={{fontSize: '72px', marginBottom: '24px'}}>{currentNote.icon}</div>
+                  <h1>{currentNote.title || 'Untitled'}</h1>
+                  <div className="reading-meta">
+                    <span>
+                      {new Date(currentNote.updatedAt).toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })}
+                    </span>
+                    {currentNote.content.length > 0 && (
+                      <>
+                        <span>•</span>
+                        <span>{currentNote.content.length} blocks</span>
+                      </>
+                    )}
+                    {currentNote.folder && (
+                      <>
+                        <span>•</span>
+                        <span>📁 {currentNote.folder}</span>
+                      </>
+                    )}
+                  </div>
+                  {currentNote.tags?.length > 0 && (
+                    <div className="reading-tags">
+                      {currentNote.tags.map(tag => (
+                        <span key={tag} className="reading-tag">#{tag}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                
+                <div>
+                  {currentNote.content.length === 0 ? (
+                    <div className="text-center py-20" style={{color: 'var(--text-secondary)'}}>
+                      <p style={{fontSize: '18px', fontFamily: 'Inter, sans-serif'}}>This note is empty.</p>
+                    </div>
+                  ) : (
+                    currentNote.content.map(block => (
+                      <div key={block.id}>
+                        {renderReadingBlock(block)}
+                      </div>
+                    ))
+                  )}
+                </div>
+                
+                {/* Related Notes Section */}
+                {(() => {
+                  const currentFolder = currentNote.folder || '';
+                  const sameFolderNotes = notes.filter(n => {
+                    if (currentFolder) {
+                      return n.folder === currentFolder && n.id !== currentNote.id;
+                    } else {
+                      return (!n.folder || n.folder === '') && n.id !== currentNote.id;
+                    }
+                  }).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)).slice(0, 3);
+                  
+                  if (sameFolderNotes.length === 0) return null;
+                  
+                  return (
+                    <div style={{marginTop: '80px', paddingTop: '60px', borderTop: '1px solid var(--border)'}}>
+                      <h3 style={{
+                        fontFamily: 'Inter, sans-serif',
+                        fontSize: '24px',
+                        fontWeight: '600',
+                        marginBottom: '32px',
+                        color: 'var(--text-primary)'
+                      }}>
+                        {currentFolder ? `More from ${currentFolder}` : 'Related Notes'}
+                      </h3>
+                      <div style={{display: 'grid', gap: '24px'}}>
+                        {sameFolderNotes.map(note => (
+                          <div 
+                            key={note.id}
+                            onClick={() => setCurrentNote(note)}
+                            style={{
+                              padding: '24px',
+                              background: 'var(--hover)',
+                              border: '1px solid var(--border)',
+                              borderRadius: '12px',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s',
+                              fontFamily: 'Inter, sans-serif'
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+                            onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+                          >
+                            <div style={{display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '12px'}}>
+                              <span style={{fontSize: '32px'}}>{note.icon}</span>
+                              <div style={{flex: 1}}>
+                                <h4 style={{
+                                  fontSize: '18px',
+                                  fontWeight: '600',
+                                  margin: 0,
+                                  marginBottom: '6px',
+                                  color: 'var(--text-primary)'
+                                }}>
+                                  {note.title || 'Untitled'}
+                                </h4>
+                                <div style={{fontSize: '13px', color: 'var(--text-secondary)'}}>
+                                  {new Date(note.updatedAt).toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric'
+                                  })}
+                                  {note.tags?.length > 0 && (
+                                    <span style={{marginLeft: '12px'}}>
+                                      {note.tags.slice(0, 2).map(t => `#${t}`).join(' ')}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              <span style={{fontSize: '24px', color: 'var(--accent)'}}>→</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+            
+            <div className="reading-toolbar">
+              <button onClick={() => setView('home')} title="Back to notes">
+                ← Back
+              </button>
+              <button onClick={() => setView('edit')} title="Edit note">
+                ✏️ Edit
+              </button>
+              <div className="toolbar-divider"></div>
+              
+              {/* Previous/Next Blog Navigation */}
+              {(() => {
+                const currentFolder = currentNote.folder || '';
+                const sameFolderNotes = notes.filter(n => {
+                  if (currentFolder) {
+                    return n.folder === currentFolder;
+                  } else {
+                    return !n.folder || n.folder === '';
+                  }
+                }).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+                
+                const currentIndex = sameFolderNotes.findIndex(n => n.id === currentNote.id);
+                const prevNote = currentIndex > 0 ? sameFolderNotes[currentIndex - 1] : null;
+                const nextNote = currentIndex < sameFolderNotes.length - 1 ? sameFolderNotes[currentIndex + 1] : null;
+                
+                return (
+                  <>
+                    <button 
+                      onClick={() => prevNote && setCurrentNote(prevNote)} 
+                      disabled={!prevNote}
+                      title={prevNote ? `Previous: ${prevNote.title}` : 'No previous note'}
+                      style={{opacity: prevNote ? 1 : 0.3, cursor: prevNote ? 'pointer' : 'not-allowed'}}
+                    >
+                      ◀ Prev
+                    </button>
+                    <span style={{fontSize: '12px', color: 'var(--text-secondary)', padding: '0 8px'}}>
+                      {currentIndex + 1}/{sameFolderNotes.length}
+                    </span>
+                    <button 
+                      onClick={() => nextNote && setCurrentNote(nextNote)} 
+                      disabled={!nextNote}
+                      title={nextNote ? `Next: ${nextNote.title}` : 'No next note'}
+                      style={{opacity: nextNote ? 1 : 0.3, cursor: nextNote ? 'pointer' : 'not-allowed'}}
+                    >
+                      Next ▶
+                    </button>
+                    <div className="toolbar-divider"></div>
+                  </>
+                );
+              })()}
+              
+              <button onClick={() => adjustFontSize(-2)} title="Decrease font size">
+                A−
+              </button>
+              <button onClick={() => adjustFontSize(2)} title="Increase font size">
+                A+
+              </button>
+              <button onClick={toggleDarkMode} title="Toggle theme">
+                {darkMode ? '☀️' : '🌙'}
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      if (view === 'edit' && currentNote) {
+        const predefinedTags = ['Important', 'Urgent', 'Review', 'Draft', 'Complete'];
+        const currentBlock = currentNote.content.length > 0 ? currentNote.content[0] : null;
+        
+        return (
+          <div className="h-screen flex flex-col" style={{background: 'var(--bg-secondary)'}}>
+            <div className="p-3 border-b flex items-center justify-between" style={{borderColor: 'var(--border)', background: 'var(--bg-primary)'}}>
+              <button onClick={() => setView('home')} className="px-3 py-2 notion-btn rounded">← Back</button>
+              <div className="flex gap-2">
+                <button onClick={() => setView('read')} className="px-4 py-2 notion-btn rounded">📖 Read</button>
+                <span className="text-xs px-3 py-2" style={{color: 'var(--text-secondary)'}}>
+                  {loading ? '💾 Saving...' : '✓ Saved'}
+                </span>
+                <button 
+                  onClick={saveCurrentNote} 
+                  className="px-4 py-2 rounded font-medium text-white" 
+                  style={{background: 'var(--accent)'}}
+                >
+                  Save
+                </button>
+                <button 
+                  onClick={() => deleteNote(currentNote.id)} 
+                  className="px-4 py-2 notion-btn rounded" 
+                  style={{color: '#ef4444'}}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+            
+            {/* Rich Text Toolbar */}
+            <div className="p-3 border-b flex gap-2 overflow-x-auto items-center" style={{borderColor: 'var(--border)', background: 'var(--bg-primary)'}}>
+              <div className="toolbar-section">
+                <button onClick={() => addBlock('text')} className="toolbar-button" title="Text">
+                  <span>T</span>
+                </button>
+                <button onClick={() => addBlock('h1')} className="toolbar-button" title="Heading 1">
+                  <span style={{fontSize: '18px', fontWeight: 'bold'}}>H1</span>
+                </button>
+                <button onClick={() => addBlock('h2')} className="toolbar-button" title="Heading 2">
+                  <span style={{fontSize: '16px', fontWeight: 'bold'}}>H2</span>
+                </button>
+                <button onClick={() => addBlock('h3')} className="toolbar-button" title="Heading 3">
+                  <span style={{fontSize: '14px', fontWeight: 'bold'}}>H3</span>
+                </button>
+              </div>
+
+              <div className="toolbar-section">
+                <button 
+                  onClick={() => currentBlock && toggleBlockStyle(currentBlock.id, 'bold')} 
+                  className={`toolbar-button ${currentBlock?.styles?.bold ? 'active' : ''}`}
+                  title="Bold"
+                >
+                  <strong>B</strong>
+                </button>
+                <button 
+                  onClick={() => currentBlock && toggleBlockStyle(currentBlock.id, 'italic')} 
+                  className={`toolbar-button ${currentBlock?.styles?.italic ? 'active' : ''}`}
+                  title="Italic"
+                >
+                  <em>I</em>
+                </button>
+                <button 
+                  onClick={() => currentBlock && toggleBlockStyle(currentBlock.id, 'underline')} 
+                  className={`toolbar-button ${currentBlock?.styles?.underline ? 'active' : ''}`}
+                  title="Underline"
+                >
+                  <u>U</u>
+                </button>
+                <button 
+                  onClick={() => currentBlock && toggleBlockStyle(currentBlock.id, 'strikethrough')} 
+                  className={`toolbar-button ${currentBlock?.styles?.strikethrough ? 'active' : ''}`}
+                  title="Strikethrough"
+                >
+                  <s>S</s>
+                </button>
+              </div>
+
+              <div className="toolbar-section">
+                <button 
+                  onClick={() => currentBlock && toggleBlockStyle(currentBlock.id, 'code')} 
+                  className={`toolbar-button ${currentBlock?.styles?.code ? 'active' : ''}`}
+                  title="Inline Code"
+                >
+                  &lt;/&gt;
+                </button>
+                <button 
+                  onClick={() => currentBlock && toggleBlockStyle(currentBlock.id, 'highlight')} 
+                  className={`toolbar-button ${currentBlock?.styles?.highlight ? 'active' : ''}`}
+                  title="Highlight"
+                >
+                  🖍
+                </button>
+              </div>
+
+              <div className="toolbar-section">
+                <button onClick={() => addBlock('list')} className="toolbar-button" title="Bullet List">
+                  • List
+                </button>
+                <button onClick={() => addBlock('numbered')} className="toolbar-button" title="Numbered List">
+                  1. List
+                </button>
+                <button onClick={() => addBlock('todo')} className="toolbar-button" title="Todo">
+                  ☐ Todo
+                </button>
+              </div>
+
+              <div className="toolbar-section">
+                <button onClick={() => addBlock('quote')} className="toolbar-button" title="Quote">
+                  " Quote
+                </button>
+                <button onClick={() => addBlock('code')} className="toolbar-button" title="Code Block">
+                  &lt;Code/&gt;
+                </button>
+                <button onClick={() => addBlock('callout')} className="toolbar-button" title="Callout">
+                  💡 Callout
+                </button>
+              </div>
+
+              <div className="toolbar-section">
+                <button onClick={() => addBlock('image')} className="toolbar-button" title="Image">
+                  🖼 Image
+                </button>
+                <button onClick={() => addBlock('table')} className="toolbar-button" title="Table">
+                  ⊞ Table
+                </button>
+                <button onClick={() => addBlock('draw')} className="toolbar-button" title="Drawing">
+                  🎨 Draw
+                </button>
+                <button onClick={() => addBlock('divider')} className="toolbar-button" title="Divider">
+                  ─ Divider
+                </button>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto">
+              <div className="max-w-4xl mx-auto p-12" style={{paddingLeft: '80px'}}>
+                <div className="mb-12">
+                  <select 
+                    value={currentNote.icon} 
+                    onChange={e => setCurrentNote({...currentNote, icon: e.target.value})} 
+                    className="text-6xl mb-6 bg-transparent outline-none cursor-pointer"
+                  >
+                    {['📝', '📄', '📋', '📌', '💡', '🎯', '📚', '✅', '📖', '💼', '🏠', '🎨', '🚀', '⭐', '🔥', '💻', '📊', '🎓'].map(icon => (
+                      <option key={icon} value={icon}>{icon}</option>
+                    ))}
+                  </select>
+                  
+                  <input 
+                    value={currentNote.title} 
+                    onChange={e => setCurrentNote({...currentNote, title: e.target.value})} 
+                    className="w-full text-5xl font-bold outline-none mb-8 p-2 rounded" 
+                    placeholder="Untitled" 
+                    style={{color: 'var(--text-primary)', background: 'transparent', border: '2px solid transparent'}}
+                    onFocus={e => e.target.style.border = '2px solid var(--accent)'}
+                    onBlur={e => e.target.style.border = '2px solid transparent'}
+                  />
+                  
+                  <div className="mb-6">
+                    <label className="block text-sm font-semibold mb-3" style={{color: 'var(--text-secondary)'}}>Folder</label>
+                    <select 
+                      value={currentNote.folder || ''} 
+                      onChange={e => setCurrentNote({...currentNote, folder: e.target.value})} 
+                      className="px-4 py-2 border rounded-lg font-medium" 
+                      style={{borderColor: 'var(--border)', background: 'var(--bg-secondary)'}}
+                    >
+                      <option value="">No Folder</option>
+                      {folders.map(f => <option key={f} value={f}>{f}</option>)}
+                    </select>
+                  </div>
+                  
+                  <div className="mb-6">
+                    <label className="block text-sm font-semibold mb-3" style={{color: 'var(--text-secondary)'}}>Tags</label>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {(currentNote.tags || []).map(tag => (
+                        <span 
+                          key={tag} 
+                          className="px-4 py-2 rounded-full text-sm flex items-center gap-2 font-medium" 
+                          style={{background: 'var(--accent)', color: '#fff'}}
+                        >
+                          #{tag}
+                          <button onClick={() => removeTag(tag)} className="hover:opacity-70 font-bold">×</button>
+                        </span>
+                      ))}
+                    </div>
+                    
+                    <div className="flex gap-2 mb-3 flex-wrap">
+                      {predefinedTags.filter(t => !currentNote.tags?.includes(t)).map(tag => (
+                        <button 
+                          key={tag} 
+                          onClick={() => toggleTag(tag)} 
+                          className="px-4 py-2 rounded-lg text-sm border font-medium" 
+                          style={{borderColor: 'var(--border)', background: 'var(--hover)'}}
+                        >
+                          + {tag}
+                        </button>
+                      ))}
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <input 
+                        value={customTagInput} 
+                        onChange={e => setCustomTagInput(e.target.value)} 
+                        onKeyPress={e => e.key === 'Enter' && addCustomTag()} 
+                        className="flex-1 px-4 py-2 border rounded-lg text-sm" 
+                        style={{borderColor: 'var(--border)', background: 'var(--bg-secondary)'}} 
+                        placeholder="Add custom tag..." 
+                      />
+                      <button 
+                        onClick={addCustomTag} 
+                        className="px-6 py-2 rounded-lg text-sm text-white font-medium" 
+                        style={{background: 'var(--accent)'}}
+                      >
+                        Add
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="text-xs pt-6 border-t" style={{color: 'var(--text-secondary)', borderColor: 'var(--border)'}}>
+                    Created {new Date(currentNote.createdAt).toLocaleDateString()} • Last edited {new Date(currentNote.updatedAt).toLocaleString()}
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  {currentNote.content.length === 0 && (
+                    <div className="text-center py-16 border-2 border-dashed rounded-xl" style={{borderColor: 'var(--border)'}}>
+                      <div className="text-5xl mb-4">✏️</div>
+                      <p className="text-lg mb-6 font-medium" style={{color: 'var(--text-secondary)'}}>Start writing your note...</p>
+                      <p className="text-sm mb-8" style={{color: 'var(--text-secondary)'}}>Use the toolbar above to add different content blocks</p>
+                      <button 
+                        onClick={() => addBlock('text')} 
+                        className="px-6 py-3 rounded-lg text-white font-medium" 
+                        style={{background: 'var(--accent)'}}
+                      >
+                        + Add Your First Block
+                      </button>
+                    </div>
+                  )}
+                  
+                  {currentNote.content.map((block, idx) => (
+                    <div key={block.id}>
+                      {renderEdit(block, idx)}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      return null;
+    }
+
+    ReactDOM.render(<NoteApp />, document.getElementById('root'));
+  </script>
+</body>
+</html>
