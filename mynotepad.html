@@ -1132,14 +1132,14 @@
             );
           case 'html':
             return (
-              <div style={{border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden', minHeight: '300px', margin: '16px 0'}}>
+              <div style={{border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden', margin: '16px 0'}}>
                 <iframe 
                   srcDoc={block.content}
                   sandbox="allow-scripts"
                   title="HTML Content"
                   style={{
                     width: '100%',
-                    minHeight: '300px',
+                    minHeight: '',
                     border: 'none',
                     background: '#fff'
                   }}
