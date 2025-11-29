@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NotePro - Enhanced Editor</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+    
+    * { 
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f7f7f7;
+      --text-primary: #37352f;
+      --text-secondary: #787774;
+      --border: #e9e9e7;
+      --hover: #f1f1ef;
+      --accent: #2383e2;
+      --sidebar: #fbfbfa;
+      --code-bg: #f6f8fa;
+      --code-border: #d0d7de;
+    }
+    
+    .dark {
+      --bg-primary: #191919;
+      --bg-secondary: #252525;
+      --text-primary: #e3e2e0;
+      --text-secondary: #9b9a97;
+      --border: #373737;
+      --hover: #2f2f2f;
+      --accent: #529cca;
+      --sidebar: #1f1f1f;
+      --code-bg: #161b22;
+      --code-border: #30363d;
+    }
+    
+    body {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      margin: 0;
+      overflow: hidden;
+    }
+    
+    .notion-btn {
+      background: transparent;
+      transition: all 0.15s ease;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+    }
+    
+    .notion-btn:hover {
+      background: var(--hover);
+    }
+
+    .toolbar-button {
+      padding: 8px 12px;
+      border-radius: 6px;
+      background: transparent;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .toolbar-button:hover {
+      background: var(--hover);
+      border-color: var(--accent);
+    }
+
+    .toolbar-button.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+    
+    .editor-block {
+      position: relative;
+      margin: 4px 0;
+      padding: 3px 0;
+      transition: all 0.15s ease;
+    }
+    
+    .editor-block:hover {
+      background: rgba(0, 0, 0, 0.02);
+    }
+    
+    .dark .editor-block:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+    
+    .editor-input, .editor-textarea {
+      width: 100%;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: var(--text-primary);
+      padding: 8px 12px;
+      border-radius: 4px;
+      transition: all 0.15s ease;
+      line-height: 1.6;
+      resize: none;
+    }
+    
+    .editor-input:focus, .editor-textarea:focus {
+      background: var(--bg-primary);
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+    
+    .editor-input::placeholder, .editor-textarea::placeholder {
+      color: var(--text-secondary);
+      opacity: 0.4;
+    }
+    
+    .editor-h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      line-height: 1.2;
+      margin: 16px 0 8px 0;
+    }
+    
+    .editor-h2 {
+      font-size: 1.875rem;
+      font-weight: 700;
+      line-height: 1.3;
+      margin: 12px 0 6px 0;
+    }
+    
+    .editor-h3 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      line-height: 1.4;
+      margin: 8px 0 4px 0;
+    }
+    
+    .editor-text {
+      font-size: 1rem;
+      line-height: 1.7;
+    }
+    
+    .editor-code {
+      font-family: 'JetBrains Mono', 'Monaco', monospace;
+      font-size: 0.875rem;
+      background: #282c34;
+      border: 1px solid var(--code-border);
+      border-radius: 6px;
+      padding: 16px;
+      line-height: 1.6;
+      color: #abb2bf;
+    }
+    
+    .dark .editor-code {
+      background: #1e1e1e;
+      color: #d4d4d4;
+    }
+    
+    .editor-code:focus {
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+    
+    .editor-quote {
+      border-left: 3px solid var(--accent);
+      padding-left: 20px;
+      margin: 12px 0;
+      font-style: italic;
+      color: var(--text-secondary);
+    }
+    
+    .editor-callout {
+      background: var(--hover);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    
+    .editor-actions {
+      position: absolute;
+      left: -40px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+    
+    .editor-block:hover .editor-actions {
+      opacity: 1;
+    }
+    
+    .action-btn {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-size: 14px;
+    }
+    
+    .action-btn:hover {
+      background: var(--hover);
+      border-color: var(--accent);
+    }
+    
+    .action-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .toolbar-section {
+      display: flex;
+      gap: 6px;
+      padding: 0 6px;
+      border-right: 1px solid var(--border);
+    }
+
+    .toolbar-section:last-child {
+      border-right: none;
+    }
+
+    .sidebar {
+      background: var(--sidebar);
+      border-right: 1px solid var(--border);
+    }
+    
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    function NoteApp() {
+      const [notes, setNotes] = useState([]);
+      const [currentNote, setCurrentNote] = useState(null);
+      const [view, setView] = useState('home');
+      const [githubToken, setGithubToken] = useState('');
+      const [gistId, setGistId] = useState('');
+      const [showSettings, setShowSettings] = useState(false);
+      const [loading, setLoading] = useState(false);
+      const [tokenInput, setTokenInput] = useState('');
+      const [darkMode, setDarkMode] = useState(false);
+
+      useEffect(() => {
+        const token = localStorage.getItem('github_token');
+        const gid = localStorage.getItem('gist_id');
+        const dm = localStorage.getItem('dark_mode') === 'true';
+        
+        setDarkMode(dm);
+        if (dm) document.documentElement.classList.add('dark');
+        
+        if (token) {
+          setGithubToken(token);
+          setTokenInput(token);
+          if (gid) setGistId(gid);
+        }
+      }, []);
+
+      const toggleDarkMode = () => {
+        const newMode = !darkMode;
+        setDarkMode(newMode);
+        localStorage.setItem('dark_mode', newMode);
+        document.documentElement.classList[newMode ? 'add' : 'remove']('dark');
+      };
+
+      const createNote = () => {
+        const note = {
+          id: Date.now().toString(),
+          title: '',
+          content: [],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        setCurrentNote(note);
+        setView('edit');
+      };
+
+      const addBlock = (type) => {
+        if (!currentNote) return;
+        setCurrentNote({
+          ...currentNote,
+          content: [...currentNote.content, { 
+            id: Date.now().toString(), 
+            type, 
+            content: '', 
+            data: false 
+          }],
+          updatedAt: new Date().toISOString()
+        });
+      };
+
+      const updateBlock = (id, content, data = null) => {
+        if (!currentNote) return;
+        setCurrentNote({
+          ...currentNote,
+          content: currentNote.content.map(b => 
+            b.id === id ? { ...b, content, ...(data !== null && { data }) } : b
+          ),
+          updatedAt: new Date().toISOString()
+        });
+      };
+
+      const deleteBlock = (id) => {
+        if (!currentNote) return;
+        setCurrentNote({ 
+          ...currentNote, 
+          content: currentNote.content.filter(b => b.id !== id) 
+        });
+      };
+
+      const renderEditBlock = (block, idx) => {
+        const actions = (
+          <div className="editor-actions">
+            <button 
+              onClick={() => deleteBlock(block.id)} 
+              className="action-btn" 
+              style={{color: '#ef4444'}}
+            >
+              ×
+            </button>
+          </div>
+        );
+
+        if (block.type === 'text') {
+          return (
+            <div key={block.id} className="editor-block">
+              {actions}
+              <textarea 
+                value={block.content} 
+                onChange={e => updateBlock(block.id, e.target.value)} 
+                className="editor-textarea editor-text" 
+                placeholder="Type something..." 
+                rows={3}
+              />
+            </div>
+          );
+        }
+
+        if (block.type === 'html') {
+          return (
+            <div key={block.id} className="editor-block">
+              {actions}
+              <div style={{border: '1px solid var(--border)', borderRadius: '8px', padding: '16px'}}>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px'}}>
+                  <span style={{fontSize: '14px', fontWeight: '500'}}>🌐 HTML Preview</span>
+                  <button 
+                    onClick={() => updateBlock(block.id, block.content, !block.data)} 
+                    style={{
+                      padding: '6px 12px',
+                      background: 'var(--accent)',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontSize: '13px',
+                      fontWeight: '500'
+                    }}
+                  >
+                    {block.data ? '📝 Edit Code' : '👁️ Preview'}
+                  </button>
+                </div>
+                {!block.data ? (
+                  <textarea 
+                    value={block.content} 
+                    onChange={e => updateBlock(block.id, e.target.value, false)} 
+                    className="editor-textarea" 
+                    placeholder="Paste your HTML code here..."
+                    rows={12}
+                    style={{
+                      fontFamily: 'JetBrains Mono, monospace',
+                      fontSize: '14px',
+                      background: '#282c34',
+                      color: '#abb2bf',
+                      border: '1px solid var(--code-border)',
+                      borderRadius: '6px',
+                      padding: '16px'
+                    }}
+                  />
+                ) : (
+                  <div style={{
+                    border: '1px solid var(--border)',
+                    borderRadius: '6px',
+                    overflow: 'hidden',
+                    minHeight: '300px'
+                  }}>
+                    <iframe 
+                      srcDoc={block.content}
+                      style={{
+                        width: '100%',
+                        minHeight: '300px',
+                        border: 'none',
+                        background: '#fff'
+                      }}
+                      sandbox="allow-scripts"
+                      title="HTML Preview"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        }
+
+        return null;
+      };
+
+      if (showSettings || !githubToken) {
+        return (
+          <div className="h-screen flex items-center justify-center p-6" style={{background: 'var(--bg-secondary)'}}>
+            <div className="max-w-lg w-full p-8 rounded-lg" style={{background: 'var(--bg-primary)', border: '1px solid var(--border)'}}>
+              <h2 className="text-2xl font-bold mb-6">Setup GitHub Storage</h2>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">GitHub Token</label>
+                <input 
+                  type="password" 
+                  value={tokenInput} 
+                  onChange={e => setTokenInput(e.target.value)} 
+                  className="w-full p-3 border rounded" 
+                  style={{borderColor: 'var(--border)', background: 'var(--bg-secondary)'}} 
+                  placeholder="ghp_..." 
+                />
+              </div>
+              <button 
+                onClick={() => { 
+                  if (tokenInput.trim()) { 
+                    localStorage.setItem('github_token', tokenInput); 
+                    setGithubToken(tokenInput); 
+                    setShowSettings(false); 
+                  }
+                }} 
+                className="w-full py-3 rounded font-semibold text-white" 
+                style={{background: 'var(--accent)'}}
+              >
+                Connect GitHub
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      if (view === 'home') {
+        return (
+          <div className="h-screen flex flex-col" style={{background: 'var(--bg-secondary)'}}>
+            <div className="p-4 border-b flex items-center justify-between" style={{borderColor: 'var(--border)', background: 'var(--bg-primary)'}}>
+              <h1 className="text-2xl font-bold">NotePro</h1>
+              <div className="flex gap-2">
+                <button onClick={toggleDarkMode} className="notion-btn p-2 rounded text-xl">
+                  {darkMode ? '☀️' : '🌙'}
+                </button>
+                <button 
+                  onClick={createNote} 
+                  className="px-4 py-2 rounded font-medium text-white" 
+                  style={{background: 'var(--accent)'}}
+                >
+                  + New Note
+                </button>
+              </div>
+            </div>
+            
+            <div className="flex-1 flex items-center justify-center">
+              <div className="text-center">
+                <div className="text-6xl mb-4">📝</div>
+                <p className="text-xl mb-6" style={{color: 'var(--text-secondary)'}}>No notes yet</p>
+                <button 
+                  onClick={createNote} 
+                  className="px-6 py-3 rounded font-semibold text-white" 
+                  style={{background: 'var(--accent)'}}
+                >
+                  Create First Note
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      if (view === 'edit' && currentNote) {
+        return (
+          <div className="h-screen flex flex-col" style={{background: 'var(--bg-secondary)'}}>
+            <div className="p-3 border-b flex items-center justify-between" style={{borderColor: 'var(--border)', background: 'var(--bg-primary)'}}>
+              <button onClick={() => setView('home')} className="px-3 py-2 notion-btn rounded">← Back</button>
+              <button 
+                onClick={() => alert('Note saved!')} 
+                className="px-4 py-2 rounded font-medium text-white" 
+                style={{background: 'var(--accent)'}}
+              >
+                Save
+              </button>
+            </div>
+            
+            <div className="p-3 border-b flex gap-2 overflow-x-auto items-center" style={{borderColor: 'var(--border)', background: 'var(--bg-primary)'}}>
+              <div className="toolbar-section">
+                <button onClick={() => addBlock('text')} className="toolbar-button">
+                  T Text
+                </button>
+                <button onClick={() => addBlock('html')} className="toolbar-button">
+                  🌐 HTML
+                </button>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto">
+              <div className="max-w-4xl mx-auto p-12">
+                <input 
+                  value={currentNote.title} 
+                  onChange={e => setCurrentNote({...currentNote, title: e.target.value})} 
+                  className="w-full text-5xl font-bold outline-none mb-8 p-2 rounded" 
+                  placeholder="Untitled" 
+                  style={{color: 'var(--text-primary)', background: 'transparent'}}
+                />
+                
+                <div className="space-y-1">
+                  {currentNote.content.length === 0 && (
+                    <div className="text-center py-16 border-2 border-dashed rounded-xl" style={{borderColor: 'var(--border)'}}>
+                      <p className="text-lg mb-6 font-medium" style={{color: 'var(--text-secondary)'}}>
+                        Click a button above to add content
+                      </p>
+                    </div>
+                  )}
+                  
+                  {currentNote.content.map((block, idx) => renderEditBlock(block, idx))}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      return null;
+    }
+
+    ReactDOM.render(<NoteApp />, document.getElementById('root'));
+  </script>
+</body>
+</html>
