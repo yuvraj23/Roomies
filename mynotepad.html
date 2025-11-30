@@ -1156,7 +1156,7 @@
                       <script>
                         window.addEventListener('load', () => {
                           const height = document.body.scrollHeight;
-                          parent.postMessage({ iframeHeight: height, id: '${block.id}' }, '*');
+                          parent.postMessage({ iframeHeight: height, id: "\\${block.id}" }, "*");
                         });
                       </script>
                     `}
@@ -1170,6 +1170,7 @@
                       overflow: 'hidden'
                     }}
                   />
+
 
               </div>
             );
