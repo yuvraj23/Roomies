@@ -1149,27 +1149,31 @@
           case 'html':
             return (
               <div style={{border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden', minHeight: '300px', margin: '16px 0'}}>
+
+
                 <iframe
-                    id={`iframe-${block.id}`}
-                    srcDoc={`
-                      ${block.content}
-                      <script>
-                        window.addEventListener('load', () => {
-                          const height = document.body.scrollHeight;
-                          parent.postMessage({ iframeHeight: height, id: "\\${block.id}" }, "*");
-                        });
-                      </script>
-                    `}
-                    sandbox="allow-scripts"
-                    title="HTML Content"
-                    style={{
-                      width: '100%',
-                      minHeight: '10px',
-                      border: 'none',
-                      background: '#fff',
-                      overflow: 'hidden'
-                    }}
-                  />
+  id={`iframe-${block.id}`}
+  srcDoc={block.content}
+  sandbox="allow-scripts"
+  title="HTML Content"
+  onLoad={(e) => {
+    try {
+      const iframe = e.target;
+      const height = iframe.contentWindow.document.body.scrollHeight;
+      iframe.style.height = height + "px";
+    } catch (err) {
+      console.error("Resize failed:", err);
+    }
+  }}
+  style={{
+    width: "100%",
+    minHeight: "10px",
+    border: "none",
+    background: "#fff",
+    overflow: "hidden",
+  }}
+/>
+
 
 
               </div>
