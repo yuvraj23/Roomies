@@ -570,23 +570,11 @@
 
     const MAX_FILE_SIZE = 95 * 1024 * 1024;
 
-    // Auto-resize iframe listener
-    useEffect(() => {
-      function handleMessage(event) {
-        if (event.data?.iframeHeight && event.data?.id) {
-          const iframe = document.getElementById(`iframe-${event.data.id}`);
-          if (iframe) {
-            iframe.style.height = event.data.iframeHeight + 'px';
-          }
-        }
-      }
-    
-      window.addEventListener("message", handleMessage);
-      return () => window.removeEventListener("message", handleMessage);
-    }, []);
+  
 
 
     function NoteApp() {
+      
       const [notes, setNotes] = useState([]);
       const [currentNote, setCurrentNote] = useState(null);
       const [view, setView] = useState('home');
@@ -608,6 +596,19 @@
       const [newFolderName, setNewFolderName] = useState('');
       const [customTagInput, setCustomTagInput] = useState('');
       const [readingFontSize, setReadingFontSize] = useState(19);
+
+       // ⬇️ ADD IT RIGHT HERE (inside NoteApp)
+  useEffect(() => {
+    function handleMessage(event) {
+      if (event.data?.iframeHeight && event.data?.id) {
+        const iframe = document.getElementById(`iframe-${event.data.id}`);
+        if (iframe) iframe.style.height = event.data.iframeHeight + "px";
+      }
+    }
+
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, []);
 
       useEffect(() => {
         const saved = {
