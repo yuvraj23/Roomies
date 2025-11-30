@@ -1149,35 +1149,26 @@
             );
           case 'html':
             return (
-              <div style={{border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden', minHeight: '300px', margin: '16px 0'}}>
+             <div style={{
+  position: "relative",
+  width: "100vw",
+  left: "50%",
+  right: "50%",
+  marginLeft: "-50vw",
+  marginRight: "-50vw"
+}}>
+  <iframe
+    id={`iframe-${block.id}`}
+    srcDoc={block.content}
+    sandbox="allow-scripts"
+    style={{
+      width: "100vw",
+      minHeight: "100vh",
+      border: "none"
+    }}
+  />
+</div>
 
-
-                <iframe
-  id={`iframe-${block.id}`}
-  srcDoc={block.content}
-  sandbox="allow-scripts"
-  title="HTML Content"
-  onLoad={(e) => {
-    try {
-      const iframe = e.target;
-      const height = iframe.contentWindow.document.body.scrollHeight;
-      iframe.style.height = height + "px";
-    } catch (err) {
-      console.error("Resize failed:", err);
-    }
-  }}
-  style={{
-    width: "100%",
-    minHeight: "10px",
-    border: "none",
-    background: "#fff",
-    overflow: "hidden",
-  }}
-/>
-
-
-
-              </div>
             );
           default:
             return null;
