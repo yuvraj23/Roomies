@@ -603,7 +603,15 @@
           readingFontSize: parseInt(localStorage.getItem('reading_font_size') || '19')
         };
 
+ function handleMessage(event) {
+    if (event.data?.iframeHeight) {
+      const iframe = document.getElementById("embedFrame");
+      iframe.style.height = event.data.iframeHeight + "px";
+    }
+  }
 
+  window.addEventListener("message", handleMessage);
+  return () => window.removeEventListener("message", handleMessage);
         
         setDarkMode(saved.darkMode);
         setFavorites(saved.favorites);
