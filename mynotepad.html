@@ -602,6 +602,16 @@
           folders: JSON.parse(localStorage.getItem('folders') || '["DSA", "Java", "Python", "AWS"]'),
           readingFontSize: parseInt(localStorage.getItem('reading_font_size') || '19')
         };
+
+         function handleMessage(event) {
+    if (event.data?.iframeHeight) {
+      const iframe = document.getElementById("embedFrame");
+      iframe.style.height = event.data.iframeHeight + "px";
+    }
+  }
+
+  window.addEventListener("message", handleMessage);
+  return () => window.removeEventListener("message", handleMessage);
         
         setDarkMode(saved.darkMode);
         setFavorites(saved.favorites);
@@ -1060,24 +1070,36 @@
                       }}
                     />
                   ) : (
-                    <div style={{
-                      border: '1px solid var(--border)',
-                      borderRadius: '6px',
-                      overflow: 'hidden',
-                      minHeight: '300px'
-                    }}>
-                      <iframe 
-                        srcDoc={block.content}
-                        style={{
-                          width: '100%',
-                          minHeight: '3000px',
-                          border: 'none',
-                          background: '#fff'
-                        }}
-                        sandbox="allow-scripts"
-                        title="HTML Preview"
-                      />
-                    </div>
+                   <div
+  style={{
+    border: '1px solid var(--border)',
+    borderRadius: '8px',
+    overflow: 'hidden',
+    margin: '16px 0'
+  }}
+>
+  <iframe
+    id="embedFrame"
+    srcDoc={`
+      ${block.content}
+      <script>
+        window.addEventListener('load', function () {
+          const height = document.body.scrollHeight;
+          parent.postMessage({ iframeHeight: height }, '*');
+        });
+      </script>
+    `}
+    sandbox="allow-scripts"
+    title="HTML Content"
+    style={{
+      width: '100%',
+      minHeight: '200px',
+      border: 'none',
+      background: '#fff'
+    }}
+  />
+</div>
+
                   )}
                 </div>
               </div>
